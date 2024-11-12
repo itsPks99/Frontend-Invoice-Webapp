@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Bell, ChevronDown, ChevronLeft, Download, Home, IndianRupee, LogOut, Mail, NotebookIcon, NotepadText, Package, Printer, Search, Settings, ShoppingCart, Users, Wallet, Plus, Edit, Trash } from "lucide-react"
 
+import  { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 const MetricCard = ({ title, value, percentage, isPositive }) => (
   <div className="bg-white p-4 rounded-lg shadow">
     <div className="flex flex-col sm:flex-row sm:justify-between">
@@ -113,10 +115,31 @@ const CustomerForm = ({ onClose }) => (
   </form>
 )
 
+
+
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('home')
   const [showProductForm, setShowProductForm] = useState(false)
   const [showCustomerForm, setShowCustomerForm] = useState(false)
+
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('authToken'); // Check if the user is logged in
+    if (!isAuthenticated) {
+      navigate('/signin'); // Redirect to login if not authenticated
+    }
+  }, [navigate]);
+
+const handleLogout = () => {
+  // Clear the auth token from localStorage
+  localStorage.removeItem('authToken');
+  
+  // Redirect the user to the login page
+  navigate('/');
+};
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -428,7 +451,7 @@ export default function Dashboard() {
 
         <div className="absolute bottom-4 space-y-2">
           <SidebarButton icon={<Settings className="h-5 w-5" />}>Settings</SidebarButton>
-          <SidebarButton icon={<LogOut className="h-5 w-5" />}>Log out</SidebarButton>
+          <SidebarButton icon={<LogOut className="h-5 w-5" />}onClick={handleLogout}> Log out</SidebarButton>
         </div>
       </aside>
 

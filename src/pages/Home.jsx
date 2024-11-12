@@ -4,6 +4,7 @@ import Icon2 from '../assets/icon2.png';
 import Icon3 from '../assets/icon3.png';
 import Icon4 from '../assets/icon4.png';
 import HeroImg from '../assets/hero-img.png';
+import { NavLink } from 'react-router-dom';
 import { FaShieldAlt, FaGavel, FaEnvelope } from 'react-icons/fa';
 
 
@@ -51,138 +52,67 @@ export default function LandingPage() {
 
   return (
     <div className="App">
- {/* Navbar */}
- <nav
-      className={`fixed top-0 w-full z-20 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md h-16" : "bg-transparent h-20"
-      }`}
-    >
-      <div
-        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${
-          scrolled ? "h-16" : "h-20"
-        }`}
+     {/* Navbar */}
+<nav
+  className={`fixed top-0 w-full z-10 transition-all duration-300 ${
+    scrolled ? 'bg-white shadow-md h-16' : 'bg-transparent h-20'
+  }`}
+>
+  <div
+    className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${
+      scrolled ? 'h-16' : 'h-20'
+    }`}
+  >
+    {/* Logo Section */}
+    <div className="flex items-center space-x-2">
+      <span
+        className={`transition-all duration-300 ${
+          scrolled ? 'text-xl' : 'text-2xl'
+        } font-extrabold text-gray-800 tracking-wide transform hover:scale-105 hover:text-blue-600`}
       >
-        {/* Logo Section */}
-        <div className="flex items-center space-x-2">
-          <span
-            className={`transition-all duration-300 ${
-              scrolled ? "text-xl" : "text-2xl"
-            } font-extrabold text-gray-800 tracking-wide transform hover:scale-105 hover:text-blue-600`}
-          >
-            Raseed
-          </span>
-        </div>
+        Raseed
+      </span>
+    </div>
 
-        {/* Nav Links (Desktop) */}
-        <div className="hidden md:flex space-x-8">
-          <a
-            href="#features"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Features
-          </a>
-          <a
-            href="#pricing"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Pricing
-          </a>
-          <a
-            href="#blog"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Blog
-          </a>
-          <a
-            href="#resources"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Resources
-          </a>
-        </div>
+    {/* Nav Links */}
+    <div className="hidden md:flex space-x-8">
+      <a
+        href="#features"
+        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      >
+        Features
+      </a>
+      <a
+        href="#pricing"
+        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      >
+        Pricing
+      </a>
+      <a
+        href="#blog"
+        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      >
+        Blog
+      </a>
+      <a
+        href="#resources"
+        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      >
+        Resources
+      </a>
+    </div>
 
-        {/* Buttons */}
-        <div className="flex space-x-4 items-center">
-          <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-105">
-            Sign in
-          </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-105">
-            Sign up
-          </button>
-
-          {/* Hamburger Icon for Mobile View */}
-          <button
-            className="md:hidden text-gray-800"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {!menuOpen ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu (Dropdown) */}
-      {menuOpen && (
-        <div
-          className="md:hidden absolute  right-0 bg-white w-full shadow-lg p-4 flex flex-col items-center space-y-4 transition-all duration-300"
-        >
-          <a
-            href="#features"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Features
-          </a>
-          <a
-            href="#pricing"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Pricing
-          </a>
-          <a
-            href="#blog"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Blog
-          </a>
-          <a
-            href="#resources"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-          >
-            Resources
-          </a>
-
-        </div>
-      )}
-    </nav>
+    {/* Buttons */}
+    <div className="flex space-x-4">
+      <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-105">
+        Sign in
+      </button>
+      <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-105">
+        Sign up
+      </button>
+    </div>
+  </div>
+</nav>
 
 
 {/* Hero Section */}
