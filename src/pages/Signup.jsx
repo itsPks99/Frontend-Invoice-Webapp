@@ -3,6 +3,7 @@ import { Mail, Lock, ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {Link} from  'react-router-dom';
 
 export default function Signup() {
   const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
@@ -68,9 +69,9 @@ export default function Signup() {
       }
       
 
-
       const successData = await response.json();
       console.log(successData);
+      localStorage.setItem('authToken', successData.token);
       
       toast.success('Signup successful! Please verify your email.');
       navigate('/dashboard');
@@ -86,10 +87,12 @@ export default function Signup() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div>
+        <Link to="/">
           <button className="mb-4 flex items-center text-gray-600 hover:text-gray-800">
             <ChevronLeft className="h-5 w-5 mr-1" />
             Back
           </button>
+          </Link>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create a new account
           </h2>

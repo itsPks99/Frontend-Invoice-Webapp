@@ -4,6 +4,7 @@ import Icon2 from '../assets/icon2.png';
 import Icon3 from '../assets/icon3.png';
 import Icon4 from '../assets/icon4.png';
 import HeroImg from '../assets/hero-img.png';
+import { NavLink } from 'react-router-dom';
 import { FaShieldAlt, FaGavel, FaEnvelope } from 'react-icons/fa';
 
 
@@ -51,7 +52,7 @@ export default function LandingPage() {
   return (
     <div className="App">
      {/* Navbar */}
-<nav
+     <nav
   className={`fixed top-0 w-full z-10 transition-all duration-300 ${
     scrolled ? 'bg-white shadow-md h-16' : 'bg-transparent h-20'
   }`}
@@ -74,40 +75,52 @@ export default function LandingPage() {
 
     {/* Nav Links */}
     <div className="hidden md:flex space-x-8">
-      <a
-        href="#features"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      <NavLink
+        to="/features"
+        className={({ isActive }) =>
+          isActive ? 'text-blue-600' : 'text-gray-800'
+        }
       >
         Features
-      </a>
-      <a
-        href="#pricing"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      </NavLink>
+      <NavLink
+        to="/pricing"
+        className={({ isActive }) =>
+          isActive ? 'text-blue-600' : 'text-gray-800'
+        }
       >
         Pricing
-      </a>
-      <a
-        href="#blog"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      </NavLink>
+      <NavLink
+        to="/blog"
+        className={({ isActive }) =>
+          isActive ? 'text-blue-600' : 'text-gray-800'
+        }
       >
         Blog
-      </a>
-      <a
-        href="#resources"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+      </NavLink>
+      <NavLink
+        to="/resources"
+        className={({ isActive }) =>
+          isActive ? 'text-blue-600' : 'text-gray-800'
+        }
       >
         Resources
-      </a>
+      </NavLink>
     </div>
 
     {/* Buttons */}
     <div className="flex space-x-4">
-      <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-105">
-        Sign in
-      </button>
-      <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-105">
-        Sign up
-      </button>
+      <NavLink to="/signin">
+        <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-105">
+          Sign in
+        </button>
+      </NavLink>
+      <NavLink to="/signup">
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-105">
+          Sign up
+        </button>
+      </NavLink>
     </div>
   </div>
 </nav>
