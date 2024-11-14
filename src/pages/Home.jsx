@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from "react-router-dom";
 import Icon1 from '../assets/icon1.png';
 import Icon2 from '../assets/icon2.png';
 import Icon3 from '../assets/icon3.png';
 import Icon4 from '../assets/icon4.png';
 import HeroImg from '../assets/hero-img.png';
-import { NavLink } from 'react-router-dom';
 import { FaShieldAlt, FaGavel, FaEnvelope } from 'react-icons/fa';
 
 
@@ -22,6 +22,17 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const sectionRef = useRef(null);
+  const navigate = useNavigate();  // Initialize the useNavigate hook
+
+  // Function to navigate to the Sign in page
+  const handleSignIn = () => {
+    navigate('/signin');
+  };
+
+  // Function to navigate to the Sign up page
+  const handleSignUp = () => {
+    navigate('/signup');
+  };
 
   useEffect(() => {
     const handleScroll = () => {      
@@ -52,67 +63,144 @@ export default function LandingPage() {
 
   return (
     <div className="App">
-     {/* Navbar */}
-<nav
-  className={`fixed top-0 w-full z-10 transition-all duration-300 ${
-    scrolled ? 'bg-white shadow-md h-16' : 'bg-transparent h-20'
-  }`}
->
-  <div
-    className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${
-      scrolled ? 'h-16' : 'h-20'
-    }`}
-  >
-    {/* Logo Section */}
-    <div className="flex items-center space-x-2">
-      <span
-        className={`transition-all duration-300 ${
-          scrolled ? 'text-xl' : 'text-2xl'
-        } font-extrabold text-gray-800 tracking-wide transform hover:scale-105 hover:text-blue-600`}
+ {/* Navbar */}
+ <nav
+      className={`fixed top-0 w-full z-20 transition-all duration-300 ${
+        scrolled ? "bg-white shadow-md h-16" : "bg-transparent h-20"
+      }`}
+    >
+      <div
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${
+          scrolled ? "h-16" : "h-20"
+        }`}
       >
-        Raseed
-      </span>
-    </div>
+        {/* Logo Section */}
+        <div className="flex items-center space-x-2">
+          <span
+            className={`transition-all duration-300 ${
+              scrolled ? "text-xl" : "text-2xl"
+            } font-extrabold text-gray-800 tracking-wide transform hover:scale-105 hover:text-blue-600`}
+          >
+            Raseed.io
+          </span>
+        </div>
 
-    {/* Nav Links */}
-    <div className="hidden md:flex space-x-8">
-      <a
-        href="#features"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-      >
-        Features
-      </a>
-      <a
-        href="#pricing"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-      >
-        Pricing
-      </a>
-      <a
-        href="#blog"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-      >
-        Blog
-      </a>
-      <a
-        href="#resources"
-        className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
-      >
-        Resources
-      </a>
-    </div>
+        {/* Nav Links (Desktop) */}
+        <div className="hidden md:flex space-x-8">
+          <a
+            href="#features"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Pricing
+          </a>
+          <a
+            href="#blog"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Blog
+          </a>
+          <a
+            href="#resources"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Resources
+          </a>
+        </div>
 
-    {/* Buttons */}
-    <div className="flex space-x-4">
-      <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-105">
-        Sign in
-      </button>
-      <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-105">
-        Sign up
-      </button>
-    </div>
-  </div>
-</nav>
+        {/* Buttons */}
+        <div className="flex space-x-4 items-center">
+        <button
+            onClick={handleSignIn}  // Navigate to /signin when clicked
+            className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-105"
+          >
+            Sign in
+          </button>
+          <button
+            onClick={handleSignUp}  // Navigate to /signup when clicked
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-105"
+          >
+            Sign up
+          </button>
+
+          {/* Hamburger Icon for Mobile View */}
+          <button
+            className="md:hidden text-gray-800"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {!menuOpen ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu (Dropdown) */}
+      {menuOpen && (
+        <div
+          className="md:hidden absolute  right-0 bg-white w-full shadow-lg p-4 flex flex-col items-center space-y-4 transition-all duration-300"
+        >
+          <a
+            href="#features"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Pricing
+          </a>
+          <a
+            href="#blog"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Blog
+          </a>
+          <a
+            href="#resources"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+          >
+            Resources
+          </a>
+
+        </div>
+      )}
+    </nav>
 
 
 {/* Hero Section */}
@@ -142,12 +230,15 @@ export default function LandingPage() {
     </p>
 
     {/* Sign-up Form */}
-    <form className="bg-gradient-to-br from-blue-600 to-blue-900 p-10 rounded-xl shadow-xl space-y-4 max-w-lg transition-all transform hover:scale-105 hover:shadow-2xl duration-300">
-      <h2 className="text-3xl font-semibold text-white text-center drop-shadow">
+    <div
+      className="bg-gradient-to-br from-blue-600 to-blue-900 p-5 rounded-xl shadow-xl space-y-4 max-w-lg transition-all transform hover:scale-105 hover:shadow-2xl duration-300 cursor-pointer"
+      onClick={handleSignUp} // Trigger the navigate function on click
+    >
+      <h2 className="text-2xl font-semibold text-white text-center drop-shadow">
         Create Your Account
       </h2>
       {/* Form fields go here */}
-    </form>
+    </div>
   </div>
 
   {/* Right side: Vector Image */}
@@ -228,7 +319,7 @@ export default function LandingPage() {
 </section>
 
 
-<section className="bg-gray-50 py-12 h-screen flex flex-col items-center px-10">
+<section className="bg-gray-50 py-12 h-full flex flex-col items-center px-10">
       {/* Section Header aligned at the top */}
       <div className="text-center mb-10 justify-center mt-6">
         <h2 className="text-3xl font-semibold text-gray-800 mb-2">
@@ -308,7 +399,7 @@ export default function LandingPage() {
 
 
   {/* Full-Screen CTA Section */}
-<section className="h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 text-white text-center relative">
+<section className="h-screen flex flex-col px-5 justify-center items-center bg-gradient-to-br from-blue-900 via-purple-800 to-indigo-900 text-white text-center relative">
   {/* Overlay for enhancing contrast */}
   <div className="absolute inset-0 bg-black opacity-20"></div>
   
@@ -330,7 +421,7 @@ export default function LandingPage() {
 
 <footer className="bg-gray-900 text-white py-8">
       <div className="container mx-auto px-4 text-center">
-        <p className="text-sm">&copy; 2024 Raseed. All Rights Reserved.</p>
+        <p className="text-sm">&copy; 2024 Raseed.io. All Rights Reserved.</p>
 
         {/* Divider */}
         <div className="border-t border-gray-700 my-4 mx-auto w-2/3"></div>

@@ -74,7 +74,7 @@ export default function Signup() {
       localStorage.setItem('authToken', successData.token);
       
       toast.success('Signup successful! Please verify your email.');
-      navigate('/dashboard');
+      navigate('/dashboard', {state: { userData: successData.user }});
     } catch (error) {
       console.error('Error during signup:', error);
       toast.error('An error occurred. Please try again.');
@@ -103,7 +103,7 @@ export default function Signup() {
               <label htmlFor="email-address" className="sr-only">Email address</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                <Mail className="absolute inset-y-2 left-0 pl-3 h-7 w-7 text-gray-400" />
                 </div>
                 <input
                   id="email-address"
@@ -122,7 +122,7 @@ export default function Signup() {
               <label htmlFor="password" className="sr-only">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                <Lock className="absolute inset-y-2 left-0 pl-3 h-7 w-7 text-gray-400" />
                 </div>
                 <input
                   id="password"
@@ -141,7 +141,7 @@ export default function Signup() {
               <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                <Lock className="absolute inset-y-2 left-0 pl-3 h-7 w-7 text-gray-400" />
                 </div>
                 <input
                   id="confirm-password"

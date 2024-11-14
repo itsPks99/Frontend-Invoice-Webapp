@@ -23,7 +23,8 @@ export default function Login() {
 
       if (response.ok) {
         localStorage.setItem('authToken', data.token);
-        navigate('/dashboard'); // Redirect to dashboard on success
+        console.log('data.user', data.user);
+        navigate('/dashboard', {state: { userData: data.user }}); // Redirect to dashboard on success
       } else {
         setError(data.message || 'Login failed'); // Display error message
       }
