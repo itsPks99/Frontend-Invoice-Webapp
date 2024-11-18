@@ -701,9 +701,9 @@ export default function Dashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("data.customers:", data.customer);
+        console.log("data.customers:", data);
         setAllCustomers(data.customer);
-        fetchCustomers();
+        // fetchCustomers();
       } else {
         console.error("Failed to fetch products:", response.statusText);
       }
@@ -1242,195 +1242,188 @@ export default function Dashboard() {
       </main>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div
-            className="bg-white p-5 rounded-lg shadow-lg w-2/3 max-w-2xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
-            style={{ animation: "fadeSlideUp 0.6s forwards" }}
-          >
-            <style>
-              {`
-          @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}
-            </style>
-
-            {/* Profile Image Placeholder
-      <div className="flex justify-center mb-4">
-        <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
-          <img src="/placeholder-profile.svg" alt="Profile" className="h-16 w-16 rounded-full" />
-        </div>
-      </div> */}
-
-            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-              Enter Your Details
-            </h2>
-
-            <form onSubmit={handleFormSubmitUserDetails} className="space-y-4">
-              <div className="relative">
-                <label
-                  htmlFor="first_name"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  id="first_name"
-                  value={formData.first_name}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <label
-                  htmlFor="last_name"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  id="last_name"
-                  value={formData.last_name}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              {/* Phone Input */}
-              <div className="relative">
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  Phone
-                </label>
-                <input
-                  type="text"
-                  id="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <label
-                  htmlFor="companyName"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  Company Name
-                </label>
-                <input
-                  type="text"
-                  id="companyName"
-                  value={formData.companyName}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <label
-                  htmlFor="companyFullAddress"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  Company Address
-                </label>
-                <input
-                  type="text"
-                  id="companyFullAddress"
-                  value={formData.companyFullAddress}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <label
-                  htmlFor="GST"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  GST
-                </label>
-                <input
-                  type="text"
-                  id="GST"
-                  value={formData.GST}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <label
-                  htmlFor="country"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  Country
-                </label>
-                <input
-                  type="text"
-                  id="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  City
-                </label>
-                <input
-                  type="text"
-                  id="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <label
-                  htmlFor="pincode"
-                  className="block text-sm font-medium text-gray-600"
-                >
-                  Pincode
-                </label>
-                <input
-                  type="text"
-                  id="pincode"
-                  value={formData.pincode}
-                  onChange={handleInputChange}
-                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-              >
-                Submit
-              </button>
-            </form>
-          </div>
-        </div>
+       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+       <div
+         className="bg-white p-5 rounded-lg shadow-lg w-2/3 max-w-2xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
+         style={{ animation: "fadeSlideUp 0.6s forwards", maxHeight: "90vh", overflowY: "auto" }}
+       >
+         <style>
+           {`
+             @keyframes fadeSlideUp {
+               from { opacity: 0; transform: translateY(10px); }
+               to { opacity: 1; transform: translateY(0); }
+             }
+           `}
+         </style>
+     
+         <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
+           Enter Your Details
+         </h2>
+     
+         <form onSubmit={handleFormSubmitUserDetails} className="space-y-4">
+           <div className="relative">
+             <label
+               htmlFor="first_name"
+               className="block text-sm font-medium text-gray-600"
+             >
+               First Name
+             </label>
+             <input
+               type="text"
+               id="first_name"
+               value={formData.first_name}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="last_name"
+               className="block text-sm font-medium text-gray-600"
+             >
+               Last Name
+             </label>
+             <input
+               type="text"
+               id="last_name"
+               value={formData.last_name}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="phone"
+               className="block text-sm font-medium text-gray-600"
+             >
+               Phone
+             </label>
+             <input
+               type="text"
+               id="phone"
+               value={formData.phone}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="companyName"
+               className="block text-sm font-medium text-gray-600"
+             >
+               Company Name
+             </label>
+             <input
+               type="text"
+               id="companyName"
+               value={formData.companyName}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="companyFullAddress"
+               className="block text-sm font-medium text-gray-600"
+             >
+               Company Address
+             </label>
+             <input
+               type="text"
+               id="companyFullAddress"
+               value={formData.companyFullAddress}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="GST"
+               className="block text-sm font-medium text-gray-600"
+             >
+               GST
+             </label>
+             <input
+               type="text"
+               id="GST"
+               value={formData.GST}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="country"
+               className="block text-sm font-medium text-gray-600"
+             >
+               Country
+             </label>
+             <input
+               type="text"
+               id="country"
+               value={formData.country}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="city"
+               className="block text-sm font-medium text-gray-600"
+             >
+               City
+             </label>
+             <input
+               type="text"
+               id="city"
+               value={formData.city}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <div className="relative">
+             <label
+               htmlFor="pincode"
+               className="block text-sm font-medium text-gray-600"
+             >
+               Pincode
+             </label>
+             <input
+               type="text"
+               id="pincode"
+               value={formData.pincode}
+               onChange={handleInputChange}
+               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+               required
+             />
+           </div>
+     
+           <button
+             type="submit"
+             className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+           >
+             Submit
+           </button>
+         </form>
+       </div>
+     </div>
+     
       )}
     </div>
   );

@@ -56,36 +56,37 @@ export default function Login() {
           </div>
         )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div className="relative">
-              <Mail className="absolute inset-y-0 left-0 pl-3 h-5 w-5 text-gray-400" />
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-t-md w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Email address"
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute inset-y-0 left-0 pl-3 h-5 w-5 text-gray-400" />
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-b-md w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Password"
-              />
-            </div>
-          </div>
+        <div className="rounded-md shadow-sm space-y-4">
+  <div className="relative flex items-center">
+    <Mail className="absolute left-3 h-5 w-5 text-gray-400" />
+    <input
+      id="email-address"
+      name="email"
+      type="email"
+      autoComplete="email"
+      required
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      className="appearance-none w-full pl-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      placeholder="Email address"
+    />
+  </div>
+  <div className="relative flex items-center">
+    <Lock className="absolute left-3 h-5 w-5 text-gray-400" />
+    <input
+      id="password"
+      name="password"
+      type="password"
+      autoComplete="current-password"
+      required
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="appearance-none w-full pl-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+      placeholder="Password"
+    />
+  </div>
+</div>
+
           <div className="mt-8">
             <button
               type="submit"
