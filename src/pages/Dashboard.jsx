@@ -1,21 +1,23 @@
 import React, { useState } from "react";
 import {
+  Home,
+  Package,
+  Users,
+  NotebookIcon,
+  NotepadText,
+  IndianRupee,
+  Settings,
+  LogOut,
+  Menu,
+  X,
   Bell,
   ChevronDown,
   ChevronLeft,
   Download,
-  Home,
-  IndianRupee,
-  LogOut,
   Mail,
-  NotebookIcon,
-  NotepadText,
-  Package,
   Printer,
   Search,
-  Settings,
   ShoppingCart,
-  Users,
   Wallet,
   Plus,
   Edit,
@@ -24,6 +26,8 @@ import {
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import CountryDropdown from "../components/CountryDropdown";
+import CreateInvoicePage from "../components/CreateInvoicePage";
+// import Alert from "../components/Alert";
 
 const MetricCard = ({ title, value, percentage, isPositive }) => (
   <div className="bg-white p-4 rounded-lg shadow">
@@ -65,95 +69,97 @@ const SidebarButton = ({ icon, children, isActive, onClick }) => (
 
 const ProductForm = ({ onClose, onSubmit, formData, inputChange }) => (
   <form
-  onSubmit={onSubmit}
-  className="w-full max-w-xl space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
-  style={{ animation: "fadeSlideUp 0.6s forwards" }}
->
-  <style>
-    {`
+    onSubmit={onSubmit}
+    className="w-full max-w-xl space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
+    style={{ animation: "fadeSlideUp 0.6s forwards" }}
+  >
+    <style>
+      {`
         @keyframes fadeSlideUp {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}
-  </style>
-  <div className="flex justify-between items-center px-0 py-2">
-    <h3 className="text-lg font-bold">Add New Product</h3>
-    <button
-      onClick={onClose}
-      className="text-gray-500 hover:text-gray-700"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M6 18L18 6M6 6l12 12"
-        />
-      </svg>
-    </button>
-  </div>
-
-  {/* Form fields */}
-  {[
-    {
-      id: "productName",
-      label: "Product Name",
-      placeholder: "Enter product name",
-    },
-    {
-      id: "price",
-      label: "Price",
-      placeholder: "Enter price",
-      type: "number",
-    },
-    {
-      id: "description",
-      label: "Description",
-      placeholder: "Enter description",
-    },
-    { id: "hsnCode", label: "HSN Code", placeholder: "Enter HSN code" },
-    { id: "cgst", label: "CGST", placeholder: "Enter CGST", type: "number" },
-    { id: "sgst", label: "SGST", placeholder: "Enter SGST", type: "number" },
-    { id: "igst", label: "IGST", placeholder: "Enter IGST", type: "number" },
-  ].map(({ id, label, placeholder, type = "text" }) => (
-    <div key={id} className="relative">
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-      >
-        {label}
-      </label>
-      <input
-        id={id}
-        name={id}
-        type={type}
-        value={formData[id]}
-        onChange={inputChange}
-        className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        placeholder={placeholder}
-      />
+    </style>
+    <div className="flex justify-between items-center px-0 py-2">
+      <h3 className="text-lg font-bold">Add New Product</h3>
+      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
     </div>
-  ))}
 
-  {/* Submit button */}
-  <button
-    type="submit"
-    className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md hover:bg-gradient-to-r hover:from-indigo-500 hover:to-blue-500 transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-  >
-    Add Product
-  </button>
-</form>
+    {/* Form fields */}
+    {[
+      {
+        id: "productName",
+        label: "Product Name",
+        placeholder: "Enter product name",
+      },
+      {
+        id: "price",
+        label: "Price",
+        placeholder: "Enter price",
+        type: "number",
+      },
+      {
+        id: "description",
+        label: "Description",
+        placeholder: "Enter description",
+      },
+      { id: "hsnCode", label: "HSN Code", placeholder: "Enter HSN code" },
+      { id: "cgst", label: "CGST", placeholder: "Enter CGST", type: "number" },
+      { id: "sgst", label: "SGST", placeholder: "Enter SGST", type: "number" },
+      { id: "igst", label: "IGST", placeholder: "Enter IGST", type: "number" },
+    ].map(({ id, label, placeholder, type = "text" }) => (
+      <div key={id} className="relative">
+        <label
+          htmlFor={id}
+          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
+        >
+          {label}
+        </label>
+        <input
+          id={id}
+          name={id}
+          type={type}
+          value={formData[id]}
+          onChange={inputChange}
+          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
+          placeholder={placeholder}
+        />
+      </div>
+    ))}
 
+    {/* Submit button */}
+    <button
+      type="submit"
+      className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md hover:bg-gradient-to-r hover:from-indigo-500 hover:to-blue-500 transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+    >
+      Add Product
+    </button>
+  </form>
 );
 
-const CustomerForm = ({ onClose, onSubmit, formData, inputChange,inputChange2}) => (
+const CustomerForm = ({
+  onClose,
+  onSubmit,
+  formData,
+  inputChange,
+  inputChange2,
+}) => (
   <form
     onSubmit={onSubmit}
     className="space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg max-w-2xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
@@ -168,27 +174,24 @@ const CustomerForm = ({ onClose, onSubmit, formData, inputChange,inputChange2}) 
         `}
     </style>
     <div className="flex justify-between items-center px-0 p-2">
-                    <h3 className="text-lg font-bold">Add New Customer</h3>
-                    <button
-                      onClick={onClose}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+      <h3 className="text-lg font-bold">Add New Customer</h3>
+      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
     {/* Personal Info */}
     <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
       <div>
@@ -299,10 +302,10 @@ const CustomerForm = ({ onClose, onSubmit, formData, inputChange,inputChange2}) 
     {/* Billing and Shipping Address - Two Column Layout */}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        
-        <label 
-        htmlFor="billingAddress"
-        className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105">
+        <label
+          htmlFor="billingAddress"
+          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
+        >
           {" "}
           Billing Address
         </label>
@@ -424,28 +427,32 @@ export default function Dashboard() {
   const [isShimmer, setisShimmer] = useState(true);
   const [allProducts, setAllProducts] = useState([]);
   const [allCustomers, setAllCustomers] = useState([]);
-
+  const [showAlert, setShowAlert] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { userData } = location.state || {};
-
+  // console.log('userData', userData);
+  const [allUserInfo, setAllUserInfo] = useState(userData);
+  // console.log('allUserInfo', allUserInfo);
   // useEffect to check if userData is present
   useEffect(() => {
     // console.log("condition:", userData.first_name!="");
     if (activeTab === "home") {
-      console.log("userData:", userData);
+      console.log("allUserInfo:", allUserInfo);
       if (
-        userData.first_name == "" ||
-        userData.last_name == "" ||
-        userData.phone == ""
+        allUserInfo.first_name == "" ||
+        allUserInfo.last_name == "" ||
+        allUserInfo.phone == ""
       ) {
         setShowForm(true); // Show the form if userData is missing
       } else {
+        fetchUserInfo();
         setShowForm(false);
         setisShimmer(false);
       }
-    }  else if (activeTab === "products") {
+    } else if (activeTab === "products") {
       fetchProducts();
-    } else if(activeTab === "customers"){
+    } else if (activeTab === "customers") {
       fetchCustomers();
     }
   }, [activeTab]);
@@ -470,6 +477,7 @@ export default function Dashboard() {
     city: "",
     pincode: "",
     phone: "",
+    invoice_Prefix: "",
   });
 
   const [productFormData, setProductFormData] = useState({
@@ -545,7 +553,6 @@ export default function Dashboard() {
       },
     });
   };
- 
 
   // Handle product form submission
   const producutHandleFormSubmit = async (e) => {
@@ -582,6 +589,7 @@ export default function Dashboard() {
       if (response.ok) {
         console.log("Product added successfully:", result);
         alert("Product added successfully!");
+        // setShowAlert(true);
         setShowProductForm(false);
         clearProductFormData();
         fetchProducts();
@@ -625,7 +633,7 @@ export default function Dashboard() {
       },
     };
 
-    console.log('requestData', requestData);
+    console.log("requestData", requestData);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -642,10 +650,12 @@ export default function Dashboard() {
       );
 
       const result = await response.json();
-      console.log('result:',result);
+      console.log("result:", result);
       if (response.ok) {
         console.log("Customer added successfully:", result);
         alert("Customer added successfully!");
+        // setShowAlert(true);
+        fetchCustomers();
         setShowCustomerForm(false);
         clearCustomerFormData();
       } else {
@@ -685,6 +695,51 @@ export default function Dashboard() {
     }
   };
 
+  const handleDelete = async (productId) => {
+    const userConfirmed = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+
+    if (!userConfirmed) {
+      // User clicked "No"
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("authToken"); // Fetch token from localStorage
+
+      if (!token) {
+        alert("Unauthorized: Token is missing");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/products/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Proper string interpolation for token
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Product deleted successfully"); // Show success alert
+        fetchProducts(); // Optionally refresh product list
+      } else {
+        alert(
+          data.message || "Failed to delete the product. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("An unexpected error occurred. Please try again later.");
+    }
+  };
+
   const fetchCustomers = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -714,7 +769,39 @@ export default function Dashboard() {
     }
   };
 
- 
+  const fetchUserInfo = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        "http://localhost:3000/api/auth/user-profile",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // console.log("data.user:", data.user);
+        setAllUserInfo(data.user);
+        setisShimmer(false);
+        setLoading(false);
+        // fetchCustomers();
+      } else {
+        console.error("Failed to fetch products:", response.statusText);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle form input change
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -733,15 +820,15 @@ export default function Dashboard() {
 
   const customerHandleInputChange2 = (e) => {
     const { id, value } = e.target;
-  const [section, field] = id.split('.');
-  
-  setCustomerFormData((prevData) => ({
-    ...prevData,
-    [section]: {
-      ...prevData[section],
-      [field]: value,
-    },
-  }));
+    const [section, field] = id.split(".");
+
+    setCustomerFormData((prevData) => ({
+      ...prevData,
+      [section]: {
+        ...prevData[section],
+        [field]: value,
+      },
+    }));
   };
 
   useEffect(() => {
@@ -894,39 +981,65 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {allProducts.map((product) => (
-                    <tr key={product._id} className="border-t">
-                      <td className="px-4 py-2">{product.productName}</td>
-                      <td className="px-4 py-2">₹{product.price}</td>
-                      <td className="px-4 py-2">{product.hsnCode}</td>
-                      <td className="px-4 py-2">{product.tax.cgst}</td>
-                      <td className="px-4 py-2">{product.tax.sgst}</td>
-                      <td className="px-4 py-2">{product.tax.igst}</td>
-                      <td className="px-4 py-2">
-                        <div className="flex space-x-2">
-                          <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200">
-                            <Trash className="h-4 w-4" />
-                          </button>
-                        </div>
+                  {allProducts.length > 0 ? (
+                    allProducts.map((product) => (
+                      <tr key={product._id} className="border-t">
+                        <td className="px-4 py-2">{product.productName}</td>
+                        <td className="px-4 py-2">₹{product.price}</td>
+                        <td className="px-4 py-2">{product.hsnCode}</td>
+                        <td className="px-4 py-2">{product.tax.cgst}</td>
+                        <td className="px-4 py-2">{product.tax.sgst}</td>
+                        <td className="px-4 py-2">{product.tax.igst}</td>
+                        <td className="px-4 py-2">
+                          <div className="flex space-x-2">
+                            <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button
+                              className="bg-red-500 text-white p-1 rounded hover:bg-red-400"
+                              onClick={() => handleDelete(product._id)}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No products available.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
+            {/* {showAlert && (
+              <Alert
+                message="Product added successfully!"
+                type="success"
+                onClose={() => setShowAlert(false)}
+              />
+            )} */}
             {showProductForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-0">
-                <ProductForm
-                onClose={()=>setShowProductForm(false)}
-                    onSubmit={producutHandleFormSubmit}
-                    formData={productFormData}
-                    inputChange={productHandleInputChange}
-                  />
-              </div>
-            )}
+  <div
+    className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+  >
+   
+      <ProductForm
+        onClose={() => setShowProductForm(false)}
+        onSubmit={producutHandleFormSubmit}
+        formData={productFormData}
+        inputChange={productHandleInputChange}
+      />
+   
+  </div>
+)}
+
           </div>
         );
       case "customers":
@@ -953,35 +1066,59 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {allCustomers.map((customer) => (
-                    <tr key={customer._id} className="border-t">
-                      <td className="px-4 py-2">{customer.firstName  + " " + customer.lastName }</td>
-                      <td className="px-4 py-2">{customer.companyName || 'N/A'} </td>
-                      <td className="px-4 py-2">{customer.email || 'N/A'}</td>
-                      <td className="px-4 py-2">
-                        <div className="flex space-x-2">
-                          <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200">
-                            <Trash className="h-4 w-4" />
-                          </button>
-                        </div>
+                  {allCustomers.length > 0 ? (
+                    allCustomers.map((customer) => (
+                      <tr key={customer._id} className="border-t">
+                        <td className="px-4 py-2">
+                          {customer.firstName + " " + customer.lastName}
+                        </td>
+                        <td className="px-4 py-2">
+                          {customer.companyName || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">{customer.email || "N/A"}</td>
+                        <td className="px-4 py-2">
+                          <div className="flex space-x-2">
+                            <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200">
+                              <Trash className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No customers available.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
+            {/* {showAlert && (
+              <Alert
+                message="Customer added successfully!"
+                type="success"
+                onClose={() => setShowAlert(false)}
+              />
+            )} */}
             {showCustomerForm && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-0">
-               <CustomerForm
-                    onClose={() => setShowCustomerForm(false)}
-                    onSubmit={customerHandleFormSubmit}
-                    formData={customerFormData}
-                    inputChange={customerHandleInputChange}
-                    inputChange2={customerHandleInputChange2}
-                  />
+              <div
+              className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+            >
+                <CustomerForm
+                  onClose={() => setShowCustomerForm(false)}
+                  onSubmit={customerHandleFormSubmit}
+                  formData={customerFormData}
+                  inputChange={customerHandleInputChange}
+                  inputChange2={customerHandleInputChange2}
+                />
               </div>
             )}
           </div>
@@ -991,7 +1128,10 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">Invoices</h2>
-              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={() => setActiveTab("createinvoices")}
+              >
                 <Plus className="h-4 w-4 inline-block mr-2" />
                 Create Invoice
               </button>
@@ -1035,6 +1175,8 @@ export default function Dashboard() {
             </div>
           </div>
         );
+      case "createinvoices":
+        return <CreateInvoicePage userDetails={allUserInfo} productDetails={allProducts} customerDetails={allCustomers}/>;
       case "purchase-orders":
         return (
           <div className="bg-white p-6 rounded-lg shadow">
@@ -1115,6 +1257,7 @@ export default function Dashboard() {
         alert("Profile updated successfully!");
         setShowForm(false);
         setisShimmer(false);
+        fetchUserInfo();
       } else {
         alert("Error updating profile: " + result.message);
       }
@@ -1124,11 +1267,24 @@ export default function Dashboard() {
     }
   };
 
- 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Sidebar */}
-      <aside className="w-full md:w-64 bg-white p-4 md:h-screen">
+      <div className="md:hidden fixed top-4 right-4 z-50">
+        {/* Hamburger or Close icon based on sidebar state */}
+        <button
+          className="text-2xl"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          {isSidebarOpen ? <X /> : <Menu />}
+        </button>
+      </div>
+
+      <aside
+        className={`${
+          isSidebarOpen ? "transform-none" : "-translate-x-full"
+        } fixed top-0 left-0 w-full md:w-64 bg-white p-4 md:h-screen transition-transform md:relative md:transform-none z-40`}
+      >
         <div className="flex items-center gap-2 pb-8">
           <div className="rounded-full bg-blue-500 p-2">
             <img
@@ -1184,9 +1340,19 @@ export default function Dashboard() {
           >
             Purchase Orders
           </SidebarButton>
+          <div className="md:hidden block ">
+            <SidebarButton icon={<Settings className="h-5 w-5" />}>
+              Settings
+            </SidebarButton>
+            <SidebarButton
+              icon={<LogOut className="h-5 w-5" />}
+              onClick={handleLogout}
+            >
+              Log out
+            </SidebarButton>
+          </div>
         </nav>
-
-        <div className="absolute bottom-4 space-y-2">
+        <div className="absolute bottom-4 left-4 space-y-2 w-full md:w-auto mb-20 md:block hidden">
           <SidebarButton icon={<Settings className="h-5 w-5" />}>
             Settings
           </SidebarButton>
@@ -1197,38 +1363,52 @@ export default function Dashboard() {
             Log out
           </SidebarButton>
         </div>
+
+        {/* Cross icon to close the sidebar in mobile */}
+        <div className="md:hidden fixed top-4 right-4 z-50">
+          {/* <button
+      className="text-2xl"
+      onClick={() => setIsSidebarOpen(false)}
+    >
+      <X />
+    </button> */}
+        </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-8 overflow-auto">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <button className="p-2 hover:bg-gray-500 rounded-full border-4">
+            {/* <button className="p-2 hover:bg-gray-500 rounded-full border-4">
               <ChevronLeft className="h-5 w-5" />
-            </button>
+            </button> */}
             <div className="pt-5">
               {isShimmer ? (
                 <div className="h-8 w-40 bg-gray-200 rounded-md animate-pulse"></div>
               ) : (
-                <h1 className="text-2xl font-bold">
+                <h1 className="text-2xl font-bold mt-7 md:mt-0">
                   Hello{" "}
-                  {userData.first_name != ""
-                    ? capitalizeFirstLetter(userData.first_name)
+                  {allUserInfo.first_name != ""
+                    ? capitalizeFirstLetter(allUserInfo.first_name)
+                    : allUserInfo.first_name != ""
+                    ? allUserInfo.first_name
                     : "User"}
                   !
                 </h1>
               )}
             </div>
-            <p className="text-gray-500">Welcome back to dashboard.</p>
+            {activeTab === "home" && (
+              <p className="text-gray-500">Welcome to dashboard.</p>
+            )}
           </div>
           <div className="flex items-center gap-4 pt-10">
-            <div className="relative">
+            {/* <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
               <input
                 className="w-full md:w-80 pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Search..."
               />
-            </div>
+            </div> */}
             <button className="p-2 hover:bg-gray-100 rounded-full">
               <Bell className="h-5 w-5" />
             </button>
@@ -1242,188 +1422,216 @@ export default function Dashboard() {
       </main>
 
       {showForm && (
-       <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-       <div
-         className="bg-white p-5 rounded-lg shadow-lg w-2/3 max-w-2xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
-         style={{ animation: "fadeSlideUp 0.6s forwards", maxHeight: "90vh", overflowY: "auto" }}
-       >
-         <style>
-           {`
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div
+            className="bg-white p-5 rounded-lg shadow-lg w-2/3 max-w-2xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
+            style={{
+              animation: "fadeSlideUp 0.6s forwards",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
+            <style>
+              {`
              @keyframes fadeSlideUp {
                from { opacity: 0; transform: translateY(10px); }
                to { opacity: 1; transform: translateY(0); }
              }
            `}
-         </style>
-     
-         <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-           Enter Your Details
-         </h2>
-     
-         <form onSubmit={handleFormSubmitUserDetails} className="space-y-4">
-           <div className="relative">
-             <label
-               htmlFor="first_name"
-               className="block text-sm font-medium text-gray-600"
-             >
-               First Name
-             </label>
-             <input
-               type="text"
-               id="first_name"
-               value={formData.first_name}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="last_name"
-               className="block text-sm font-medium text-gray-600"
-             >
-               Last Name
-             </label>
-             <input
-               type="text"
-               id="last_name"
-               value={formData.last_name}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="phone"
-               className="block text-sm font-medium text-gray-600"
-             >
-               Phone
-             </label>
-             <input
-               type="text"
-               id="phone"
-               value={formData.phone}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="companyName"
-               className="block text-sm font-medium text-gray-600"
-             >
-               Company Name
-             </label>
-             <input
-               type="text"
-               id="companyName"
-               value={formData.companyName}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="companyFullAddress"
-               className="block text-sm font-medium text-gray-600"
-             >
-               Company Address
-             </label>
-             <input
-               type="text"
-               id="companyFullAddress"
-               value={formData.companyFullAddress}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="GST"
-               className="block text-sm font-medium text-gray-600"
-             >
-               GST
-             </label>
-             <input
-               type="text"
-               id="GST"
-               value={formData.GST}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="country"
-               className="block text-sm font-medium text-gray-600"
-             >
-               Country
-             </label>
-             <input
-               type="text"
-               id="country"
-               value={formData.country}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="city"
-               className="block text-sm font-medium text-gray-600"
-             >
-               City
-             </label>
-             <input
-               type="text"
-               id="city"
-               value={formData.city}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <div className="relative">
-             <label
-               htmlFor="pincode"
-               className="block text-sm font-medium text-gray-600"
-             >
-               Pincode
-             </label>
-             <input
-               type="text"
-               id="pincode"
-               value={formData.pincode}
-               onChange={handleInputChange}
-               className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-               required
-             />
-           </div>
-     
-           <button
-             type="submit"
-             className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-           >
-             Submit
-           </button>
-         </form>
-       </div>
-     </div>
-     
+            </style>
+
+            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
+              Enter Your Details
+            </h2>
+
+            <form onSubmit={handleFormSubmitUserDetails} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative">
+                  <label
+                    htmlFor="first_name"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="first_name"
+                    value={formData.first_name}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+
+                <div className="relative">
+                  <label
+                    htmlFor="last_name"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="last_name"
+                    value={formData.last_name}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    id="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+
+                <div className="relative">
+                  <label
+                    htmlFor="companyName"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Company Name
+                  </label>
+                  <input
+                    type="text"
+                    id="companyName"
+                    value={formData.companyName}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="relative">
+                <label
+                  htmlFor="companyFullAddress"
+                  className="block text-sm font-medium text-gray-600"
+                >
+                  Company Address
+                </label>
+                <input
+                  type="text"
+                  id="companyFullAddress"
+                  value={formData.companyFullAddress}
+                  onChange={handleInputChange}
+                  className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative">
+                  <label
+                    htmlFor="GST"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    GST
+                  </label>
+                  <input
+                    type="text"
+                    id="GST"
+                    value={formData.GST}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+
+                <div className="relative">
+                  <label
+                    htmlFor="country"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Country
+                  </label>
+                  <input
+                    type="text"
+                    id="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="relative">
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    id="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+
+                <div className="relative">
+                  <label
+                    htmlFor="pincode"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Pincode
+                  </label>
+                  <input
+                    type="text"
+                    id="pincode"
+                    value={formData.pincode}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <label
+                    htmlFor="invoice_Prefix"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Invoice Prefix
+                  </label>
+                  <input
+                    type="text"
+                    id="invoice_Prefix"
+                    value={formData.invoice_Prefix}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+              </div>
+
+              
+
+
+              <button
+                type="submit"
+                className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
