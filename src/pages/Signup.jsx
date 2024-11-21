@@ -76,7 +76,7 @@ export default function Signup() {
       }
 
       const successData = await response.json();
-      console.log(successData);
+      // console.log(successData);
       localStorage.setItem("authToken", successData.token);
 
       toast.success("Signup successful! Please verify your email.");
