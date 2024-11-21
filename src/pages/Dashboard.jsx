@@ -450,12 +450,11 @@ export default function Dashboard() {
         setShowForm(false);
         setisShimmer(false);
       }
-    } else if (activeTab === "products" ) {
+    } else if (activeTab === "products") {
       fetchProducts();
-    } else if (activeTab === "customers" ) {
+    } else if (activeTab === "customers") {
       fetchCustomers();
-    }
-     else if (activeTab === "invoices" ) {
+    } else if (activeTab === "invoices") {
       fetchCustomers();
       fetchProducts();
     }
@@ -850,6 +849,41 @@ export default function Dashboard() {
     navigate("/");
   };
 
+  const handleFormSubmitUserDetails = async (e) => {
+    // console.log("formData", formData);
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem("authToken"); // Replace this with your actual token, or retrieve it dynamically (e.g., from localStorage, context, etc.)
+      // console.log("request data", JSON.stringify(formData));
+      const response = await fetch(
+        "http://localhost:3000/api/auth/updatePofile",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Adding token to Authorization header
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        // console.log("result",result);
+        alert("Profile updated successfully!");
+        setShowForm(false);
+        setisShimmer(false);
+        fetchUserInfo();
+      } else {
+        alert("Error updating profile: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to update profile.");
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "home":
@@ -1030,20 +1064,15 @@ export default function Dashboard() {
               />
             )} */}
             {showProductForm && (
-  <div
-    className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
-  >
-   
-      <ProductForm
-        onClose={() => setShowProductForm(false)}
-        onSubmit={producutHandleFormSubmit}
-        formData={productFormData}
-        inputChange={productHandleInputChange}
-      />
-   
-  </div>
-)}
-
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                <ProductForm
+                  onClose={() => setShowProductForm(false)}
+                  onSubmit={producutHandleFormSubmit}
+                  formData={productFormData}
+                  inputChange={productHandleInputChange}
+                />
+              </div>
+            )}
           </div>
         );
       case "customers":
@@ -1113,9 +1142,7 @@ export default function Dashboard() {
               />
             )} */}
             {showCustomerForm && (
-              <div
-              className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
-            >
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                 <CustomerForm
                   onClose={() => setShowCustomerForm(false)}
                   onSubmit={customerHandleFormSubmit}
@@ -1180,12 +1207,18 @@ export default function Dashboard() {
           </div>
         );
       case "createinvoices":
-        return <CreateInvoicePage userDetails={allUserInfo} productDetails={allProducts} customerDetails={allCustomers}/>;
+        return (
+          <CreateInvoicePage
+            userDetails={allUserInfo}
+            productDetails={allProducts}
+            customerDetails={allCustomers}
+          />
+        );
       case "purchase-orders":
         return (
           <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Purchase Orders</h2>
+              <h2 className="text-2xl font-bold">Estimates</h2>
               <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                 <Plus className="h-4 w-4 inline-block mr-2" />
                 Create Purchase Order
@@ -1236,40 +1269,7 @@ export default function Dashboard() {
   };
 
   // Handle form submit
-  const handleFormSubmitUserDetails = async (e) => {
-    // console.log("formData", formData);
-    e.preventDefault();
-
-    try {
-      const token = localStorage.getItem("authToken"); // Replace this with your actual token, or retrieve it dynamically (e.g., from localStorage, context, etc.)
-      // console.log("request data", JSON.stringify(formData));
-      const response = await fetch(
-        "http://localhost:3000/api/auth/updatePofile",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Adding token to Authorization header
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      const result = await response.json();
-      if (response.ok) {
-        // console.log("result",result);
-        alert("Profile updated successfully!");
-        setShowForm(false);
-        setisShimmer(false);
-        fetchUserInfo();
-      } else {
-        alert("Error updating profile: " + result.message);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to update profile.");
-    }
-  };
+ 
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
@@ -1301,7 +1301,6 @@ export default function Dashboard() {
         </div>
 
         <nav className="space-y-2">
-          {/* Sidebar buttons */}
           <SidebarButton
             icon={<Home className="h-5 w-5" />}
             isActive={activeTab === "home"}
@@ -1325,11 +1324,35 @@ export default function Dashboard() {
           </SidebarButton>
           <SidebarButton
             icon={<NotebookIcon className="h-5 w-5" />}
-            isActive={activeTab === "invoices"}
+            isActive={
+              activeTab === "invoices" ||
+              activeTab === "create-invoice" 
+              // ||
+              // activeTab === "payments"
+            }
             onClick={() => setActiveTab("invoices")}
           >
-            Invoices
+            <div className="flex justify-around items-end">
+              <span>Invoices</span>
+              {/* <ChevronDown className="h-5 w-5 text-right" /> */}
+            </div>
           </SidebarButton>
+          {activeTab === "invoices" && (
+            <div className="ml-8 mt-2 space-y-2">
+              <button
+                onClick={() => setActiveTab("createinvoices")}
+                className="text-gray-600 hover:text-blue-500 transition-colors"
+              >
+                Create Invoice
+              </button>
+              {/* <button
+                onClick={() => setActiveTab("payments")}
+                className="text-gray-600 hover:text-blue-500 transition-colors"
+              >
+                Payments
+              </button> */}
+            </div>
+          )}
           <SidebarButton
             icon={<NotepadText className="h-5 w-5" />}
             isActive={activeTab === "templates"}
@@ -1342,20 +1365,10 @@ export default function Dashboard() {
             isActive={activeTab === "purchase-orders"}
             onClick={() => setActiveTab("purchase-orders")}
           >
-            Purchase Orders
+            Estimates
           </SidebarButton>
-          <div className="md:hidden block ">
-            <SidebarButton icon={<Settings className="h-5 w-5" />}>
-              Settings
-            </SidebarButton>
-            <SidebarButton
-              icon={<LogOut className="h-5 w-5" />}
-              onClick={handleLogout}
-            >
-              Log out
-            </SidebarButton>
-          </div>
         </nav>
+
         <div className="absolute bottom-4 left-4 space-y-2 w-full md:w-auto mb-20 md:block hidden">
           <SidebarButton icon={<Settings className="h-5 w-5" />}>
             Settings
@@ -1623,9 +1636,6 @@ export default function Dashboard() {
                   />
                 </div>
               </div>
-
-              
-
 
               <button
                 type="submit"

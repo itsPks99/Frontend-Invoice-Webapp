@@ -7,8 +7,8 @@ const CreateInvoicePage = ({
   customerDetails,
 }) => {
   //   console.log("userDetails:", userDetails);
-  //   console.log("productDetails:", productDetails);
-  //   console.log("customerDetails:", customerDetails);
+    console.log("productDetails:", productDetails);
+    console.log("customerDetails:", customerDetails );
   const [customer, setCustomer] = useState("");
   const [items, setItems] = useState([
     { description: "", quantity: 1, price: 0, tax:0 },
@@ -103,6 +103,21 @@ const CreateInvoicePage = ({
     today.setDate(today.getDate() + days);
     return today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
   };
+  const [selectedCustomerId, setSelectedCustomerId] = useState(""); // Store selected customer ID
+
+  // Find selected customer from data
+  const selectedCustomer = customerDetails.find(
+    (customer) => customer.firstName === selectedCustomerId
+  );
+
+  console.log('selectedCustomerId', selectedCustomerId);
+  console.log('selectedCustomers', selectedCustomer);
+
+  const userState = "Maharashtra"; // Replace with dynamic user state
+const customerState = customerDetails.find(c => c.id === selectedCustomerId)?.state || "";
+const getTaxType = (userState, customerState) => {
+    return userState === customerState ? "CGST + SGST" : "IGST";
+  };
   
 
   return (
@@ -152,28 +167,75 @@ const CreateInvoicePage = ({
         </div>
       </div>
 
-      {/* Customer Info */}
+      <div className="py-2">
+      {/* Customer Dropdown */}
       <div className="mb-6">
         <label className="block font-semibold mb-2">Customer</label>
         <select
           id="customers"
-          value={customer}
-          onChange={(e) => setCustomer(e.target.value)}
+          value={selectedCustomerId}
+          onChange={(e) => setSelectedCustomerId(e.target.value)}
           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
         >
           <option value="" disabled>
             Select a customer
           </option>
-          {customerDetails.map((customer, index) => (
-            <option
-              key={`${customer.id}-${index}`}
-              value={`${customer.firstName} ${customer.lastName} ${customer.companyName}`}
-            >
-              {customer.firstName} {customer.lastName} ({customer.companyName})
+          {customerDetails.map((customer) => (
+            <option key={customer.id} value={customer.firstName}>
+              {customer.firstName} {customer.lastName} - ({customer.companyName})
             </option>
           ))}
         </select>
       </div>
+
+      {/* Address Section */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Billing Address */}
+        <div>
+          <label className="block font-semibold mb-2">Billing Address</label>
+          <div className="p-3 rounded-md border border-gray-300 shadow-sm bg-gray-50">
+            {selectedCustomer?.billingAddress ? (
+              <>
+                <p>{selectedCustomer.billingAddress.address1}</p>
+                {selectedCustomer.billingAddress.address2 && (
+                  <p>{selectedCustomer.billingAddress.address2}</p>
+                )}
+                <p>
+                  {selectedCustomer.billingAddress.city},{" "}
+                  {selectedCustomer.billingAddress.state}{" "},
+                  {selectedCustomer.billingAddress.pincode}
+                </p>
+              </>
+            ) : (
+              <p className="text-gray-500">No address</p>
+            )}
+          </div>
+        </div>
+
+        {/* Shipping Address */}
+        <div>
+          <label className="block font-semibold mb-2">Shipping Address</label>
+          <div className="p-3 rounded-md border border-gray-300 shadow-sm bg-gray-50">
+            {selectedCustomer?.shippingAddress ? (
+              <>
+                <p>{selectedCustomer.shippingAddress.address1}</p>
+                {selectedCustomer.shippingAddress.address2 && (
+                  <p>{selectedCustomer.shippingAddress.address2}</p>
+                )}
+                <p>
+                  {selectedCustomer.shippingAddress.city},{" "}
+                  {selectedCustomer.shippingAddress.state}{" "},
+                  {selectedCustomer.shippingAddress.pincode}
+                </p>
+              </>
+            ) : (
+              <p className="text-gray-500">No address</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+
 
       {/* Invoice Details */}
       <div className="grid grid-cols-2 gap-4 mb-6">
@@ -333,88 +395,83 @@ const CreateInvoicePage = ({
             </tr>
           </thead>
           <tbody>
-            {items.map((item, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="border px-4 py-2">
-                  <select
-                    id="products"
-                    value={item.description}
-                    onChange={(e) => {
-                      const selectedProduct = productDetails.find(
-                        (product) => product.productName === e.target.value
-                      );
-                      handleItemChange(index, "description", e.target.value);
-                      if (selectedProduct) {
-                        handleItemChange(index, "price", selectedProduct.price);
-                      }
-                    }}
-                    className="w-full p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
-                  >
-                    <option value="" disabled>
-                      Select a product
-                    </option>
-                    {productDetails.map((product, i) => (
-                      <option key={i} value={product.productName}>
-                        {product.productName}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="border px-4 py-2">
-                  <input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(e) =>
-                      handleItemChange(
-                        index,
-                        "quantity",
-                        Number(e.target.value)
-                      )
-                    }
-                    className="w-full p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
-                  />
-                </td>
-                <td className="border px-4 py-2">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={item.price}
-                    readOnly
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
-                  />
-                </td>
-                <td className="border px-4 py-2">
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={item.tax}
-                    onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "tax",
-                          Number(e.target.value)
-                        )
-                      }
-                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
-                  />
-                </td>
-                <td className="border px-4 py-2 text-right">
-                  {(item.quantity * item.price).toFixed(2)}
-                </td>
-                <td className="border px-4 py-2 text-center">
-                  <button
-                    className="bg-red-500 text-white p-1 rounded hover:bg-red-400"
-                    onClick={() => removeItem(index)}
-                  >
-                    <Trash className="h-5 w-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {items.map((item, index) => (
+    <tr key={index} className="hover:bg-gray-50">
+      <td className="border px-4 py-2">
+        <select
+          id="products"
+          value={item.description}
+          onChange={(e) => {
+            const selectedProduct = productDetails.find(
+              (product) => product.productName === e.target.value
+            );
+            handleItemChange(index, "description", e.target.value);
+            if (selectedProduct) {
+              handleItemChange(index, "price", selectedProduct.price);
+              handleItemChange(index, "tax", selectedProduct.tax);
+            }
+          }}
+          className="w-full p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
+        >
+          <option value="" disabled>
+            Select a product
+          </option>
+          {productDetails.map((product, i) => (
+            <option key={i} value={product.productName}>
+              {product.productName}
+            </option>
+          ))}
+        </select>
+      </td>
+      <td className="border px-4 py-2">
+        <input
+          type="number"
+          min="1"
+          value={item.quantity}
+          onChange={(e) =>
+            handleItemChange(index, "quantity", Number(e.target.value))
+          }
+          className="w-full p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
+        />
+      </td>
+      <td className="border px-4 py-2">
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={item.price}
+          readOnly
+          className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
+        />
+      </td>
+      <td className="border px-4 py-2">
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={item.tax}
+          readOnly
+          className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
+        />
+      </td>
+      <td className="border px-4 py-2 text-center">
+        {getTaxType(userState, customerState)}
+      </td>
+      <td className="border px-4 py-2 text-right">
+        {(item.quantity * item.price).toFixed(2)}
+      </td>
+      <td className="border px-4 py-2 text-center">
+        <button
+          className="bg-red-500 text-white p-1 rounded hover:bg-red-400"
+          onClick={() => removeItem(index)}
+        >
+          <Trash className="h-5 w-5" />
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
         </table>
 
         <button
