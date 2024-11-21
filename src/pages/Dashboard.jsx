@@ -438,7 +438,7 @@ export default function Dashboard() {
   useEffect(() => {
     // console.log("condition:", userData.first_name!="");
     if (activeTab === "home") {
-      console.log("allUserInfo:", allUserInfo);
+      // console.log("allUserInfo:", allUserInfo);
       if (
         allUserInfo.first_name == "" ||
         allUserInfo.last_name == "" ||
@@ -450,10 +450,14 @@ export default function Dashboard() {
         setShowForm(false);
         setisShimmer(false);
       }
-    } else if (activeTab === "products") {
+    } else if (activeTab === "products" ) {
       fetchProducts();
-    } else if (activeTab === "customers") {
+    } else if (activeTab === "customers" ) {
       fetchCustomers();
+    }
+     else if (activeTab === "invoices" ) {
+      fetchCustomers();
+      fetchProducts();
     }
   }, [activeTab]);
 
@@ -587,7 +591,7 @@ export default function Dashboard() {
 
       const result = await response.json();
       if (response.ok) {
-        console.log("Product added successfully:", result);
+        // console.log("Product added successfully:", result);
         alert("Product added successfully!");
         // setShowAlert(true);
         setShowProductForm(false);
@@ -633,7 +637,7 @@ export default function Dashboard() {
       },
     };
 
-    console.log("requestData", requestData);
+    // console.log("requestData", requestData);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -650,9 +654,9 @@ export default function Dashboard() {
       );
 
       const result = await response.json();
-      console.log("result:", result);
+      // console.log("result:", result);
       if (response.ok) {
-        console.log("Customer added successfully:", result);
+        // console.log("Customer added successfully:", result);
         alert("Customer added successfully!");
         // setShowAlert(true);
         fetchCustomers();
@@ -683,7 +687,7 @@ export default function Dashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("data.products:", data.products);
+        // console.log("data.products:", data.products);
         setAllProducts(data.products);
       } else {
         console.error("Failed to fetch products:", response.statusText);
@@ -756,7 +760,7 @@ export default function Dashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("data.customers:", data);
+        // console.log("data.customers:", data);
         setAllCustomers(data.customer);
         // fetchCustomers();
       } else {
@@ -1233,12 +1237,12 @@ export default function Dashboard() {
 
   // Handle form submit
   const handleFormSubmitUserDetails = async (e) => {
-    console.log("formData", formData);
+    // console.log("formData", formData);
     e.preventDefault();
 
     try {
       const token = localStorage.getItem("authToken"); // Replace this with your actual token, or retrieve it dynamically (e.g., from localStorage, context, etc.)
-      console.log("request data", JSON.stringify(formData));
+      // console.log("request data", JSON.stringify(formData));
       const response = await fetch(
         "http://localhost:3000/api/auth/updatePofile",
         {
