@@ -344,13 +344,7 @@ const CustomerForm = ({
           placeholder="Pincode"
           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
         />
-        <input
-          id="billingAddress.phone"
-          value={formData.billingAddress.phone}
-          onChange={inputChange2}
-          placeholder="Phone"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
+        
       </div>
 
       <div>
@@ -393,13 +387,7 @@ const CustomerForm = ({
           placeholder="Pincode"
           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
         />
-        <input
-          id="shippingAddress.phone"
-          value={formData.shippingAddress.phone}
-          onChange={inputChange2}
-          placeholder="Phone"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
+        
       </div>
     </div>
 
@@ -518,7 +506,7 @@ export default function Dashboard() {
       city: "",
       state: "",
       pincode: "",
-      phone: "",
+      
     },
     shippingAddress: {
       country: "India",
@@ -526,7 +514,7 @@ export default function Dashboard() {
       city: "",
       state: "",
       pincode: "",
-      phone: "",
+      
     },
   });
 
@@ -624,7 +612,7 @@ export default function Dashboard() {
         city: customerFormData.billingAddress.city,
         state: customerFormData.billingAddress.state,
         pincode: customerFormData.billingAddress.pincode,
-        phone: customerFormData.billingAddress.phone,
+       
       },
       shippingAddress: {
         country: customerFormData.shippingAddress.country,
@@ -632,7 +620,7 @@ export default function Dashboard() {
         city: customerFormData.shippingAddress.city,
         state: customerFormData.shippingAddress.state,
         pincode: customerFormData.shippingAddress.pincode,
-        phone: customerFormData.shippingAddress.phone,
+        
       },
     };
 
