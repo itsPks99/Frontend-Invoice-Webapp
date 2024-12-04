@@ -81,7 +81,7 @@ export default function LandingPage() {
               scrolled ? "text-xl" : "text-2xl"
             } font-extrabold text-gray-800 tracking-wide transform hover:scale-105 hover:text-blue-600`}
           >
-            Raseed.io
+            Workzy
           </span>
         </div>
 
@@ -421,7 +421,7 @@ export default function LandingPage() {
 
 <footer className="bg-gray-900 text-white py-8">
       <div className="container mx-auto px-4 text-center">
-        <p className="text-sm">&copy; 2024 Raseed.io. All Rights Reserved.</p>
+        <p className="text-sm">&copy; 2024 Workzy.io. All Rights Reserved.</p>
 
         {/* Divider */}
         <div className="border-t border-gray-700 my-4 mx-auto w-2/3"></div>

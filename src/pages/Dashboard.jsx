@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import Swal from "sweetalert2";
+
 import {
   Home,
   Package,
@@ -11,23 +13,19 @@ import {
   Menu,
   X,
   Bell,
-  ChevronDown,
-  ChevronLeft,
   Download,
   Mail,
   Printer,
-  Search,
-  ShoppingCart,
-  Wallet,
   Plus,
   Edit,
   Trash,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import CountryDropdown from "../components/CountryDropdown";
 import CreateInvoicePage from "../components/CreateInvoicePage";
-// import Alert from "../components/Alert";
+import { useClickAway } from "react-use";
+import PickState from "../components/PickState";
+import { HexColorPicker } from "react-colorful";
 
 const MetricCard = ({ title, value, percentage, isPositive }) => (
   <div className="bg-white p-4 rounded-lg shadow">
@@ -36,22 +34,22 @@ const MetricCard = ({ title, value, percentage, isPositive }) => (
         <p className="text-gray-500 text-sm">{title}</p>
         <h3 className="text-xl font-bold mt-1">{value}</h3>
       </div>
-      <div
+      {/* <div
         className={`mt-2 sm:mt-0 ${
           isPositive ? "text-green-500" : "text-red-500"
         }`}
       >
         {percentage}% {isPositive ? "↑" : "↓"}
-      </div>
+      </div> */}
     </div>
-    <div className="mt-4 h-2 w-full bg-gray-200 rounded">
+    {/* <div className="mt-4 h-2 w-full bg-gray-200 rounded">
       <div
         className={`h-full rounded ${
           isPositive ? "bg-green-500" : "bg-red-500"
         }`}
         style={{ width: `${Math.abs(percentage)}%` }}
       ></div>
-    </div>
+    </div> */}
   </div>
 );
 
@@ -162,7 +160,7 @@ const CustomerForm = ({
 }) => (
   <form
     onSubmit={onSubmit}
-    className="space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg max-w-2xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
+    className="space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg max-w-4xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
     style={{ animation: "fadeSlideUp 0.6s forwards" }}
   >
     <style>
@@ -344,7 +342,6 @@ const CustomerForm = ({
           placeholder="Pincode"
           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
         />
-        
       </div>
 
       <div>
@@ -387,7 +384,6 @@ const CustomerForm = ({
           placeholder="Pincode"
           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
         />
-        
       </div>
     </div>
 
@@ -410,21 +406,30 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("home");
   const [showProductForm, setShowProductForm] = useState(false);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const location = useLocation();
   const [isShimmer, setisShimmer] = useState(true);
   const [allProducts, setAllProducts] = useState([]);
   const [allCustomers, setAllCustomers] = useState([]);
-  const [showAlert, setShowAlert] = useState(false);
+  // const [showAlert, setShowAlert] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { userData } = location.state || {};
-  // console.log('userData', userData);
+  const [showSetting, setShowSettings] = useState(false);
   const [allUserInfo, setAllUserInfo] = useState(userData);
+  const [image, setImage] = useState(null);
+  const [color, setColor] = useState("#4F46E5");
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const colorPickerRef = useRef(null);
+  const [totalInvoicesRaised, settotalInvoicesRaised] = useState(0);
+
+  const [totalBalanceDue, settotalBalanceDue] = useState(0);
+
   // console.log('allUserInfo', allUserInfo);
   // useEffect to check if userData is present
   useEffect(() => {
     // console.log("condition:", userData.first_name!="");
+
     if (activeTab === "home") {
       // console.log("allUserInfo:", allUserInfo);
       if (
@@ -432,12 +437,14 @@ export default function Dashboard() {
         allUserInfo.last_name == "" ||
         allUserInfo.phone == ""
       ) {
-        setShowForm(true); // Show the form if userData is missing
+        setShowSettings(true);
+        setActiveTab("settings"); // Show the form if userData is missing
       } else {
         fetchUserInfo();
-        setShowForm(false);
+        setShowSettings(false);
         setisShimmer(false);
       }
+      fetchInvoices();
     } else if (activeTab === "products") {
       fetchProducts();
     } else if (activeTab === "customers") {
@@ -445,6 +452,7 @@ export default function Dashboard() {
     } else if (activeTab === "invoices") {
       fetchCustomers();
       fetchProducts();
+      fetchInvoices();
     }
   }, [activeTab]);
 
@@ -455,21 +463,6 @@ export default function Dashboard() {
       <div className="h-8 bg-gray-300 rounded mb-4"></div>
     </div>
   );
-
-  const [showForm, setShowForm] = useState(false);
-
-  const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
-    companyName: "",
-    companyFullAddress: "",
-    GST: "",
-    country: "India",
-    city: "",
-    pincode: "",
-    phone: "",
-    invoice_Prefix: "",
-  });
 
   const [productFormData, setProductFormData] = useState({
     productName: "",
@@ -506,7 +499,6 @@ export default function Dashboard() {
       city: "",
       state: "",
       pincode: "",
-      
     },
     shippingAddress: {
       country: "India",
@@ -514,7 +506,6 @@ export default function Dashboard() {
       city: "",
       state: "",
       pincode: "",
-      
     },
   });
 
@@ -556,9 +547,9 @@ export default function Dashboard() {
       description: productFormData.description,
       hsnCode: productFormData.hsnCode,
       tax: {
-        cgst: `${Number(productFormData.cgst)}%`,
-        sgst: `${Number(productFormData.sgst)}%`,
-        igst: `${Number(productFormData.igst)}%`,
+        cgst: `${Number(productFormData.cgst)}`,
+        sgst: `${Number(productFormData.sgst)}`,
+        igst: `${Number(productFormData.igst)}`,
       },
     };
 
@@ -579,18 +570,42 @@ export default function Dashboard() {
       const result = await response.json();
       if (response.ok) {
         // console.log("Product added successfully:", result);
-        alert("Product added successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Product added successfully!",
+          text: "Your product has been added.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#2563EB",
+          // timer: 3000, // Auto close after 3 seconds
+        });
+        // alert("Product added successfully!");
         // setShowAlert(true);
         setShowProductForm(false);
         clearProductFormData();
         fetchProducts();
       } else {
-        alert("Error adding product: " + result.message);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error adding product: " + result.message,
+          confirmButtonText: "OK",
+          confirmButtonColor: "#2563EB",
+          // timer: 3000, // Auto close after 3 seconds
+        });
+        // alert("Error adding product: " + result.message);
         setShowProductForm(false);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to add product.");
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: "Failed to add product: " + result.message,
+        confirmButtonText: "OK",
+        confirmButtonColor: "#2563EB",
+        // timer: 3000, // Auto close after 3 seconds
+      });
+      // alert("Failed to add product.");
       setShowProductForm(false);
     }
   };
@@ -605,14 +620,13 @@ export default function Dashboard() {
       companyName: customerFormData.companyName,
       email: customerFormData.email,
       phone: Number(customerFormData.phone),
-      gstNumber: customerFormData.email,
+      gstNumber: customerFormData.gstNumber,
       billingAddress: {
         country: customerFormData.billingAddress.country,
         address1: customerFormData.billingAddress.address1,
         city: customerFormData.billingAddress.city,
         state: customerFormData.billingAddress.state,
         pincode: customerFormData.billingAddress.pincode,
-       
       },
       shippingAddress: {
         country: customerFormData.shippingAddress.country,
@@ -620,7 +634,6 @@ export default function Dashboard() {
         city: customerFormData.shippingAddress.city,
         state: customerFormData.shippingAddress.state,
         pincode: customerFormData.shippingAddress.pincode,
-        
       },
     };
 
@@ -644,16 +657,33 @@ export default function Dashboard() {
       // console.log("result:", result);
       if (response.ok) {
         // console.log("Customer added successfully:", result);
-        alert("Customer added successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Customer added successfully!",
+          text: "Your Customer has been added.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#2563EB",
+          // timer: 3000, // Auto close after 3 seconds
+        });
+        // alert("Customer added successfully!");
         // setShowAlert(true);
         fetchCustomers();
         setShowCustomerForm(false);
         clearCustomerFormData();
       } else {
-        alert("Error adding customer: " + result.message);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error adding customer: " + result.message,
+          confirmButtonText: "OK",
+          confirmButtonColor: "#2563EB",
+          // timer: 3000, // Auto close after 3 seconds
+        });
+        // alert("Error adding customer: " + result.message);
       }
     } catch (error) {
       console.error("Error:", error);
+
       alert("Failed to add customer.");
     }
   };
@@ -763,6 +793,13 @@ export default function Dashboard() {
   const fetchUserInfo = async () => {
     try {
       const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        console.error("No auth token found in localStorage.");
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch(
         "http://localhost:3000/api/auth/user-profile",
         {
@@ -776,28 +813,27 @@ export default function Dashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        // console.log("data.user:", data.user);
+        console.log("User data fetched:--", data.user);
+
         setAllUserInfo(data.user);
         setisShimmer(false);
         setLoading(false);
+        // Uncomment if needed
         // fetchCustomers();
+        // console.log("allUserInfo.first_name:", allUserInfo.first_name);
       } else {
-        console.error("Failed to fetch products:", response.statusText);
+        console.error(
+          `Failed to fetch user info: ${response.status} - ${response.statusText}`
+        );
         setLoading(false);
       }
     } catch (error) {
-      console.error("Error fetching products:", error);
-      setLoading(false);
+      console.error("Error fetching user info:", error.message);
     } finally {
-      setLoading(false);
+      setLoading(false); // Ensure the loading state is cleared
     }
   };
 
-  // Handle form input change
-  const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [id]: value }));
-  };
   // Handle form input change
   const productHandleInputChange = (e) => {
     const { id, value } = e.target;
@@ -808,6 +844,9 @@ export default function Dashboard() {
     const { id, value } = e.target;
     setCustomerFormData((prevData) => ({ ...prevData, [id]: value }));
   };
+
+  const [copyShipping, setCopyShipping] = useState(false);
+
 
   const customerHandleInputChange2 = (e) => {
     const { id, value } = e.target;
@@ -837,48 +876,13 @@ export default function Dashboard() {
     navigate("/");
   };
 
-  const handleFormSubmitUserDetails = async (e) => {
-    // console.log("formData", formData);
-    e.preventDefault();
-
-    try {
-      const token = localStorage.getItem("authToken"); // Replace this with your actual token, or retrieve it dynamically (e.g., from localStorage, context, etc.)
-      // console.log("request data", JSON.stringify(formData));
-      const response = await fetch(
-        "http://localhost:3000/api/auth/updatePofile",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Adding token to Authorization header
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      const result = await response.json();
-      if (response.ok) {
-        // console.log("result",result);
-        alert("Profile updated successfully!");
-        setShowForm(false);
-        setisShimmer(false);
-        fetchUserInfo();
-      } else {
-        alert("Error updating profile: " + result.message);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to update profile.");
-    }
-  };
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "home":
         return (
           <>
             {/* Metrics */}
-            <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {isShimmer ? (
                 Array.from({ length: 4 }).map((_, idx) => (
                   <div
@@ -889,42 +893,52 @@ export default function Dashboard() {
               ) : (
                 <>
                   <MetricCard
-                    title="Total Customers"
-                    value="₹329.50"
-                    percentage="50.43"
-                    isPositive={true}
+                    title="Total Invoice Amount"
+                    value={`₹ ${allUserInfo.total_invoice_amount || 0}`}
+                    // percentage={
+                    //   (Math.round(allUserInfo.total_invoice_balance) /
+                    //     Math.round(allUserInfo.total_invoice_amount)) *
+                    //   100
+                    // }
+                    // isPositive={true}
                   />
                   <MetricCard
-                    title="Total Revenue"
-                    value="₹200.00"
-                    percentage="12.32"
-                    isPositive={true}
+                    title="Total Balance Amount"
+                    value={`₹ ${allUserInfo.total_invoice_balance || 0}`}
+                    // percentage={
+                    //   (Math.round(allUserInfo.total_invoice_balance) /
+                    //     Math.round(allUserInfo.total_invoice_amount)) *
+                    //   100
+                    // }
+                    // isPositive={
+                    //   allUserInfo.total_invoice_balance === "0" ? true : false
+                    // }
                   />
                   <MetricCard
-                    title="Total Invoice Generated"
-                    value="₹200.00"
-                    percentage="10.89"
-                    isPositive={false}
+                    title="Total Paid Amount"
+                    value={`₹ ${allUserInfo.total_invoice_paid_amount || 0}`}
+                    // percentage="10.89"
+                    // isPositive={false}
                   />
-                  <MetricCard
+                  {/* <MetricCard
                     title="Product Count"
-                    value="₹200.00"
-                    percentage="20.92"
+                    value={`₹ ${allProducts.length || 0}`}
+                    // percentage="20.92"
                     isPositive={true}
-                  />
+                  /> */}
                 </>
               )}
             </div>
 
             {/* Recent Orders */}
             <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="flex items-center justify-between p-4">
+              <div className="flex items-center justify-between p-5">
                 <h3 className="text-lg font-medium">Recent Invoices</h3>
-                <select className="p-2 border rounded">
+                {/* <select className="p-2 border rounded">
                   <option>This Weekly</option>
                   <option>This Monthly</option>
                   <option>This Yearly</option>
-                </select>
+                </select> */}
               </div>
               <div className="overflow-x-auto">
                 {isShimmer ? (
@@ -934,45 +948,105 @@ export default function Dashboard() {
                 ) : (
                   <table className="w-full whitespace-nowrap">
                     <thead>
-                      <tr className="bg-gray-50">
-                        <th className="px-4 py-2 text-left">Invoice ID</th>
-                        <th className="px-4 py-2 text-left">Biller Name</th>
-                        <th className="px-4 py-2 text-left">Bill Date</th>
-                        <th className="px-4 py-2 text-left">Status</th>
-                        <th className="px-4 py-2 text-left">Qty</th>
-                        <th className="px-4 py-2 text-left">Total</th>
-                        <th className="px-4 py-2 text-left">Actions</th>
-                        <th className="px-4 py-2 text-left">Send To User</th>
+                      <tr className="bg-gray-50 text-center">
+                        <th className="px-4 py-2 ">Invoice ID</th>
+                        <th className="px-4 py-2 ">Biller Name</th>
+                        <th className="px-4 py-2 ">Bill Date</th>
+                        <th className="px-4 py-2 ">Status</th>
+                        <th className="px-4 py-2 ">Qty</th>
+                        <th className="px-4 py-2 ">Total</th>
+                        <th className="px-4 py-2 ">Actions</th>
+                        <th className="px-4 py-2 ">Send To User</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="border-t">
-                        <td className="px-4 py-2">#12345</td>
-                        <td className="px-4 py-2">Product Name</td>
-                        <td className="px-4 py-2">2024-01-20</td>
-                        <td className="px-4 py-2">
-                          <span className="inline-block rounded-full bg-green-100 px-2 py-1 text-xs text-green-600">
-                            Completed
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">1</td>
-                        <td className="px-4 py-2">$99.99</td>
-                        <td className="px-4 py-2 flex space-x-2">
-                          <button className="px-2 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
-                            <Download className="h-5 w-5 inline-block mr-1" />{" "}
-                            Download
-                          </button>
-                          <button className="px-2 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600">
-                            <Printer className="h-5 w-5 inline-block mr-1" />{" "}
-                            Print
-                          </button>
-                        </td>
-                        <td className="px-4 py-2">
-                          <button className="px-2 py-1 bg-indigo-500 text-white text-sm rounded hover:bg-indigo-600">
-                            Send Email
-                          </button>
-                        </td>
-                      </tr>
+                      {allInvoiceData.length > 0 ? (
+                        allInvoiceData
+                          .slice(-10) // Take the last 10 items
+                          .reverse() // Reverse to maintain the order of the latest first
+                          .map((invoice, index) => (
+                            <tr
+                              key={index}
+                              className="h-9 border-t hover:bg-slate-100 cursor-pointer text-center"
+                            >
+                              <td className="px-4 py-2 text-blue-500 hover:underline">
+                                {invoice.invoiceNumber}
+                              </td>
+
+                              <td className="px-4 py-2">
+                                {invoice.billTo.customerName}
+                              </td>
+
+                              <td className="px-4 py-2">
+                                {new Date(
+                                  invoice.invoiceDate
+                                ).toLocaleDateString()}
+                              </td>
+
+                              <td className="px-4 py-2">
+                                <span
+                                  className={`inline-block rounded-full px-2 py-1 text-xs ${
+                                    invoice.paymentStatus === "paid"
+                                      ? "bg-green-100 text-green-600"
+                                      : invoice.paymentStatus ===
+                                        "partially paid"
+                                      ? "bg-yellow-100 text-yellow-600"
+                                      : "bg-red-100 text-red-600"
+                                  }`}
+                                >
+                                  {invoice.paymentStatus}
+                                </span>
+                              </td>
+
+                              <td className="px-4 py-2 ">
+                                {invoice.products.length}
+                              </td>
+
+                              <td className="px-4 py-2 ">
+                                ₹{invoice.payment.grandTotal}
+                              </td>
+
+                              <td className="px-4 py-2">
+                                <div className="flex justify-center space-x-2">
+                                  <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+                                    <Download className="h-5 w-5" />
+                                  </button>
+                                  <button className="p-1 bg-green-100 text-green-600 rounded hover:bg-green-200">
+                                    <Mail className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                                    onClick={() => window.print()} // Triggers the browser's print functionality
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      className="h-5 w-5"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                    >
+                                      <path d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5h2a2 2 0 012 2v6a2 2 0 01-2 2h-3v2a1 1 0 01-1 1H8a1 1 0 01-1-1v-2H4a2 2 0 01-2-2v-6a2 2 0 012-2h2zm2 0h8V5H8v4zm8 2H8v6h8v-6zm-8 8h8v-1H8v1zm10-2h2v-6h-2v6zm-12-6H4v6h2v-6z" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </td>
+
+                              <td className="px-4 py-2">
+                                <span className="inline-block rounded-full px-3 py-1 text-xs bg-green-100 text-green-600">
+                                  Sent
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="8" // Ensure it spans the correct number of columns (including the last "Sent" column)
+                            className="px-4 py-6 text-center text-gray-500"
+                          >
+                            No Invoice available.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 )}
@@ -1013,9 +1087,9 @@ export default function Dashboard() {
                         <td className="px-4 py-2">{product.productName}</td>
                         <td className="px-4 py-2">₹{product.price}</td>
                         <td className="px-4 py-2">{product.hsnCode}</td>
-                        <td className="px-4 py-2">{product.tax.cgst}</td>
-                        <td className="px-4 py-2">{product.tax.sgst}</td>
-                        <td className="px-4 py-2">{product.tax.igst}</td>
+                        <td className="px-4 py-2">{product.tax.cgst}%</td>
+                        <td className="px-4 py-2">{product.tax.sgst}%</td>
+                        <td className="px-4 py-2">{product.tax.igst}%</td>
                         <td className="px-4 py-2">
                           <div className="flex space-x-2">
                             <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
@@ -1158,37 +1232,100 @@ export default function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full whitespace-nowrap">
                 <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-2 text-left">Invoice ID</th>
-                    <th className="px-4 py-2 text-left">Customer</th>
-                    <th className="px-4 py-2 text-left">Date</th>
-                    <th className="px-4 py-2 text-left">Amount</th>
-                    <th className="px-4 py-2 text-left">Status</th>
-                    <th className="px-4 py-2 text-left">Actions</th>
+                  <tr className="bg-gray-50 text-center">
+                    <th className="px-4 py-2 ">Invoice ID</th>
+                    <th className="px-4 py-2 ">Customer</th>
+                    <th className="px-4 py-2 ">Company</th>
+                    <th className="px-4 py-2 ">Date</th>
+                    <th className="px-4 py-2 ">Quantity</th>
+                    <th className="px-4 py-2 ">
+                      Invoice
+                      <br />
+                      Amount
+                    </th>
+                    <th className="px-4 py-2 ">Status</th>
+                    <th className="px-4 py-2 ">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-t">
-                    <td className="px-4 py-2">#INV001</td>
-                    <td className="px-4 py-2">Soyal Khan</td>
-                    <td className="px-4 py-2">2024-01-25</td>
-                    <td className="px-4 py-2">₹1,999</td>
-                    <td className="px-4 py-2">
-                      <span className="inline-block rounded-full bg-green-100 px-2 py-1 text-xs text-green-600">
-                        Paid
-                      </span>
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="flex space-x-2">
-                        <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
-                          <Download className="h-4 w-4" />
-                        </button>
-                        <button className="p-1 bg-green-100 text-green-600 rounded hover:bg-green-200">
-                          <Mail className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
+                {allInvoiceData.length > 0 ? (
+                  
+                  allInvoiceData
+                    .map((invoice, index) => (
+                      <tr
+                        key={index}
+                        className="h-9 border-t hover:bg-slate-100 cursor-pointer text-center"
+                      >
+                        <td className="px-4 py-2 text-blue-500 hover:underline">
+                          {invoice.invoiceNumber}
+                        </td>
+
+                        <td className="px-4 py-2">
+                          {invoice.billTo.customerName}
+                        </td>
+                        <td className="px-4 py-2">
+                          {invoice.billTo.companyName}
+                        </td>
+
+                        <td className="px-4 py-2">
+                          {new Date(invoice.invoiceDate).toLocaleDateString()}
+                        </td>
+
+                        <td className="px-4 py-2 text-center">
+                          {invoice.products.length}
+                        </td>
+                        <td className="px-4 py-2">
+                          ₹{invoice.payment.grandTotal}
+                        </td>
+
+                        <td className="px-4 py-2">
+                          <span
+                            className={`inline-block rounded-full px-2 py-1 text-xs ${
+                              invoice.paymentStatus === "paid"
+                                ? "bg-green-100 text-green-600"
+                                : invoice.paymentStatus === "partially paid"
+                                ? "bg-yellow-100 text-yellow-600"
+                                : "bg-red-100 text-red-600"
+                            }`}
+                          >
+                            {invoice.paymentStatus}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2">
+                          <div className="flex space-x-2">
+                            <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+                              <Download className="h-5 w-5" />
+                            </button>
+                            <button className="p-1 bg-green-100 text-green-600 rounded hover:bg-green-200">
+                              <Mail className="h-5 w-5" />
+                            </button>
+                            <button
+                              className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                              onClick={() => window.print()} // Triggers the browser's print functionality
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <path d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5h2a2 2 0 012 2v6a2 2 0 01-2 2h-3v2a1 1 0 01-1 1H8a1 1 0 01-1-1v-2H4a2 2 0 01-2-2v-6a2 2 0 012-2h2zm2 0h8V5H8v4zm8 2H8v6h8v-6zm-8 8h8v-1H8v1zm10-2h2v-6h-2v6zm-12-6H4v6h2v-6z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                    .reverse()) : (
+                      <tr>
+                        <td
+                          colSpan="8" // Ensure it spans the correct number of columns (including the last "Sent" column)
+                          className="px-4 py-6 text-center text-gray-500"
+                        >
+                          No Invoice available.
+                        </td>
+                      </tr>
+                    )}
                 </tbody>
               </table>
             </div>
@@ -1200,6 +1337,8 @@ export default function Dashboard() {
             userDetails={allUserInfo}
             productDetails={allProducts}
             customerDetails={allCustomers}
+            setActiveTab1={setActiveTab}
+            
           />
         );
       case "purchase-orders":
@@ -1251,202 +1390,27 @@ export default function Dashboard() {
             </div>
           </div>
         );
-      default:
-        return null;
-    }
-  };
-
-  // Handle form submit
- 
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      {/* Sidebar */}
-      <div className="md:hidden fixed top-4 right-4 z-50">
-        {/* Hamburger or Close icon based on sidebar state */}
-        <button
-          className="text-2xl"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
-          {isSidebarOpen ? <X /> : <Menu />}
-        </button>
-      </div>
-
-      <aside
-        className={`${
-          isSidebarOpen ? "transform-none" : "-translate-x-full"
-        } fixed top-0 left-0 w-full md:w-64 bg-white p-4 md:h-screen transition-transform md:relative md:transform-none z-40`}
-      >
-        <div className="flex items-center gap-2 pb-8">
-          <div className="rounded-full bg-blue-500 p-2">
-            <img
-              alt="Logo"
-              src="/placeholder.svg?height=24&width=24"
-              className="h-6 w-6"
-            />
-          </div>
-          <span className="text-xl font-bold">Raseed.io</span>
-        </div>
-
-        <nav className="space-y-2">
-          <SidebarButton
-            icon={<Home className="h-5 w-5" />}
-            isActive={activeTab === "home"}
-            onClick={() => setActiveTab("home")}
-          >
-            Home
-          </SidebarButton>
-          <SidebarButton
-            icon={<Package className="h-5 w-5" />}
-            isActive={activeTab === "products"}
-            onClick={() => setActiveTab("products")}
-          >
-            Products
-          </SidebarButton>
-          <SidebarButton
-            icon={<Users className="h-5 w-5" />}
-            isActive={activeTab === "customers"}
-            onClick={() => setActiveTab("customers")}
-          >
-            Customers
-          </SidebarButton>
-          <SidebarButton
-            icon={<NotebookIcon className="h-5 w-5" />}
-            isActive={
-              activeTab === "invoices" ||
-              activeTab === "create-invoice" 
-              // ||
-              // activeTab === "payments"
-            }
-            onClick={() => setActiveTab("invoices")}
-          >
-            <div className="flex justify-around items-end">
-              <span>Invoices</span>
-              {/* <ChevronDown className="h-5 w-5 text-right" /> */}
-            </div>
-          </SidebarButton>
-          {activeTab === "invoices" && (
-            <div className="ml-8 mt-2 space-y-2">
-              <button
-                onClick={() => setActiveTab("createinvoices")}
-                className="text-gray-600 hover:text-blue-500 transition-colors"
-              >
-                Create Invoice
-              </button>
-              {/* <button
-                onClick={() => setActiveTab("payments")}
-                className="text-gray-600 hover:text-blue-500 transition-colors"
-              >
-                Payments
-              </button> */}
-            </div>
-          )}
-          <SidebarButton
-            icon={<NotepadText className="h-5 w-5" />}
-            isActive={activeTab === "templates"}
-            onClick={() => setActiveTab("templates")}
-          >
-            Templates
-          </SidebarButton>
-          <SidebarButton
-            icon={<IndianRupee className="h-5 w-5" />}
-            isActive={activeTab === "purchase-orders"}
-            onClick={() => setActiveTab("purchase-orders")}
-          >
-            Estimates
-          </SidebarButton>
-        </nav>
-
-        <div className="absolute bottom-4 left-4 space-y-2 w-full md:w-auto mb-20 md:block hidden">
-          <SidebarButton icon={<Settings className="h-5 w-5" />}>
-            Settings
-          </SidebarButton>
-          <SidebarButton
-            icon={<LogOut className="h-5 w-5" />}
-            onClick={handleLogout}
-          >
-            Log out
-          </SidebarButton>
-        </div>
-
-        {/* Cross icon to close the sidebar in mobile */}
-        <div className="md:hidden fixed top-4 right-4 z-50">
-          {/* <button
-      className="text-2xl"
-      onClick={() => setIsSidebarOpen(false)}
-    >
-      <X />
-    </button> */}
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 overflow-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            {/* <button className="p-2 hover:bg-gray-500 rounded-full border-4">
-              <ChevronLeft className="h-5 w-5" />
-            </button> */}
-            <div className="pt-5">
-              {isShimmer ? (
-                <div className="h-8 w-40 bg-gray-200 rounded-md animate-pulse"></div>
-              ) : (
-                <h1 className="text-2xl font-bold mt-7 md:mt-0">
-                  Hello{" "}
-                  {allUserInfo.first_name != ""
-                    ? capitalizeFirstLetter(allUserInfo.first_name)
-                    : allUserInfo.first_name != ""
-                    ? allUserInfo.first_name
-                    : "User"}
-                  !
-                </h1>
-              )}
-            </div>
-            {activeTab === "home" && (
-              <p className="text-gray-500">Welcome to dashboard.</p>
-            )}
-          </div>
-          <div className="flex items-center gap-4 pt-10">
-            {/* <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
-              <input
-                className="w-full md:w-80 pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Search..."
-              />
-            </div> */}
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <Bell className="h-5 w-5" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <Mail className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {renderTabContent()}
-      </main>
-
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      case "settings":
+        return (
           <div
-            className="bg-white p-5 rounded-lg shadow-lg w-2/3 max-w-2xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
+            className="bg-white p-5 rounded-lg shadow-lg  max-w-6xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
             style={{
               animation: "fadeSlideUp 0.6s forwards",
-              maxHeight: "90vh",
+              maxHeight: "120vh",
               overflowY: "auto",
             }}
           >
             <style>
               {`
-             @keyframes fadeSlideUp {
-               from { opacity: 0; transform: translateY(10px); }
-               to { opacity: 1; transform: translateY(0); }
-             }
-           `}
+      @keyframes fadeSlideUp {
+       from { opacity: 0; transform: translateY(10px); }
+       to { opacity: 1; transform: translateY(0); }
+      }
+      `}
             </style>
 
             <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-              Enter Your Details
+              Enter Your Organization Details
             </h2>
 
             <form onSubmit={handleFormSubmitUserDetails} className="space-y-4">
@@ -1456,7 +1420,7 @@ export default function Dashboard() {
                     htmlFor="first_name"
                     className="block text-sm font-medium text-gray-600"
                   >
-                    First Name
+                    First Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1473,7 +1437,7 @@ export default function Dashboard() {
                     htmlFor="last_name"
                     className="block text-sm font-medium text-gray-600"
                   >
-                    Last Name
+                    Last Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1491,7 +1455,7 @@ export default function Dashboard() {
                     htmlFor="phone"
                     className="block text-sm font-medium text-gray-600"
                   >
-                    Phone
+                    Phone <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1516,7 +1480,6 @@ export default function Dashboard() {
                     value={formData.companyName}
                     onChange={handleInputChange}
                     className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                    required
                   />
                 </div>
               </div>
@@ -1526,60 +1489,25 @@ export default function Dashboard() {
                   htmlFor="companyFullAddress"
                   className="block text-sm font-medium text-gray-600"
                 >
-                  Company Address
+                  Full Address <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <textarea
+                  type="textarea"
                   id="companyFullAddress"
                   value={formData.companyFullAddress}
                   onChange={handleInputChange}
                   className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
                   required
-                />
+                ></textarea>
               </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="relative">
-                  <label
-                    htmlFor="GST"
-                    className="block text-sm font-medium text-gray-600"
-                  >
-                    GST
-                  </label>
-                  <input
-                    type="text"
-                    id="GST"
-                    value={formData.GST}
-                    onChange={handleInputChange}
-                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                    required
-                  />
-                </div>
-
-                <div className="relative">
-                  <label
-                    htmlFor="country"
-                    className="block text-sm font-medium text-gray-600"
-                  >
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    id="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="relative">
                   <label
                     htmlFor="city"
                     className="block text-sm font-medium text-gray-600"
                   >
-                    City
+                    City <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1593,10 +1521,62 @@ export default function Dashboard() {
 
                 <div className="relative">
                   <label
+                    htmlFor="state"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    State <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="state"
+                    value={formData.state} // This will bind the state from formData
+                    onChange={(e) => {
+                      // Find the selected state object based on the selected value (code)
+                      const selectedState = PickState.find(
+                        (state) => state.name === e.target.value
+                      );
+                      // Set the state name into formData
+                      setFormData({
+                        ...formData,
+                        state: selectedState ? selectedState.name : "", // Set the state name
+                      });
+                      // console.log('PickState.find(state => state.name === e.target.value)', PickState.find(state => state.name === e.target.value));
+                      // console.log('selectedState.name',selectedState.name);
+                      // console.log('e.target.value',e.target.value);
+                    }} // Update formData on state selection
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                  >
+                    {PickState.map((state) => (
+                      <option key={state.name} value={state.name}>
+                        {state.name}{" "}
+                        {/* This will show the state name in the dropdown */}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="relative">
+                  <label
+                    htmlFor="country"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Country <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+                <div className="relative">
+                  <label
                     htmlFor="pincode"
                     className="block text-sm font-medium text-gray-600"
                   >
-                    Pincode
+                    Pincode <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1609,10 +1589,28 @@ export default function Dashboard() {
                 </div>
                 <div className="relative">
                   <label
+                    htmlFor="GST"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    GST
+                  </label>
+                  <input
+                    type="text"
+                    id="GST"
+                    value={formData.GST}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="relative">
+                  <label
                     htmlFor="invoice_Prefix"
                     className="block text-sm font-medium text-gray-600"
                   >
-                    Invoice Prefix
+                    Invoice Prefix <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1623,18 +1621,688 @@ export default function Dashboard() {
                     required
                   />
                 </div>
+                <div className="relative">
+                  <label
+                    htmlFor="invoice_Number"
+                    className="block text-sm font-medium text-gray-600"
+                  >
+                    Invoice Number{" "}
+                    <span className="text-gray-400">(start from) </span>
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="invoice_Number"
+                    value={formData.invoice_Number}
+                    onChange={handleInputChange}
+                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    required
+                  />
+                </div>
+                {/* Color Picker Section */}
+                <div ref={colorPickerRef} className="align">
+                  <label className="block text-sm font-medium text-gray-600">
+                    Choose Color
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={color}
+                      onChange={handleColorInput}
+                      onFocus={() => setShowColorPicker(true)}
+                      className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                      placeholder="Enter or paste color code"
+                      aria-label="Color code input"
+                    />
+                    <button
+                      className="absolute mt-0.5 right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 rounded-full border-2 border-white"
+                      style={{ backgroundColor: color }}
+                      onClick={() => setShowColorPicker(!showColorPicker)}
+                      aria-label="Toggle color picker"
+                    />
+                  </div>
+                  {showColorPicker && (
+                    <div className="ab mt-2 z-10 w-72">
+                      {" "}
+                      {/* Set a fixed width using Tailwind */}
+                      <HexColorPicker
+                        color={color}
+                        onChange={handleColorChange}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p className="text-[13px] ml-2 text-gray-400">
+                Note: Your invoice number will be look like this: (
+                {formData.invoice_Prefix + formData.invoice_Number})
+              </p>
+
+              {/* Image Upload Section */}
+              <div className="mb-20">
+                <label className="block text-sm font-medium text-gray-600 mb-2">
+                  Company Logo
+                </label>
+                <div
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer transition-all duration-300 hover:border-indigo-500 hover:bg-indigo-50"
+                  onDrop={onDrop}
+                  onDragOver={onDragOver}
+                  onClick={() => document.getElementById("fileInput").click()}
+                >
+                  {image ? (
+                    <div className="relative flex justify-center">
+                      <img
+                        src={image}
+                        alt="Uploaded"
+                        className=" h-40 object-contain rounded-lg shadow-md "
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeImage();
+                        }}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        aria-label="Remove image"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-32">
+                      <svg
+                        className="w-8 h-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        ></path>
+                      </svg>
+                      <p className="mt-2 text-xs text-gray-600">
+                        Drag and drop an image here, or click to select a file
+                      </p>
+                    </div>
+                  )}
+                  <input
+                    id="fileInput"
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => handleFile(e.target.files[0])}
+                    accept="image/*"
+                  />
+                </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-              >
-                Submit
-              </button>
+              <div className="submit flex justify-end my-20">
+                <button
+                  type="submit"
+                  className="w-60 h-14  font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md transition-all duration-300 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                  {loading ? (
+                    <div className="w-60 h-14 flex justify-center items-center">
+                      {/* Spinner (you can replace it with your preferred spinner */}
+                      <div className="w-60 h-14 flex justify-center items-center">
+                        <div className="w-7 h-7 border-2 border-t-transparent border-white border-solid rounded-full animate-spin"></div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p> Update Profile </p>
+                  )}
+                </button>
+              </div>
             </form>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const [allInvoiceData, setallInvoiceData] = useState([]);
+
+  const fetchInvoices = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await fetch(
+        "http://localhost:3000/api/invoice/fetchAllInvoice",
+
+        {
+          method: "GET",
+
+          headers: {
+            "Content-Type": "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // console.log("Raw data :", data)
+
+        setallInvoiceData(data.invoices);
+
+        // console.log('allInvoiceData',allInvoiceData);
+
+        // fetchCustomers();
+      } else {
+        console.error("Failed to fetch products:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+
+
+  const handleCheckboxChange = (e) => {
+    const { checked } = e.target;
+    setCopyShipping(checked);
+
+    if (checked) {
+      // Copy billing address to shipping address
+      setFormData((prevData) => ({
+        ...prevData,
+        shippingAddress: { ...prevData.billingAddress },
+      }));
+    } else {
+      // Reset shipping address if unchecked
+      setFormData((prevData) => ({
+        ...prevData,
+        shippingAddress: {
+          country: "",
+          address1: "",
+          city: "",
+          state: "",
+          pincode: "",
+        },
+      }));
+    }
+  };
+
+
+
+  useEffect(() => {
+    if (allInvoiceData.length > 0) {
+      const totalRaised = allInvoiceData.reduce(
+        (acc, invoice) => acc + (invoice.payment?.subtotal || 0),
+
+        0
+      );
+
+      const totalDue = allInvoiceData.reduce(
+        (acc, invoice) => acc + (invoice.payment?.balanceDue || 0),
+
+        0
+      );
+
+      settotalInvoicesRaised(totalRaised);
+
+      settotalBalanceDue(totalDue);
+
+      // Move logs into a separate effect to log the updated values
+
+      // console.log("Total Balance Due: ", totalDue);
+
+      // console.log("Total Invoices Raised: ", totalRaised);
+    }
+  }, [allInvoiceData]); // Run when allInvoiceData changes
+
+  useClickAway(colorPickerRef, () => {
+    setShowColorPicker(false);
+  });
+
+  useEffect(() => {
+    // console.log("condition:", userData.first_name!="");
+    fetchUserInfo();
+  }, []);
+
+
+
+  useEffect(() => {
+    if (allUserInfo) {
+      // console.log("Updated allUserInfo:", allUserInfo.first_name);
+      // Perform additional actions when allUserInfo updates
+      setFormData({
+        first_name: allUserInfo.first_name || "",
+        last_name: allUserInfo.last_name || "",
+        companyName: allUserInfo.companyName || "",
+        companyFullAddress: allUserInfo.companyFullAddress || "",
+        GST: allUserInfo.GST || "",
+        country: allUserInfo.country || "India",
+        city: allUserInfo.city || "",
+        state: allUserInfo.state || "",
+        pincode: allUserInfo.pincode || "",
+        phone: allUserInfo.phone || "",
+        invoice_Prefix: allUserInfo.invoice_Prefix || "INV",
+        invoice_Number: allUserInfo.invoice_Number || "",
+        total_invoice_amount: allUserInfo.total_invoice_amount || "0",
+        total_invoice_balance: allUserInfo.total_invoice_balance || "0",
+        total_invoice_paid_amount: allUserInfo.total_invoice_paid_amount || "0",
+        brandColor: color,
+      });
+    }
+  }, [allUserInfo]);
+
+  const [formData, setFormData] = useState({
+    first_name: "aaaa",
+    last_name: "",
+    companyName: "",
+    companyFullAddress: "",
+    GST: "",
+    country: "India",
+    city: "",
+    state: "",
+    pincode: "",
+    phone: "",
+    invoice_Prefix: "INV",
+    invoice_Number: "",
+    total_invoice_amount: "0",
+    total_invoice_balance: "0",
+    total_invoice_paid_amount: "0",
+    brandColor: color,
+  });
+
+  const removeImage = () => {
+    if (image) {
+      URL.revokeObjectURL(image);
+    }
+    setImage(null);
+  };
+
+  const handleColorChange = (newColor) => {
+    setColor(newColor);
+  };
+
+  const handleColorInput = (e) => {
+    const inputColor = e.target.value;
+    if (inputColor.startsWith("#")) {
+      setColor(inputColor);
+      if (/^#[0-9A-F]{6}$/i.test(inputColor)) {
+        setShowColorPicker(false);
+      }
+    }
+  };
+
+  const onDrop = useCallback((e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    handleFile(file);
+  }, []);
+
+  const onDragOver = useCallback((e) => {
+    e.preventDefault();
+  }, []);
+
+  const handleFile = (file) => {
+    if (file && file.type.substr(0, 5) === "image") {
+      if (image) {
+        URL.revokeObjectURL(image);
+      }
+      setImage(URL.createObjectURL(file));
+    } else {
+      alert("Please upload an image file");
+    }
+  };
+
+  // Handle form input change
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [id]: value }));
+  };
+
+  const handleFormSubmitUserDetails = async (e) => {
+    // console.log("formData", formData);
+    e.preventDefault();
+
+    try {
+      const token = localStorage.getItem("authToken"); // Replace this with your actual token, or retrieve it dynamically (e.g., from localStorage, context, etc.)
+      // console.log("request data", JSON.stringify(formData));
+      const response = await fetch(
+        "http://localhost:3000/api/auth/updatePofile",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Adding token to Authorization header
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        // console.log("result",result);
+        alert("Profile updated successfully!");
+        setShowSettings(false);
+        handleTabChange("home");
+        setisShimmer(false);
+        fetchUserInfo();
+      } else {
+        alert("Error updating profile: " + result.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed to update profile.");
+    }
+  };
+
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show top bar only if scrolled down
+      setHasScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const handleTabChange = (newTab) => {
+    if (activeTab === "createinvoices") {
+      // Show confirmation alert when leaving "createinvoices"
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You have unsaved changes. Do you want to leave this page?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Leave",
+        cancelButtonText: "Stay",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setActiveTab(newTab); // Switch to the new tab
+        }
+        // If "Stay" is clicked, do nothing (alert closes automatically)
+      });
+    } else {
+      setActiveTab(newTab); // Switch to the new tab directly
+    }
+  };
+  // const handleTabChange = (newTab) => {
+  //   if (activeTab === "createinvoices") {
+  //     // Show confirmation alert when leaving "createinvoices"
+  //     Swal.fire({
+  //       title: "Are you sure?",
+  //       text: "You have unsaved changes. Do you want to leave this page?",
+  //       icon: "warning",
+  //       showCancelButton: true,
+  //       confirmButtonText: "Leave",
+  //       cancelButtonText: "Stay",
+  //     }).then((result) => {
+  //       if (result.isConfirmed) {
+  //         setActiveTab(newTab); // Update activeTab state
+  //         // navigate(`/dashboard/${newTab}`); // Navigate to the new route
+  //       }
+  //       // If "Stay" is clicked, the alert closes automatically and no action is taken
+  //     });
+  //   } else {
+  //     setActiveTab(newTab); // Update activeTab state
+  //     navigate(`/dashboard/${newTab}`); // Navigate to the new route
+  //   }
+  // };
+  
+
+
+  useEffect(() => {
+    // Sync the activeTab with the URL when the pathname changes
+    const currentTab = location.pathname.split("/")[2];
+    if (currentTab !== activeTab) {
+      setActiveTab(currentTab || "home");
+    }
+  }, [location.pathname]);
+
+  return (
+
+
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      {/* Sidebar */}
+      {/* Top Bar - Visible after scrolling and hidden when the sidebar is open */}
+      <div className="md:hidden fixed top-4 right-4 z-50">
+      {/* Hamburger or Close icon based on sidebar state */}
+
+      <button
+        className="text-2xl"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        {isSidebarOpen ? <X /> : <Menu />}
+      </button>
+    </div>
+      {!isSidebarOpen && hasScrolled && (
+        <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50 md:hidden transition-transform">
+          <div className="flex items-center justify-between p-4">
+            <div className="rounded-full bg-blue-500 p-2">
+              <img
+                alt="Logo"
+                src="/placeholder.svg?height=24&width=24"
+                className="h-6 w-6"
+              />
+            </div>
+            <span className="text-xl font-bold">Workzy</span>
+
+            {/* Hamburger Menu */}
+            <button
+              className="text-2xl"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              {isSidebarOpen ? <X /> : <Menu />}
+            </button>
           </div>
         </div>
       )}
+
+      <aside
+        className={`${
+          isSidebarOpen ? "transform-none" : "-translate-x-full"
+        } fixed top-0 left-0 w-full md:w-64 bg-white p-4 h-screen overflow-y-auto transition-transform md:sticky  md:transform-none z-40`}
+      >
+        <div className="flex items-center gap-2 pb-8">
+          <div className="rounded-full bg-blue-500 p-2">
+            <img
+              alt="Logo"
+              src="/placeholder.svg?height=24&width=24"
+              className="h-6 w-6"
+            />
+          </div>
+          <span className="text-xl font-bold">Workzy</span>
+        </div>
+
+        <nav className="space-y-2">
+          <SidebarButton
+            icon={<Home className="h-5 w-5" />}
+            isActive={activeTab === "home"}
+            onClick={() => {
+              if (showSetting !== true) {
+                handleTabChange("home");
+                setIsSidebarOpen(false); // Close the sidebar
+              }
+            }}
+          >
+            Home
+          </SidebarButton>
+          <SidebarButton
+            icon={<Package className="h-5 w-5" />}
+            isActive={activeTab === "products"}
+            onClick={() => {
+              if (showSetting !== true) {
+                handleTabChange("products");
+                setIsSidebarOpen(false); // Close the sidebar
+              }
+            }}
+          >
+            Products
+          </SidebarButton>
+          <SidebarButton
+            icon={<Users className="h-5 w-5" />}
+            isActive={activeTab === "customers"}
+            onClick={() => {
+              if (showSetting !== true) {
+                handleTabChange("customers");
+                setIsSidebarOpen(false); // Close the sidebar
+              }
+            }}
+          >
+            Customers
+          </SidebarButton>
+          <SidebarButton
+            icon={<NotebookIcon className="h-5 w-5" />}
+            isActive={
+              activeTab === "invoices" || activeTab === "create-invoice"
+            }
+            onClick={() => {
+              if (showSetting !== true) {
+                handleTabChange("invoices");
+                setIsSidebarOpen(false); // Close the sidebar
+              }
+            }}
+          >
+            <div className="flex justify-around items-end">
+              <span>Invoices</span>
+            </div>
+          </SidebarButton>
+          {activeTab === "invoices" && (
+            <div className="ml-8 mt-2 space-y-2">
+              <button
+                onClick={() => {
+                  if (showSetting !== true) {
+                    handleTabChange("createinvoices");
+                    setIsSidebarOpen(false); // Close the sidebar
+                  }
+                }}
+                className="text-gray-600 hover:text-blue-500 transition-colors"
+              >
+                Create Invoice
+              </button>
+            </div>
+          )}
+          <SidebarButton
+            icon={<NotepadText className="h-5 w-5" />}
+            isActive={activeTab === "templates"}
+            disabled
+            onClick={() => {
+              if (showSetting !== true) {
+                // setActiveTab("templates");
+                setIsSidebarOpen(false); // Close the sidebar
+              }
+            }}
+          >
+            Templates
+          </SidebarButton>
+          <SidebarButton
+            icon={<IndianRupee className="h-5 w-5" />}
+            isActive={activeTab === "purchase-orders"}
+            onClick={() => {
+              if (showSetting !== true) {
+                // setActiveTab("purchase-orders");
+                setIsSidebarOpen(false); // Close the sidebar
+              }
+            }}
+          >
+            Estimates
+          </SidebarButton>
+        </nav>
+
+        <div className="absolute bottom-4 left-4 space-y-2 w-full md:w-auto mb-20 ">
+          <SidebarButton
+            icon={<Settings className="h-5 w-5" />}
+            isActive={activeTab === "settings"}
+            onClick={() => {
+              handleTabChange("settings");
+              setIsSidebarOpen(false); // Close the sidebar
+            }}
+          >
+            Settings
+          </SidebarButton>
+          <SidebarButton
+            icon={<LogOut className="h-5 w-5" />}
+            onClick={() => {
+              handleLogout();
+              setIsSidebarOpen(false); // Close the sidebar
+            }}
+          >
+            Log out
+          </SidebarButton>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-4 md:p-8 overflow-auto">
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <div className="pt-10">
+              {isShimmer ? (
+                <div>
+                  {showSetting === false ? (
+                    <div className="h-8 w-40 bg-gray-200 rounded-md animate-pulse"></div>
+                  ) : (
+                    <h1 className="text-2xl font-bold mt-7 md:mt-0">
+                      Hello{" "}
+                      {allUserInfo.first_name
+                        ? capitalizeFirstLetter(allUserInfo.first_name)
+                        : "User"}
+                      !
+                    </h1>
+                  )}
+                </div>
+              ) : (
+                <h1 className="text-2xl font-bold mt-7 md:mt-0">
+                  Hello{" "}
+                  {allUserInfo.first_name
+                    ? capitalizeFirstLetter(allUserInfo.first_name)
+                    : "User"}
+                  !
+                </h1>
+              )}
+            </div>
+            {activeTab === "home" && (
+              <p className="text-gray-500">Welcome to dashboard.</p>
+            )}
+          </div>
+          <div className="flex items-center gap-4 pt-10">
+            <button className="p-2 hover:bg-gray-100 rounded-full">
+              <Bell className="h-5 w-5" />
+            </button>
+            <button className="p-2 hover:bg-gray-100 rounded-full">
+              <Mail className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {renderTabContent()}
+      </main>
     </div>
+
+
+
+   
+
   );
 }
+
+
