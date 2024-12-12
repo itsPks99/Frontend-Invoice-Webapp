@@ -79,7 +79,7 @@ export default function LandingPage() {
           <span
             className={`transition-all duration-300 ${
               scrolled ? "text-xl" : "text-2xl"
-            } font-extrabold text-gray-800 tracking-wide transform hover:scale-105 hover:text-blue-600`}
+            } font-extrabold text-gray-800 tracking-wide transform hover:scale-101 hover:text-blue-600`}
           >
             Workzy
           </span>
@@ -89,25 +89,25 @@ export default function LandingPage() {
         <div className="hidden md:flex space-x-8">
           <a
             href="#features"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Features
           </a>
           <a
             href="#pricing"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Pricing
           </a>
           <a
             href="#blog"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Blog
           </a>
           <a
             href="#resources"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Resources
           </a>
@@ -117,13 +117,13 @@ export default function LandingPage() {
         <div className="flex space-x-4 items-center">
         <button
             onClick={handleSignIn}  // Navigate to /signin when clicked
-            className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-105"
+            className="border border-blue-600 text-blue-600 px-4 py-2 rounded-md hover:bg-blue-50 transition-transform duration-200 transform hover:scale-101"
           >
             Sign in
           </button>
           <button
             onClick={handleSignUp}  // Navigate to /signup when clicked
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-105"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-transform duration-200 transform hover:scale-101"
           >
             Sign up
           </button>
@@ -175,25 +175,25 @@ export default function LandingPage() {
         >
           <a
             href="#features"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Features
           </a>
           <a
             href="#pricing"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Pricing
           </a>
           <a
             href="#blog"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Blog
           </a>
           <a
             href="#resources"
-            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-105"
+            className="text-gray-800 hover:text-gradient transition duration-200 transform hover:scale-101"
           >
             Resources
           </a>
@@ -231,7 +231,7 @@ export default function LandingPage() {
 
     {/* Sign-up Form */}
     <div
-      className="bg-gradient-to-br from-blue-600 to-blue-900 p-5 rounded-xl shadow-xl space-y-4 max-w-lg transition-all transform hover:scale-105 hover:shadow-2xl duration-300 cursor-pointer"
+      className="bg-gradient-to-br from-blue-600 to-blue-900 p-5 rounded-xl shadow-xl space-y-4 max-w-lg transition-all transform hover:scale-101 hover:shadow-2xl duration-300 cursor-pointer"
       onClick={handleSignUp} // Trigger the navigate function on click
     >
       <h2 className="text-2xl font-semibold text-white text-center drop-shadow">
@@ -246,7 +246,7 @@ export default function LandingPage() {
     <img
       src={HeroImg} // Replace with actual image path
       alt="Business Vector"
-      className="max-w-lg transition-transform duration-500 hover:scale-105 hover:rotate-1"
+      className="max-w-lg transition-transform duration-500 hover:scale-101 hover:rotate-1"
     />
   </div>
 </section>
@@ -274,7 +274,7 @@ export default function LandingPage() {
   <p className="text-lg sm:text-xl text-gray-300 mb-12 animate-fade-in">Your Wave account gets you access to all this and more:</p>
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-10">
     {features.map((feature, index) => (
-      <div key={index} className="flex items-center max-w-md text-left mx-auto transform transition duration-300 hover:scale-105">
+      <div key={index} className="flex items-center max-w-md text-left mx-auto transform transition duration-300 hover:scale-101">
         <img src={feature.icon} alt="Feature Icon" className="w-10 h-10 mr-4" />
         <p className="text-gray-200">{feature.title}</p>
       </div>
@@ -386,7 +386,7 @@ export default function LandingPage() {
       <div className="text-center mt-10 justify-center mb-6">
         <a
           href="#"
-          className="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition duration-200 transform hover:scale-105 active:scale-95"
+          className="bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition duration-200 transform hover:scale-101 active:scale-95"
         >
           Get started today
         </a>
@@ -405,7 +405,7 @@ export default function LandingPage() {
   
   {/* Content */}
   <div className="relative z-10">
-    <h2 className="text-5xl font-bold mb-4 animate-fade-in transition-transform transform hover:scale-105 duration-300">
+    <h2 className="text-5xl font-bold mb-4 animate-fade-in transition-transform transform hover:scale-101 duration-300">
       Ready to get started?
     </h2>
     <p className="text-xl mb-6 text-gray-300 max-w-lg mx-auto">

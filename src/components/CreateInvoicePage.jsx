@@ -1,14 +1,21 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Trash, Plus } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
+import CustomerForm from "../components/CustomerForm";
 
- 
+import Invoice from "../components/InvoiceTemplates/InvoiceTemplate1";
+import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
+import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
+import PreviewPage from "../components/PreviewPage";
+import ProductForm from "./ProductForm";
+
+
 const CreateInvoicePage = ({
-  userDetails,
-  productDetails,
-  customerDetails,
+  // userDetails,
+  // productDetails,
+  // customerDetails,
   setActiveTab1,
-  
 }) => {
   // console.log("userDetails:", userDetails);
   // console.log("productDetails:", productDetails);
@@ -27,6 +34,9 @@ const CreateInvoicePage = ({
   const [InvoiceNumber, setInvoiceNumber] = useState("");
   const [InvoicePrefix, setInvoicePrefix] = useState("");
   const [posoNumber, setPosoNumber] = useState("");
+  const [productDetails, setProductDetails] = useState([]);
+  const [customerDetails, setCustomerDetails] = useState([]);
+  const [userDetails, setUserDetails] = useState({});
   const [termsAndCondition, setTermsAndCondition] = useState(
     "Please check the invoice and make the payment before 30 days."
   );
@@ -38,6 +48,10 @@ const CreateInvoicePage = ({
   const [selectedCustomerId, setSelectedCustomerId] = useState(""); // Store selected customer ID
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Cash");
   const [selected, setSelected] = useState("rupee");
+  const [showPreview, setshowPreview] = useState();
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const navigate = useNavigate();
   const [invoiceDate, setInvoiceDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
@@ -313,16 +327,22 @@ const CreateInvoicePage = ({
 
   // Find selected customer from data
   const selectedCustomer = customerDetails.find(
-    (customer) => customer.firstName === selectedCustomerId
+    (customer) => customer._id === selectedCustomerId
   );
+  // console.log("selectedCustomer--", selectedCustomer);
 
-  const userState = "Delhi"; // Replace with dynamic user state
+  const userState =
+    selectedCustomer !== undefined
+      ? selectedCustomer.billingAddress.state
+      : "Delhi"; // Replace with dynamic user state
   // console.log("userState", userState);
 
   const customerState =
-    customerDetails.find((c) => c.firstName === selectedCustomerId)
-      ?.billingAddress?.state || "";
+    customerDetails.find((c) => c._id === selectedCustomerId)?.billingAddress
+      ?.state || "";
   // console.log("customerState", customerState);
+  // console.log("selectedCustomerId", selectedCustomerId);
+  // console.log("customerDetails--", customerDetails);
 
   //--------------------------------------------------------------------------------------------
 
@@ -350,19 +370,20 @@ const CreateInvoicePage = ({
   const handleTotalDiscountChange = (e) => {
     const discountValue = parseInt(e.target.value, 10); // Convert string to integer
     let newDiscount = 0;
-  
+
     if (selected === "percentage") {
-      newDiscount = isNaN(discountValue) ? 0 : Math.round((calculateTotal() * discountValue) / 100);
+      newDiscount = isNaN(discountValue)
+        ? 0
+        : Math.round((calculateTotal() * discountValue) / 100);
     } else {
       newDiscount = isNaN(discountValue) ? 0 : discountValue;
     }
-  
+
     setTotalDiscount(newDiscount); // Update the state
-  
+
     // Log the updated value after ensuring it is set
-    console.log("TotalDiscount", newDiscount);
+    // console.log("TotalDiscount", newDiscount);
   };
-  
 
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...items];
@@ -412,11 +433,28 @@ const CreateInvoicePage = ({
 
   const handleTabChange = (newTab) => {
     setActiveTab1(newTab); // Update the activeTab in the Dashboard
+    window.scrollTo(0, 0);
   };
 
   //--------------------------------------------------------------------------------------------
 
   // UseEffets
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([fetchProducts(), fetchCustomers(), fetchUserInfo()]);
+      } catch (error) {
+        console.error("Error in fetching data:", error);
+      } finally {
+        setLoading(false); // Ensure loading state is updated after all fetches
+      }
+    };
+
+    fetchData();
+  }, []);
+
   useEffect(() => {
     // Ensure userDetails.invoice_Number is valid
     let checkINV = parseInt(userDetails.invoice_Number, 10);
@@ -429,7 +467,7 @@ const CreateInvoicePage = ({
       setInvoiceNumber(newInvoiceNumber);
       // console.log('InvoiceNumber:',InvoiceNumber);
     } else {
-      console.error("Invalid invoice number:", userDetails.invoice_Number);
+      // console.error("Invalid invoice number:", userDetails.invoice_Number);
     }
     setInvoicePrefix(userDetails.invoice_Prefix);
   }, [userDetails.invoice_Number, userDetails.invoice_Prefix]);
@@ -450,10 +488,10 @@ const CreateInvoicePage = ({
     setTotalDiscount(0); // Reset to 0 whenever selected changes
   }, [selected]);
 
-
   //--------------------------------------------------------------------------------------------
 
   // Calculation Funtions
+
   const calculateTotal = () => {
     return items.reduce((total, item) => {
       let itemTotal = item.quantity * item.price;
@@ -539,7 +577,96 @@ const CreateInvoicePage = ({
 
   // API Funtions
 
+  const fetchProducts = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        "http://localhost:3000/api/products/fetchProducts",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setProductDetails(data.products); // Save to state
+        // console.log("Product Details:", data.products);
+      } else {
+        console.error("Failed to fetch products:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(
+        "http://localhost:3000/api/customers/fetchAllCustomer",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setCustomerDetails(data.customer); // Save to state
+        // console.log("Customer Details:", data.customer);
+      } else {
+        console.error("Failed to fetch customers:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
+  const fetchUserInfo = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        console.error("No auth token found in localStorage.");
+        return;
+      }
+
+      const response = await fetch(
+        "http://localhost:3000/api/auth/user-profile",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserDetails(data.user); // Save to state
+        // console.log("User Details:", data.user);
+      } else {
+        console.error(
+          `Failed to fetch user info: ${response.status} - ${response.statusText}`
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching user info:", error.message);
+    }
+  };
+
   const callCreateAPI = async (userData) => {
+
+    // console.log('selectedCustomer data', selectedCustomer.firstName + " " + selectedCustomer.lastName || "");
+
     if (selectedCustomer) {
       if (items[0].hsnCode !== "" || items[0].price !== 0) {
         setLoading(true); // Start loading
@@ -568,7 +695,7 @@ const CreateInvoicePage = ({
             invoiceNumber: InvoiceNumber || "N/A",
             invoiceDate: invoiceDate || "N/A",
             invoiceDueDate: paymentDue || "N/A",
-            companyName: userDetails.companyName.toUpperCase() || "N/A",
+            companyName: userDetails.companyName || "N/A",
             country: userDetails.country || "N/A",
             gstNumber: userDetails.GST || "N/A",
             poNumber: posoNumber || "",
@@ -579,14 +706,13 @@ const CreateInvoicePage = ({
 
             billTo: {
               customerName:
-                selectedCustomer.firstName ||
-                "N/A" + selectedCustomer.lastName ||
+                selectedCustomer.firstName + " " + selectedCustomer.lastName ||
                 "",
               companyName: selectedCustomer.companyName || "N/A",
               phone: selectedCustomer.phone || "N/A",
               email: selectedCustomer.email || "N/A",
               address: selectedCustomer.billingAddress.address1 || "N/A",
-              city: selectedCustomer.billingAddress.address1 || "N/A",
+              city: selectedCustomer.billingAddress.city || "N/A",
               gstNumber: selectedCustomer.gstNumber || "N/A",
               state: selectedCustomer.billingAddress.state || "N/A",
               country: selectedCustomer.billingAddress.country || "N/A",
@@ -702,6 +828,8 @@ const CreateInvoicePage = ({
       if (response.ok) {
         const data = await response.json(); // Parse the JSON response if needed
 
+        console.log('invoicedata', data)
+
         const invNumber = data.invoice.invoiceNumber || "N/A";
         const totalInvoiceAmt =
           Number(userData.total_invoice_amount) +
@@ -710,12 +838,12 @@ const CreateInvoicePage = ({
           Number(userData.total_invoice_balance) +
             data.invoice.payment.balanceDue || "0";
         const totalPaidAmt =
-        Number(userData.total_invoice_paid_amount||0) +
+          Number(userData.total_invoice_paid_amount || 0) +
             data.invoice.payment.paymentMade || "0";
         // console.log("invNumber", invNumber);
-        console.log("totalInvoiceAmt", totalInvoiceAmt);
-        console.log("totalBalanceAmt", totalBalanceAmt);
-        console.log("totalPaidAmt", totalPaidAmt);
+        // console.log("totalInvoiceAmt", totalInvoiceAmt);
+        // console.log("totalBalanceAmt", totalBalanceAmt);
+        // console.log("totalPaidAmt", totalPaidAmt);
 
         updateProfileApi({
           invoice_Number: invNumber,
@@ -732,8 +860,11 @@ const CreateInvoicePage = ({
           confirmButtonColor: "#2563EB",
           // timer: 3000, // Auto close after 3 seconds
         });
-        console.log("Invoice created successfully:", data);
-        handleTabChange("invoices");
+        // console.log("Invoice created successfully:", data);
+        handleTabChange("preview-page");
+        navigate(`/dashboard/${"preview-page"}`,
+          {state: { invoiceData: data.invoice, userData :userDetails}}
+        );
         resetFields();
       } else {
         setLoading(false);
@@ -752,7 +883,7 @@ const CreateInvoicePage = ({
   };
 
   const updateProfileApi = async (profileData) => {
-    console.log("profileData:", profileData);
+    // console.log("profileData:", profileData);
     clearAllFields();
     try {
       const token = localStorage.getItem("authToken");
@@ -778,7 +909,7 @@ const CreateInvoicePage = ({
       if (response.ok) {
         const data = await response.json(); // Parse the JSON response if needed
 
-        console.log("Profile update successfully:", data);
+        // console.log("Profile update successfully:", data);
         setLoading(false);
       } else {
         setLoading(false);
@@ -795,7 +926,10 @@ const CreateInvoicePage = ({
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
+
+    
+      
+      <div className="p-6 mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
       <div className="mb-10 flex items-center justify-between">
         <div>
           {logo ? (
@@ -831,7 +965,7 @@ const CreateInvoicePage = ({
         {/* Left Section - Company Details */}
         <div>
           <h2 className="text-xl font-bold">
-            {userDetails.companyName.toUpperCase() || "N/A"}
+            {userDetails.companyName || "N/A"}
           </h2>
           <p>
             Address: {userDetails.companyFullAddress || "N/A"},<br />
@@ -839,6 +973,7 @@ const CreateInvoicePage = ({
             {userDetails.country || "N/A"}
           </p>
           <p>Ph: {userDetails.phone || "N/A"}</p>
+          <p>GST: {userDetails.GST || "N/A"}</p>
         </div>
 
         {/* Right Section - Place of Supply */}
@@ -870,20 +1005,26 @@ const CreateInvoicePage = ({
               Select a customer
             </option>
             {customerDetails.map((customer) => (
-              <option key={customer.id} value={customer.firstName}>
+              <option
+                key={
+                  customer._id ||
+                  customer.id ||
+                  `${customer.firstName}-${customer.lastName}`
+                } // Use a unique key
+                value={customer._id || customer.id} // Use the unique identifier as the value
+              >
                 {customer.firstName} {customer.lastName} - (
                 {customer.companyName})
               </option>
             ))}
           </select>
           <span
-  className="flex items-center text-blue-600 cursor-pointer hover:text-blue-800 transition-colors py-2 mx-2 my-1"
-  onClick={() => handleTabChange("customers")} // Use a function reference
->
-  <Plus className="h-5 w-5 mr-1" /> {/* Lucide Plus icon */}
-  Add Customer
-</span>
-
+            className="flex items-center text-blue-600 cursor-pointer hover:text-blue-800 transition-colors py-2 mx-2 my-1"
+            onClick={() => setShowCustomerForm(true)}
+          >
+            <Plus className="h-5 w-5 mr-1" /> {/* Lucide Plus icon */}
+            Add Customer
+          </span>
         </div>
 
         {/* Address Section */}
@@ -905,6 +1046,7 @@ const CreateInvoicePage = ({
                     {", "}
                     {selectedCustomer.billingAddress.pincode}
                   </p>
+                  <p>GST: {selectedCustomer.gstNumber}</p>
                 </>
               ) : (
                 <p className="text-gray-500">No address</p>
@@ -919,15 +1061,13 @@ const CreateInvoicePage = ({
               {selectedCustomer?.shippingAddress ? (
                 <>
                   <p>{selectedCustomer.shippingAddress.address1}</p>
-                  {selectedCustomer.shippingAddress.address2 && (
-                    <p>{selectedCustomer.shippingAddress.address2}</p>
-                  )}
                   <p>
                     {selectedCustomer.shippingAddress.city}
                     {", "}
                     {selectedCustomer.shippingAddress.state}
                     {", "}
                     {selectedCustomer.shippingAddress.pincode}
+                   <p>‎ </p>
                   </p>
                 </>
               ) : (
@@ -1022,9 +1162,13 @@ const CreateInvoicePage = ({
             <thead>
               <tr className="bg-gray-100">
                 <th className="border px-3 py-2 text-center w-4/12 ">Item</th>
-                <th className="border px-3 py-2 text-center w-2/12">HSN/<br/>SAC</th>
+                <th className="border px-3 py-2 text-center w-2/12">
+                  HSN/
+                  <br />
+                  SAC
+                </th>
                 <th className="border px-3 py-2 text-center w-1/12">
-                  Quantity
+                  Qty
                 </th>
                 <th className="border px-3 py-2 text-center w-2/12">Price</th>
                 {getTaxType(userState, customerState) === "SGST" && (
@@ -1111,7 +1255,19 @@ const CreateInvoicePage = ({
                     </select>
                   </td>
                   <td className="border px-4 py-2 text-center">
-                    {item.hsnCode || "0"}
+                  <input
+                    
+                      value={item.hsnCode}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          "hsnCode",
+                         e.target.value
+                        )
+                      }
+                      className="w-full text-left p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
+                    />
+                    {/* {item.hsnCode || "0"} */}
                   </td>
                   <td className="border px-2 py-2">
                     <input
@@ -1129,19 +1285,15 @@ const CreateInvoicePage = ({
                     />
                   </td>
                   <td className="border px-2 py-2 text-center">
-                  <input
+                    <input
                       type="number"
                       min="1"
                       value={item.price}
                       onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "price",
-                          Number(e.target.value)
-                        )
+                        handleItemChange(index, "price", Number(e.target.value))
                       }
                       className="w-full  text-center p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
-                   />
+                    />
                   </td>
                   {(getTaxType(userState, customerState) === "SGST" ||
                     getTaxType(userState, customerState) === "CGST") && (
@@ -1188,7 +1340,7 @@ const CreateInvoicePage = ({
           + Add Item
         </button>
         <button
-          onClick={() => handleTabChange("products")}
+          onClick={() => setShowProductForm(true)}
           className="mt-3 ml-5 inline-block px-4 py-2 text-blue-500 border border-blue-500 rounded-md font-medium text-sm hover:bg-blue-500 hover:text-white transition-colors duration-300 ease-in-out"
         >
           + Add Product
@@ -1216,44 +1368,44 @@ const CreateInvoicePage = ({
         </div>
         <div className="text-right mt-10 mb-10 flex gap-4 items-center">
           <p className=" text-center items-center text-sm font-semibold mb-2 ">
-            Add Discount<br/>
+            Add Discount
+            <br />
             <span className="ml-1  text-gray-400">(optional)</span>
           </p>
 
           <input
             type="number"
             min="0"
-            max={selected ==="percentage" ? "10":"100000"}
+            max={selected === "percentage" ? "10" : "100000"}
             step="0.01"
-            placeholder= {selected ==="percentage" ?"0%":"0"}
+            placeholder={selected === "percentage" ? "0%" : "0"}
             onChange={handleTotalDiscountChange}
             className="w-20 h-10 py-2 px-2 text-center border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
           />
           <div className="flex flex-col space-y-2">
-      <label className="flex items-center">
-        <input
-          type="radio"
-          name="option"
-          value="rupee"
-          className="form-radio text-blue-500"
-          checked={selected === "rupee"}
-          onChange={(e) => setSelected(e.target.value)}
-        />
-        <span className="ml-2">₹
-        </span>
-      </label>
-      <label className="flex items-center">
-        <input
-          type="radio"
-          name="option"
-          value="percentage"
-          className="form-radio text-blue-500"
-          checked={selected === "percentage"}
-          onChange={(e) => setSelected(e.target.value)}
-        />
-        <span className="ml-2">%</span>
-      </label>
-    </div>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="option"
+                value="rupee"
+                className="form-radio text-blue-500"
+                checked={selected === "rupee"}
+                onChange={(e) => setSelected(e.target.value)}
+              />
+              <span className="ml-2">₹</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="option"
+                value="percentage"
+                className="form-radio text-blue-500"
+                checked={selected === "percentage"}
+                onChange={(e) => setSelected(e.target.value)}
+              />
+              <span className="ml-2">%</span>
+            </label>
+          </div>
         </div>
       </div>
       <hr />
@@ -1429,146 +1581,7 @@ const CreateInvoicePage = ({
       <hr />
 
       {/* Save Button */}
-      {/* <div className="mt-6 text-left">
-        <button
-          className="bg-blue-500 text-white px-4 py-2 mb-10 rounded hover:bg-blue-600 "
-          onClick={() => {
-            if (selectedCustomer) {
-              if (items[0].hsnCode !== "" || items[0].price !== 0) {
-                setInvoiceData((prevData) => {
-                  // Calculate payment status before updating the invoice data
-                  const paymentStatus = (() => {
-                    const total = Math.round(calculateTotal()); // Remove decimals from total
-                    const discount = Math.round(totalDiscount); // Remove decimals from discount
-                    const received = Math.round(amountReceived); // Remove decimals from received amount
-                    const due = total - discount - received; // Calculate due amount without decimals
-
-                    if (due === 0 && isPaymentReceived) {
-                      return "paid";
-                    } else if (!isPaymentReceived || due === total) {
-                      return "unpaid";
-                    } else if (received < total && received !== 0) {
-                      return "partially paid";
-                    } else {
-                      return "unpaid";
-                    }
-                  })();
-
-                  const updatedData = {
-                    ...prevData,
-                    userId: userDetails.id || "",
-                    brandLogoUrl: logo || "",
-                    invoiceNumber: InvoiceNumber || "N/A",
-                    invoiceDate: invoiceDate || "N/A",
-                    invoiceDueDate: paymentDue || "N/A",
-                    companyName: userDetails.companyName.toUpperCase() || "N/A",
-                    country: userDetails.country || "N/A",
-                    gstNumber: userDetails.GST || "N/A",
-                    poNumber: posoNumber || "",
-                    companyFullAddress: userDetails.companyFullAddress || "N/A",
-                    city: userDetails.city || "N/A",
-                    state: userDetails.state || "N/A",
-                    pincode: userDetails.pincode || "N/A",
-
-                    billTo: {
-                      customerName:
-                        selectedCustomer.firstName ||
-                        "N/A" + selectedCustomer.lastName ||
-                        "",
-                      companyName: selectedCustomer.companyName || "N/A",
-                      phone: selectedCustomer.phone || "N/A",
-                      email: selectedCustomer.email || "N/A",
-                      address:
-                        selectedCustomer.billingAddress.address1 || "N/A",
-                      city: selectedCustomer.billingAddress.address1 || "N/A",
-                      gstNumber:
-                        selectedCustomer.gstNumber || "N/A",
-                      state: selectedCustomer.billingAddress.state || "N/A",
-                      country: selectedCustomer.billingAddress.country || "N/A",
-                      pincode: selectedCustomer.billingAddress.pincode || "N/A",
-                      placeOfSupply:
-                        selectedCustomer.billingAddress.state || "N/A",
-                    },
-                    shipTo: {
-                      address:
-                        selectedCustomer.shippingAddress.address1 || "N/A",
-                      city: selectedCustomer.shippingAddress.city || "N/A",
-                      state: selectedCustomer.shippingAddress.state || "N/A",
-                      country:
-                        selectedCustomer.shippingAddress.country || "N/A",
-                      pincode:
-                        selectedCustomer.shippingAddress.pincode || "N/A",
-                    },
-                    products: items.map((item) => ({
-                      name: item.productName,
-                      hsnCode: item.hsnCode,
-                      quantity: item.quantity,
-                      price: item.price,
-                      tax: {
-                        cgst: item.cgst,
-                        sgst: item.sgst,
-                        igst: item.igst,
-                      },
-                      subTotalAmount:
-                        getTaxType(userState, customerState) === "IGST"
-                          ? Math.round(
-                              item.quantity * item.price +
-                                (item.price * item.igst || 0) / 100
-                            )
-                          : Math.round(
-                              item.quantity * item.price +
-                                (item.price * item.sgst || 0) / 100 +
-                                (item.price * item.cgst || 0) / 100
-                            ),
-                    })),
-                    payment: {
-                      modeOfPayment: selectedPaymentMethod || "N/A",
-                      discount: Math.round(totalDiscount) || 0,
-                      tax: Math.round(calculateTotalTax()) || 0,
-                      paymentMade: Math.round(amountReceived) || 0,
-                      balanceDue: Math.round(
-                        calculateTotal() - totalDiscount - amountReceived
-                      ),
-                      grandTotal:
-                        Math.round(calculateTotal() - Number(totalDiscount)) ||
-                        0,
-                    },
-
-                    paymentStatus, // Using the calculated payment status here
-                    customerInvoiceNote: customerNote,
-                    termsAndCondition: termsAndCondition,
-                  };
-
-                  // console.log("Updated InvoiceData: ", updatedData);
-                  return updatedData;
-                });
-
-                
-              } else {
-                Swal.fire({
-                  icon: "error",
-                  title: "No product selected!",
-                  text: "Please select a product.",
-                  confirmButtonText: "OK",
-                  confirmButtonColor: "#2563EB",
-                  // timer: 3000, // Auto close after 3 seconds
-                });
-              }
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: "No customer selected!",
-                text: "Please select a customer.",
-                confirmButtonText: "OK",
-                confirmButtonColor: "#2563EB",
-                // timer: 3000, // Auto close after 3 seconds
-              });
-            }
-          }}
-        >
-          Save and Continue
-        </button>
-      </div> */}
+     
       <div className="mt-6 text-left">
         <button
           className={`bg-blue-500 text-white px-4 py-2 mb-10 rounded hover:bg-blue-600 flex items-center justify-center ${
@@ -1600,12 +1613,50 @@ const CreateInvoicePage = ({
                 d="M4 12a8 8 0 018-8v8H4z"
               ></path>
             </svg>
+          ) : InvoiceData.userId === "" ? (
+            "Save and Continue"
           ) : (
-             InvoiceData.userId === "" ? "Save and Continue" : "Genereate Invoice"
+            "Genereate Invoice"
           )}
         </button>
       </div>
+      {/* <Invoice invoiceData={InvoiceData} 
+      // customerData={customerDetails}
+      userData={userDetails} 
+      /> */}
+      {showCustomerForm && (
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                <CustomerForm
+                  onClose={() => setShowCustomerForm(false)}
+                  fetchCust={() => fetchCustomers()}
+                  // onSubmit={customerHandleFormSubmit}
+                  // formData={customerFormData}
+                  // inputChange={customerHandleInputChange}
+                  // inputChange2={customerHandleInputChange2}
+                  // copyShipping={copyShipping}
+                  // checkboxChange={handleCheckboxChange}
+                />
+              </div>
+            )}
+      {showProductForm && (
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+                <ProductForm
+                  onClose={() => setShowProductForm(false)}
+                  fetchPro={() => fetchProducts()}
+                  // onSubmit={customerHandleFormSubmit}
+                  // formData={customerFormData}
+                  // inputChange={customerHandleInputChange}
+                  // inputChange2={customerHandleInputChange2}
+                  // copyShipping={copyShipping}
+                  // checkboxChange={handleCheckboxChange}
+                />
+              </div>
+            )}
     </div>
+   
+
+
+
   );
 };
 

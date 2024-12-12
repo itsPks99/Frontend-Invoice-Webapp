@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
-
+import CustomerForm from "../components/CustomerForm";
+import ProductForm from "../components/ProductForm";
+import Invoice from "../components/InvoiceTemplates/InvoiceTemplate1";
+import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
+import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
+import PreviewPage from "../components/PreviewPage";
 import {
   Home,
   Package,
@@ -16,6 +21,7 @@ import {
   Download,
   Mail,
   Printer,
+  NotebookTabs,
   Plus,
   Edit,
   Trash,
@@ -26,6 +32,7 @@ import CreateInvoicePage from "../components/CreateInvoicePage";
 import { useClickAway } from "react-use";
 import PickState from "../components/PickState";
 import { HexColorPicker } from "react-colorful";
+import StatementTab from "../components/StatementTab";
 
 const MetricCard = ({ title, value, percentage, isPositive }) => (
   <div className="bg-white p-4 rounded-lg shadow">
@@ -65,338 +72,362 @@ const SidebarButton = ({ icon, children, isActive, onClick }) => (
   </button>
 );
 
-const ProductForm = ({ onClose, onSubmit, formData, inputChange }) => (
-  <form
-    onSubmit={onSubmit}
-    className="w-full max-w-xl space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
-    style={{ animation: "fadeSlideUp 0.6s forwards" }}
-  >
-    <style>
-      {`
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}
-    </style>
-    <div className="flex justify-between items-center px-0 py-2">
-      <h3 className="text-lg font-bold">Add New Product</h3>
-      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
-    </div>
+// const ProductForm = ({ onClose, onSubmit, formData, inputChange }) => (
+//   <form
+//     onSubmit={onSubmit}
+//     className="w-full max-w-xl space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
+//     style={{ animation: "fadeSlideUp 0.6s forwards" }}
+//   >
+//     <style>
+//       {`
+//         @keyframes fadeSlideUp {
+//           from { opacity: 0; transform: translateY(10px); }
+//           to { opacity: 1; transform: translateY(0); }
+//         }
+//       `}
+//     </style>
+//     <div className="flex justify-between items-center px-0 py-2">
+//       <h3 className="text-lg font-bold">Add New Product</h3>
+//       <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+//         <svg
+//           xmlns="http://www.w3.org/2000/svg"
+//           className="h-6 w-6"
+//           fill="none"
+//           viewBox="0 0 24 24"
+//           stroke="currentColor"
+//         >
+//           <path
+//             strokeLinecap="round"
+//             strokeLinejoin="round"
+//             strokeWidth={2}
+//             d="M6 18L18 6M6 6l12 12"
+//           />
+//         </svg>
+//       </button>
+//     </div>
 
-    {/* Form fields */}
-    {[
-      {
-        id: "productName",
-        label: "Product Name",
-        placeholder: "Enter product name",
-      },
-      {
-        id: "price",
-        label: "Price",
-        placeholder: "Enter price",
-        type: "number",
-      },
-      {
-        id: "description",
-        label: "Description",
-        placeholder: "Enter description",
-      },
-      { id: "hsnCode", label: "HSN Code", placeholder: "Enter HSN code" },
-      { id: "cgst", label: "CGST", placeholder: "Enter CGST", type: "number" },
-      { id: "sgst", label: "SGST", placeholder: "Enter SGST", type: "number" },
-      { id: "igst", label: "IGST", placeholder: "Enter IGST", type: "number" },
-    ].map(({ id, label, placeholder, type = "text" }) => (
-      <div key={id} className="relative">
-        <label
-          htmlFor={id}
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          {label}
-        </label>
-        <input
-          id={id}
-          name={id}
-          type={type}
-          value={formData[id]}
-          onChange={inputChange}
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-          placeholder={placeholder}
-        />
-      </div>
-    ))}
+//     {/* Form fields */}
+//     {[
+//       {
+//         id: "productName",
+//         label: "Product Name",
+//         placeholder: "Enter product name",
+//       },
+//       {
+//         id: "price",
+//         label: "Price",
+//         placeholder: "Enter price",
+//         type: "number",
+//       },
+//       {
+//         id: "description",
+//         label: "Description",
+//         placeholder: "Enter description",
+//       },
+//       { id: "hsnCode", label: "HSN Code", placeholder: "Enter HSN code" },
+//       { id: "cgst", label: "CGST", placeholder: "Enter CGST", type: "number" },
+//       { id: "sgst", label: "SGST", placeholder: "Enter SGST", type: "number" },
+//       { id: "igst", label: "IGST", placeholder: "Enter IGST", type: "number" },
+//     ].map(({ id, label, placeholder, type = "text" }) => (
+//       <div key={id} className="relative">
+//         <label
+//           htmlFor={id}
+//           className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-101"
+//         >
+//           {label}
+//         </label>
+//         <input
+//           id={id}
+//           name={id}
+//           type={type}
+//           value={formData[id]}
+//           onChange={inputChange}
+//           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
+//           placeholder={placeholder}
+//         />
+//       </div>
+//     ))}
 
-    {/* Submit button */}
-    <button
-      type="submit"
-      className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md hover:bg-gradient-to-r hover:from-indigo-500 hover:to-blue-500 transition-transform duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-    >
-      Add Product
-    </button>
-  </form>
-);
+//     {/* Submit button */}
+//     <button
+//       type="submit"
+//       className="w-full px-4 py-2 mt-4 font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-md hover:bg-gradient-to-r hover:from-indigo-500 hover:to-blue-500 transition-transform duration-300 transform hover:scale-101 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+//     >
+//       Add Product
+//     </button>
+//   </form>
+// );
 
-const CustomerForm = ({
-  onClose,
-  onSubmit,
-  formData,
-  inputChange,
-  inputChange2,
-}) => (
-  <form
-    onSubmit={onSubmit}
-    className="space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg max-w-4xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
-    style={{ animation: "fadeSlideUp 0.6s forwards" }}
-  >
-    <style>
-      {`
-          @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-        `}
-    </style>
-    <div className="flex justify-between items-center px-0 p-2">
-      <h3 className="text-lg font-bold">Add New Customer</h3>
-      <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
-    </div>
-    {/* Personal Info */}
-    <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
-      <div>
-        <label
-          htmlFor="firstName"
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          First Name
-        </label>
-        <input
-          id="firstName"
-          value={formData.firstName}
-          onChange={inputChange}
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-          placeholder="Enter first name"
-        />
-      </div>
+// const CustomerForm = ({
+//   onClose,
+//   onSubmit,
+//   formData,
+//   inputChange,
+//   inputChange2,
+//   copyShipping,
+//   checkboxChange
+// }) => (
+//   <form
+//     onSubmit={onSubmit}
+//     className="space-y-4 bg-white px-5 pb-3 rounded-lg shadow-lg max-w-4xl mx-auto transform transition-all duration-500 ease-out opacity-0 translate-y-4"
+//     style={{ animation: "fadeSlideUp 0.6s forwards" }}
+//   >
+//     <style>
+//       {`
+//           @keyframes fadeSlideUp {
+//             from { opacity: 0; transform: translateY(10px); }
+//             to { opacity: 1; transform: translateY(0); }
+//           }
+//         `}
+//     </style>
+//     <div className="flex justify-between items-center px-0 p-2">
+//       <h3 className="text-lg font-bold">Add New Customer</h3>
+//       <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+//         <svg
+//           xmlns="http://www.w3.org/2000/svg"
+//           className="h-6 w-6"
+//           fill="none"
+//           viewBox="0 0 24 24"
+//           stroke="currentColor"
+//         >
+//           <path
+//             strokeLinecap="round"
+//             strokeLinejoin="round"
+//             strokeWidth={2}
+//             d="M6 18L18 6M6 6l12 12"
+//           />
+//         </svg>
+//       </button>
+//     </div>
+//     {/* Personal Info */}
+//     <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+//       <div>
+//         <label
+//           htmlFor="firstName"
+//           className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-101"
+//         >
+//           First Name
+//         </label>
+//         <input
+//           id="firstName"
+//           value={formData.firstName}
+//           onChange={inputChange}
+//           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
+//           placeholder="Enter first name"
+//         />
+//       </div>
 
-      <div>
-        <label
-          htmlFor="lastName"
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          Last Name
-        </label>
-        <input
-          id="lastName"
-          value={formData.lastName}
-          onChange={inputChange}
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-          placeholder="Enter last name"
-        />
-      </div>
-    </div>
+//       <div>
+//         <label
+//           htmlFor="lastName"
+//           className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-100"
+//         >
+//           Last Name
+//         </label>
+//         <input
+//           id="lastName"
+//           value={formData.lastName}
+//           onChange={inputChange}
+//           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
+//           placeholder="Enter last name"
+//         />
+//       </div>
+//     </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <label
-          htmlFor="companyName"
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          {" "}
-          Company Name
-        </label>
-        <input
-          id="companyName"
-          value={formData.companyName}
-          onChange={inputChange}
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-          placeholder="Enter company name"
-        />
-      </div>
+//     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//       <div>
+//         <label
+//           htmlFor="companyName"
+//           className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-101"
+//         >
+//           {" "}
+//           Company Name
+//         </label>
+//         <input
+//           id="companyName"
+//           value={formData.companyName}
+//           onChange={inputChange}
+//           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
+//           placeholder="Enter company name"
+//         />
+//       </div>
 
-      <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          {" "}
-          Email
-        </label>
-        <input
-          id="email"
-          value={formData.email}
-          onChange={inputChange}
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-          placeholder="Enter email"
-        />
-      </div>
-    </div>
+//       <div>
+//         <label
+//           htmlFor="email"
+//           className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-101"
+//         >
+//           {" "}
+//           Email
+//         </label>
+//         <input
+//           id="email"
+//           value={formData.email}
+//           onChange={inputChange}
+//           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
+//           placeholder="Enter email"
+//         />
+//       </div>
+//     </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <label
-          htmlFor="phone"
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          {" "}
-          Phone
-        </label>
-        <input
-          id="phone"
-          value={formData.phone}
-          onChange={inputChange}
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-          placeholder="Enter phone number"
-        />
-      </div>
+//     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//       <div>
+//         <label
+//           htmlFor="phone"
+//           className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-101"
+//         >
+//           {" "}
+//           Phone
+//         </label>
+//         <input
+//           id="phone"
+//           value={formData.phone}
+//           onChange={inputChange}
+//           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
+//           placeholder="Enter phone number"
+//         />
+//       </div>
 
-      <div>
-        <label
-          htmlFor="gstNumber"
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          {" "}
-          GST Number
-        </label>
-        <input
-          id="gstNumber"
-          value={formData.gstNumber}
-          onChange={inputChange}
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-          placeholder="Enter GST number"
-        />
-      </div>
-    </div>
+//       <div>
+//         <label
+//           htmlFor="gstNumber"
+//           className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-101"
+//         >
+//           {" "}
+//           GST Number
+//         </label>
+//         <input
+//           id="gstNumber"
+//           value={formData.gstNumber}
+//           onChange={inputChange}
+//           className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
+//           placeholder="Enter GST number"
+//         />
+//       </div>
+//     </div>
 
-    {/* Billing and Shipping Address - Two Column Layout */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div>
-        <label
-          htmlFor="billingAddress"
-          className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105"
-        >
-          {" "}
-          Billing Address
-        </label>
-        <input
-          id="billingAddress.country"
-          value={formData.billingAddress.country}
-          onChange={inputChange2}
-          placeholder="Country"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="billingAddress.address1"
-          value={formData.billingAddress.address1}
-          onChange={inputChange2}
-          placeholder="Address"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="billingAddress.city"
-          value={formData.billingAddress.city}
-          onChange={inputChange2}
-          placeholder="City"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="billingAddress.state"
-          value={formData.billingAddress.state}
-          onChange={inputChange2}
-          placeholder="State"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="billingAddress.pincode"
-          value={formData.billingAddress.pincode}
-          onChange={inputChange2}
-          placeholder="Pincode"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-      </div>
+//     {/* Billing and Shipping Address - Two Column Layout */}
+//     <div>
+//       <div className="mb-4">
+//         <label className="inline-flex items-center">
+//           <input
+//             type="checkbox"
+//             className="form-checkbox"
+//             checked={copyShipping}
+//             onChange={checkboxChange}
+//           />
+//           <span className="ml-2">Same as Billing Address</span>
+//         </label>
+//       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-600 transition-transform duration-200 ease-in-out transform hover:scale-105">
-          {" "}
-          Shipping Address
-        </label>
-        <input
-          id="shippingAddress.country"
-          value={formData.shippingAddress.country}
-          onChange={inputChange2}
-          placeholder="Country"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="shippingAddress.address1"
-          value={formData.shippingAddress.address1}
-          onChange={inputChange2}
-          placeholder="Address"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="shippingAddress.city"
-          value={formData.shippingAddress.city}
-          onChange={inputChange2}
-          placeholder="City"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="shippingAddress.state"
-          value={formData.shippingAddress.state}
-          onChange={inputChange2}
-          placeholder="State"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-        <input
-          id="shippingAddress.pincode"
-          value={formData.shippingAddress.pincode}
-          onChange={inputChange2}
-          placeholder="Pincode"
-          className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-105"
-        />
-      </div>
-    </div>
+//       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//         {/* Billing Address */}
+//         <div>
+//           <label
+//             htmlFor="billingAddress"
+//             className="block text-sm font-medium text-gray-600"
+//           >
+//             Billing Address
+//           </label>
+//           <input
+//             id="billingAddress.country"
+//             value={formData.billingAddress.country}
+//             onChange={inputChange2}
+//             placeholder="Country"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//           />
+//           <input
+//             id="billingAddress.address1"
+//             value={formData.billingAddress.address1}
+//             onChange={inputChange2}
+//             placeholder="Address"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//           />
+//           <input
+//             id="billingAddress.city"
+//             value={formData.billingAddress.city}
+//             onChange={inputChange2}
+//             placeholder="City"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//           />
+//           <input
+//             id="billingAddress.state"
+//             value={formData.billingAddress.state}
+//             onChange={inputChange2}
+//             placeholder="State"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//           />
+//           <input
+//             id="billingAddress.pincode"
+//             value={formData.billingAddress.pincode}
+//             onChange={inputChange2}
+//             placeholder="Pincode"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//           />
+//         </div>
 
-    <div className="text-center">
-      <button
-        type="submit"
-        className="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out"
-      >
-        Submit
-      </button>
-    </div>
-  </form>
-);
+//         {/* Shipping Address */}
+//         <div>
+//           <label
+//             htmlFor="shippingAddress"
+//             className="block text-sm font-medium text-gray-600"
+//           >
+//             Shipping Address
+//           </label>
+//           <input
+//             id="shippingAddress.country"
+//             value={formData.shippingAddress.country}
+//             onChange={inputChange2}
+//             placeholder="Country"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//             disabled={copyShipping} // Disable if checkbox is checked
+//           />
+//           <input
+//             id="shippingAddress.address1"
+//             value={formData.shippingAddress.address1}
+//             onChange={inputChange2}
+//             placeholder="Address"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//             disabled={copyShipping}
+//           />
+//           <input
+//             id="shippingAddress.city"
+//             value={formData.shippingAddress.city}
+//             onChange={inputChange2}
+//             placeholder="City"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//             disabled={copyShipping}
+//           />
+//           <input
+//             id="shippingAddress.state"
+//             value={formData.shippingAddress.state}
+//             onChange={inputChange2}
+//             placeholder="State"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//             disabled={copyShipping}
+//           />
+//           <input
+//             id="shippingAddress.pincode"
+//             value={formData.shippingAddress.pincode}
+//             onChange={inputChange2}
+//             placeholder="Pincode"
+//             className="mt-1 w-full p-3 rounded-md border border-gray-300"
+//             disabled={copyShipping}
+//           />
+//         </div>
+//       </div>
+//     </div>
+
+//     <div className="text-center">
+//       <button
+//         type="submit"
+//         className="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out"
+//       >
+//         Submit
+//       </button>
+//     </div>
+//   </form>
+// );
 
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -428,33 +459,41 @@ export default function Dashboard() {
   // console.log('allUserInfo', allUserInfo);
   // useEffect to check if userData is present
   useEffect(() => {
-    // console.log("condition:", userData.first_name!="");
+    const handleTabChange = async () => {
+      try {
+        await fetchUserInfo(); // Ensure user data is fetched before proceeding
 
-    if (activeTab === "home") {
-      // console.log("allUserInfo:", allUserInfo);
-      if (
-        allUserInfo.first_name == "" ||
-        allUserInfo.last_name == "" ||
-        allUserInfo.phone == ""
-      ) {
-        setShowSettings(true);
-        setActiveTab("settings"); // Show the form if userData is missing
-      } else {
-        fetchUserInfo();
-        setShowSettings(false);
-        setisShimmer(false);
+        if (activeTab === "home") {
+          if (
+            allUserInfo?.first_name === "" ||
+            allUserInfo?.last_name === "" ||
+            allUserInfo?.phone === ""
+          ) {
+            setShowSettings(true);
+            setActiveTab("settings"); // Show the form if user data is missing
+          } else {
+            setShowSettings(false);
+            setisShimmer(false);
+            await fetchInvoices(); // Fetch invoices for the home tab
+          }
+        } else if (activeTab === "products") {
+          await fetchProducts();
+        } else if (activeTab === "customers") {
+          await fetchCustomers();
+        } else if (activeTab === "invoices") {
+          await Promise.all([
+            fetchCustomers(),
+            fetchProducts(),
+            fetchInvoices(),
+          ]);
+        }
+      } catch (error) {
+        console.error("Error in handleTabChange:", error);
       }
-      fetchInvoices();
-    } else if (activeTab === "products") {
-      fetchProducts();
-    } else if (activeTab === "customers") {
-      fetchCustomers();
-    } else if (activeTab === "invoices") {
-      fetchCustomers();
-      fetchProducts();
-      fetchInvoices();
-    }
-  }, [activeTab]);
+    };
+
+    handleTabChange(); // Call the async function inside useEffect
+  }, [activeTab]); // Dependency array
 
   const Shimmer = () => (
     <div className="animate-pulse">
@@ -464,229 +503,229 @@ export default function Dashboard() {
     </div>
   );
 
-  const [productFormData, setProductFormData] = useState({
-    productName: "",
-    price: "",
-    description: "",
-    hsnCode: "",
-    cgst: "",
-    sgst: "",
-    igst: "",
-  });
+  // const [productFormData, setProductFormData] = useState({
+  //   productName: "",
+  //   price: "",
+  //   description: "",
+  //   hsnCode: "",
+  //   cgst: "",
+  //   sgst: "",
+  //   igst: "",
+  // });
 
-  const clearProductFormData = () => {
-    setProductFormData({
-      productName: "",
-      price: "",
-      description: "",
-      hsnCode: "",
-      cgst: "",
-      sgst: "",
-      igst: "",
-    });
-  };
+  // const clearProductFormData = () => {
+  //   setProductFormData({
+  //     productName: "",
+  //     price: "",
+  //     description: "",
+  //     hsnCode: "",
+  //     cgst: "",
+  //     sgst: "",
+  //     igst: "",
+  //   });
+  // };
 
-  const [customerFormData, setCustomerFormData] = useState({
-    firstName: "",
-    lastName: "",
-    companyName: "",
-    email: "",
-    phone: "",
-    gstNumber: "",
-    billingAddress: {
-      country: "India",
-      address1: "",
-      city: "",
-      state: "",
-      pincode: "",
-    },
-    shippingAddress: {
-      country: "India",
-      address1: "",
-      city: "",
-      state: "",
-      pincode: "",
-    },
-  });
+  // const [customerFormData, setCustomerFormData] = useState({
+  //   firstName: "",
+  //   lastName: "",
+  //   companyName: "",
+  //   email: "",
+  //   phone: "",
+  //   gstNumber: "",
+  //   billingAddress: {
+  //     country: "India",
+  //     address1: "",
+  //     city: "",
+  //     state: "",
+  //     pincode: "",
+  //   },
+  //   shippingAddress: {
+  //     country: "India",
+  //     address1: "",
+  //     city: "",
+  //     state: "",
+  //     pincode: "",
+  //   },
+  // });
 
-  const clearCustomerFormData = () => {
-    setCustomerFormData({
-      firstName: "",
-      lastName: "",
-      companyName: "",
-      email: "",
-      phone: "",
-      gstNumber: "",
-      billingAddress: {
-        country: "India",
-        address1: "",
-        city: "",
-        state: "",
-        pincode: "",
-        phone: "",
-      },
-      shippingAddress: {
-        country: "India",
-        address1: "",
-        city: "",
-        state: "",
-        pincode: "",
-        phone: "",
-      },
-    });
-  };
+  // const clearCustomerFormData = () => {
+  //   setCustomerFormData({
+  //     firstName: "",
+  //     lastName: "",
+  //     companyName: "",
+  //     email: "",
+  //     phone: "",
+  //     gstNumber: "",
+  //     billingAddress: {
+  //       country: "India",
+  //       address1: "",
+  //       city: "",
+  //       state: "",
+  //       pincode: "",
+  //       phone: "",
+  //     },
+  //     shippingAddress: {
+  //       country: "India",
+  //       address1: "",
+  //       city: "",
+  //       state: "",
+  //       pincode: "",
+  //       phone: "",
+  //     },
+  //   });
+  // };
 
   // Handle product form submission
-  const producutHandleFormSubmit = async (e) => {
-    e.preventDefault();
+  // const producutHandleFormSubmit = async (e) => {
+  //   e.preventDefault();
 
-    // Prepare the data structure for the API call
-    const requestData = {
-      productName: productFormData.productName,
-      price: Number(productFormData.price),
-      description: productFormData.description,
-      hsnCode: productFormData.hsnCode,
-      tax: {
-        cgst: `${Number(productFormData.cgst)}`,
-        sgst: `${Number(productFormData.sgst)}`,
-        igst: `${Number(productFormData.igst)}`,
-      },
-    };
+  //   // Prepare the data structure for the API call
+  //   const requestData = {
+  //     productName: productFormData.productName,
+  //     price: Number(productFormData.price),
+  //     description: productFormData.description,
+  //     hsnCode: productFormData.hsnCode,
+  //     tax: {
+  //       cgst: `${Number(productFormData.cgst)}`,
+  //       sgst: `${Number(productFormData.sgst)}`,
+  //       igst: `${Number(productFormData.igst)}`,
+  //     },
+  //   };
 
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        "http://localhost:3000/api/products/addProduct",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await fetch(
+  //       "http://localhost:3000/api/products/addProduct",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         body: JSON.stringify(requestData),
+  //       }
+  //     );
 
-      const result = await response.json();
-      if (response.ok) {
-        // console.log("Product added successfully:", result);
-        Swal.fire({
-          icon: "success",
-          title: "Product added successfully!",
-          text: "Your product has been added.",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#2563EB",
-          // timer: 3000, // Auto close after 3 seconds
-        });
-        // alert("Product added successfully!");
-        // setShowAlert(true);
-        setShowProductForm(false);
-        clearProductFormData();
-        fetchProducts();
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Error adding product: " + result.message,
-          confirmButtonText: "OK",
-          confirmButtonColor: "#2563EB",
-          // timer: 3000, // Auto close after 3 seconds
-        });
-        // alert("Error adding product: " + result.message);
-        setShowProductForm(false);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: "Failed to add product: " + result.message,
-        confirmButtonText: "OK",
-        confirmButtonColor: "#2563EB",
-        // timer: 3000, // Auto close after 3 seconds
-      });
-      // alert("Failed to add product.");
-      setShowProductForm(false);
-    }
-  };
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       // console.log("Product added successfully:", result);
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Product added successfully!",
+  //         text: "Your product has been added.",
+  //         confirmButtonText: "OK",
+  //         confirmButtonColor: "#2563EB",
+  //         // timer: 3000, // Auto close after 3 seconds
+  //       });
+  //       // alert("Product added successfully!");
+  //       // setShowAlert(true);
+  //       setShowProductForm(false);
+  //       clearProductFormData();
+  //       fetchProducts();
+  //     } else {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Error occured",
+  //         text: "Error adding product: " + result.message,
+  //         confirmButtonText: "OK",
+  //         confirmButtonColor: "#2563EB",
+  //         // timer: 3000, // Auto close after 3 seconds
+  //       });
+  //       // alert("Error adding product: " + result.message);
+  //       setShowProductForm(false);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
+  //     Swal.fire({
+  //       icon: "error",
+  //       title: "Failed",
+  //       text: "Failed to add product: " + result.message,
+  //       confirmButtonText: "OK",
+  //       confirmButtonColor: "#2563EB",
+  //       // timer: 3000, // Auto close after 3 seconds
+  //     });
+  //     // alert("Failed to add product.");
+  //     setShowProductForm(false);
+  //   }
+  // };
 
-  const customerHandleFormSubmit = async (e) => {
-    e.preventDefault();
+  // const customerHandleFormSubmit = async (e) => {
+  //   e.preventDefault();
 
-    // Prepare the data structure for the API call
-    const requestData = {
-      firstName: customerFormData.firstName,
-      lastName: customerFormData.lastName,
-      companyName: customerFormData.companyName,
-      email: customerFormData.email,
-      phone: Number(customerFormData.phone),
-      gstNumber: customerFormData.gstNumber,
-      billingAddress: {
-        country: customerFormData.billingAddress.country,
-        address1: customerFormData.billingAddress.address1,
-        city: customerFormData.billingAddress.city,
-        state: customerFormData.billingAddress.state,
-        pincode: customerFormData.billingAddress.pincode,
-      },
-      shippingAddress: {
-        country: customerFormData.shippingAddress.country,
-        address1: customerFormData.shippingAddress.address1,
-        city: customerFormData.shippingAddress.city,
-        state: customerFormData.shippingAddress.state,
-        pincode: customerFormData.shippingAddress.pincode,
-      },
-    };
+  //   // Prepare the data structure for the API call
+  //   const requestData = {
+  //     firstName: customerFormData.firstName,
+  //     lastName: customerFormData.lastName,
+  //     companyName: customerFormData.companyName,
+  //     email: customerFormData.email,
+  //     phone: Number(customerFormData.phone),
+  //     gstNumber: customerFormData.gstNumber,
+  //     billingAddress: {
+  //       country: customerFormData.billingAddress.country,
+  //       address1: customerFormData.billingAddress.address1,
+  //       city: customerFormData.billingAddress.city,
+  //       state: customerFormData.billingAddress.state,
+  //       pincode: customerFormData.billingAddress.pincode,
+  //     },
+  //     shippingAddress: {
+  //       country: customerFormData.shippingAddress.country,
+  //       address1: customerFormData.shippingAddress.address1,
+  //       city: customerFormData.shippingAddress.city,
+  //       state: customerFormData.shippingAddress.state,
+  //       pincode: customerFormData.shippingAddress.pincode,
+  //     },
+  //   };
 
-    // console.log("requestData", requestData);
+  //   // console.log("requestData", requestData);
 
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        "http://localhost:3000/api/customers/createCustomer",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+  //   try {
+  //     const token = localStorage.getItem("authToken");
+  //     const response = await fetch(
+  //       "http://localhost:3000/api/customers/createCustomer",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         body: JSON.stringify(requestData),
+  //       }
+  //     );
 
-      const result = await response.json();
-      // console.log("result:", result);
-      if (response.ok) {
-        // console.log("Customer added successfully:", result);
-        Swal.fire({
-          icon: "success",
-          title: "Customer added successfully!",
-          text: "Your Customer has been added.",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#2563EB",
-          // timer: 3000, // Auto close after 3 seconds
-        });
-        // alert("Customer added successfully!");
-        // setShowAlert(true);
-        fetchCustomers();
-        setShowCustomerForm(false);
-        clearCustomerFormData();
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Error adding customer: " + result.message,
-          confirmButtonText: "OK",
-          confirmButtonColor: "#2563EB",
-          // timer: 3000, // Auto close after 3 seconds
-        });
-        // alert("Error adding customer: " + result.message);
-      }
-    } catch (error) {
-      console.error("Error:", error);
+  //     const result = await response.json();
+  //     // console.log("result:", result);
+  //     if (response.ok) {
+  //       // console.log("Customer added successfully:", result);
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Customer added successfully!",
+  //         text: "Your Customer has been added.",
+  //         confirmButtonText: "OK",
+  //         confirmButtonColor: "#2563EB",
+  //         // timer: 3000, // Auto close after 3 seconds
+  //       });
+  //       // alert("Customer added successfully!");
+  //       // setShowAlert(true);
+  //       fetchCustomers();
+  //       setShowCustomerForm(false);
+  //       clearCustomerFormData();
+  //     } else {
+  //       Swal.fire({
+  //         icon: "error",
+  //         title: "Error occured",
+  //         text: "Error adding customer: " + result.message,
+  //         confirmButtonText: "OK",
+  //         confirmButtonColor: "#2563EB",
+  //         // timer: 3000, // Auto close after 3 seconds
+  //       });
+  //       // alert("Error adding customer: " + result.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error:", error);
 
-      alert("Failed to add customer.");
-    }
-  };
+  //     alert("Failed to add customer.");
+  //   }
+  // };
 
   const fetchProducts = async () => {
     try {
@@ -713,51 +752,6 @@ export default function Dashboard() {
       console.error("Error fetching products:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDelete = async (productId) => {
-    const userConfirmed = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-
-    if (!userConfirmed) {
-      // User clicked "No"
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("authToken"); // Fetch token from localStorage
-
-      if (!token) {
-        alert("Unauthorized: Token is missing");
-        return;
-      }
-
-      const response = await fetch(
-        `http://localhost:3000/api/products/${productId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Proper string interpolation for token
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Product deleted successfully"); // Show success alert
-        fetchProducts(); // Optionally refresh product list
-      } else {
-        alert(
-          data.message || "Failed to delete the product. Please try again."
-        );
-      }
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      alert("An unexpected error occurred. Please try again later.");
     }
   };
 
@@ -813,7 +807,7 @@ export default function Dashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("User data fetched:--", data.user);
+        // console.log("User data fetched:--", data.user);
 
         setAllUserInfo(data.user);
         setisShimmer(false);
@@ -834,32 +828,99 @@ export default function Dashboard() {
     }
   };
 
-  // Handle form input change
-  const productHandleInputChange = (e) => {
-    const { id, value } = e.target;
-    setProductFormData((prevData) => ({ ...prevData, [id]: value }));
+  const handleDelete = async (productId) => {
+    const userConfirmed = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+
+    if (!userConfirmed) {
+      // User clicked "No"
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("authToken"); // Fetch token from localStorage
+
+      if (!token) {
+        alert("Unauthorized: Token is missing");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/products/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Proper string interpolation for token
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Product deleted successfully"); // Show success alert
+        fetchProducts(); // Optionally refresh product list
+      } else {
+        alert(
+          data.message || "Failed to delete the product. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("An unexpected error occurred. Please try again later.");
+    }
   };
 
-  const customerHandleInputChange = (e) => {
-    const { id, value } = e.target;
-    setCustomerFormData((prevData) => ({ ...prevData, [id]: value }));
-  };
+  // // Handle form input change
+  // const productHandleInputChange = (e) => {
+  //   const { id, value } = e.target;
+  //   setProductFormData((prevData) => ({ ...prevData, [id]: value }));
+  // };
 
-  const [copyShipping, setCopyShipping] = useState(false);
+  // const customerHandleInputChange = (e) => {
+  //   const { id, value } = e.target;
+  //   setCustomerFormData((prevData) => ({ ...prevData, [id]: value }));
+  // };
 
+  // const [copyShipping, setCopyShipping] = useState(false);
 
-  const customerHandleInputChange2 = (e) => {
-    const { id, value } = e.target;
-    const [section, field] = id.split(".");
+  // const customerHandleInputChange2 = (e) => {
+  //   const { id, value } = e.target;
+  //   const [section, field] = id.split(".");
 
-    setCustomerFormData((prevData) => ({
-      ...prevData,
-      [section]: {
-        ...prevData[section],
-        [field]: value,
-      },
-    }));
-  };
+  //   setCustomerFormData((prevData) => ({
+  //     ...prevData,
+  //     [section]: {
+  //       ...prevData[section],
+  //       [field]: value,
+  //     },
+  //   }));
+
+  //   // If "Copy to Shipping Address" is enabled, update shippingAddress too
+  //   if (copyShipping && section === "billingAddress") {
+  //     setCustomerFormData((prevData) => ({
+  //       ...prevData,
+  //       shippingAddress: {
+  //         ...prevData.shippingAddress,
+  //         [field]: value,
+  //       },
+  //     }));
+  //   }
+  // };
+
+  // const handleCheckboxChange = (e) => {
+  //   const isChecked = e.target.checked;
+  //   setCopyShipping(isChecked);
+
+  //   if (isChecked) {
+  //     setFormData((prevData) => ({
+  //       ...prevData,
+  //       shippingAddress: { ...prevData.billingAddress }, // Copy billing to shipping
+  //     }));
+  //   }
+  // };
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("authToken"); // Check if the user is logged in
@@ -1129,9 +1190,10 @@ export default function Dashboard() {
               <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                 <ProductForm
                   onClose={() => setShowProductForm(false)}
-                  onSubmit={producutHandleFormSubmit}
-                  formData={productFormData}
-                  inputChange={productHandleInputChange}
+                  // onSubmit={producutHandleFormSubmit}
+                  fetchPro={() => fetchProducts()}
+                  // formData={productFormData}
+                  // inputChange={productHandleInputChange}
                 />
               </div>
             )}
@@ -1162,27 +1224,31 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {allCustomers.length > 0 ? (
-                    allCustomers.map((customer) => (
-                      <tr key={customer._id} className="border-t">
-                        <td className="px-4 py-2">
-                          {customer.firstName + " " + customer.lastName}
-                        </td>
-                        <td className="px-4 py-2">
-                          {customer.companyName || "N/A"}
-                        </td>
-                        <td className="px-4 py-2">{customer.email || "N/A"}</td>
-                        <td className="px-4 py-2">
-                          <div className="flex space-x-2">
-                            <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
-                              <Edit className="h-4 w-4" />
-                            </button>
-                            <button className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200">
-                              <Trash className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                    [...allCustomers] // Create a shallow copy of the array
+                      .reverse() // Reverse the copied array
+                      .map((customer) => (
+                        <tr key={customer._id} className="border-t">
+                          <td className="px-4 py-2">
+                            {customer.firstName + " " + customer.lastName}
+                          </td>
+                          <td className="px-4 py-2">
+                            {customer.companyName || "N/A"}
+                          </td>
+                          <td className="px-4 py-2">
+                            {customer.email || "N/A"}
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="flex space-x-2">
+                              <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200">
+                                <Trash className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
                   ) : (
                     <tr>
                       <td
@@ -1207,10 +1273,13 @@ export default function Dashboard() {
               <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                 <CustomerForm
                   onClose={() => setShowCustomerForm(false)}
-                  onSubmit={customerHandleFormSubmit}
-                  formData={customerFormData}
-                  inputChange={customerHandleInputChange}
-                  inputChange2={customerHandleInputChange2}
+                  fetchCust={() => fetchCustomers()}
+                  // onSubmit={customerHandleFormSubmit}
+                  // formData={customerFormData}
+                  // inputChange={customerHandleInputChange}
+                  // inputChange2={customerHandleInputChange2}
+                  // copyShipping={copyShipping}
+                  // checkboxChange={handleCheckboxChange}
                 />
               </div>
             )}
@@ -1248,84 +1317,84 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                {allInvoiceData.length > 0 ? (
-                  
-                  allInvoiceData
-                    .map((invoice, index) => (
-                      <tr
-                        key={index}
-                        className="h-9 border-t hover:bg-slate-100 cursor-pointer text-center"
-                      >
-                        <td className="px-4 py-2 text-blue-500 hover:underline">
-                          {invoice.invoiceNumber}
-                        </td>
-
-                        <td className="px-4 py-2">
-                          {invoice.billTo.customerName}
-                        </td>
-                        <td className="px-4 py-2">
-                          {invoice.billTo.companyName}
-                        </td>
-
-                        <td className="px-4 py-2">
-                          {new Date(invoice.invoiceDate).toLocaleDateString()}
-                        </td>
-
-                        <td className="px-4 py-2 text-center">
-                          {invoice.products.length}
-                        </td>
-                        <td className="px-4 py-2">
-                          ₹{invoice.payment.grandTotal}
-                        </td>
-
-                        <td className="px-4 py-2">
-                          <span
-                            className={`inline-block rounded-full px-2 py-1 text-xs ${
-                              invoice.paymentStatus === "paid"
-                                ? "bg-green-100 text-green-600"
-                                : invoice.paymentStatus === "partially paid"
-                                ? "bg-yellow-100 text-yellow-600"
-                                : "bg-red-100 text-red-600"
-                            }`}
-                          >
-                            {invoice.paymentStatus}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="flex space-x-2">
-                            <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
-                              <Download className="h-5 w-5" />
-                            </button>
-                            <button className="p-1 bg-green-100 text-green-600 rounded hover:bg-green-200">
-                              <Mail className="h-5 w-5" />
-                            </button>
-                            <button
-                              className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
-                              onClick={() => window.print()} // Triggers the browser's print functionality
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                viewBox="0 0 24 24"
-                                fill="currentColor"
-                              >
-                                <path d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5h2a2 2 0 012 2v6a2 2 0 01-2 2h-3v2a1 1 0 01-1 1H8a1 1 0 01-1-1v-2H4a2 2 0 01-2-2v-6a2 2 0 012-2h2zm2 0h8V5H8v4zm8 2H8v6h8v-6zm-8 8h8v-1H8v1zm10-2h2v-6h-2v6zm-12-6H4v6h2v-6z" />
-                              </svg>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                    .reverse()) : (
-                      <tr>
-                        <td
-                          colSpan="8" // Ensure it spans the correct number of columns (including the last "Sent" column)
-                          className="px-4 py-6 text-center text-gray-500"
+                  {allInvoiceData.length > 0 ? (
+                    allInvoiceData
+                      .map((invoice, index) => (
+                        <tr
+                          key={index}
+                          className="h-9 border-t hover:bg-slate-100 cursor-pointer text-center"
                         >
-                          No Invoice available.
-                        </td>
-                      </tr>
-                    )}
+                          <td className="px-4 py-2 text-blue-500 hover:underline">
+                            {invoice.invoiceNumber}
+                          </td>
+
+                          <td className="px-4 py-2">
+                            {invoice.billTo.customerName}
+                          </td>
+                          <td className="px-4 py-2">
+                            {invoice.billTo.companyName}
+                          </td>
+
+                          <td className="px-4 py-2">
+                            {new Date(invoice.invoiceDate).toLocaleDateString()}
+                          </td>
+
+                          <td className="px-4 py-2 text-center">
+                            {invoice.products.length}
+                          </td>
+                          <td className="px-4 py-2">
+                            ₹{invoice.payment.grandTotal}
+                          </td>
+
+                          <td className="px-4 py-2">
+                            <span
+                              className={`inline-block rounded-full px-2 py-1 text-xs ${
+                                invoice.paymentStatus === "paid"
+                                  ? "bg-green-100 text-green-600"
+                                  : invoice.paymentStatus === "partially paid"
+                                  ? "bg-yellow-100 text-yellow-600"
+                                  : "bg-red-100 text-red-600"
+                              }`}
+                            >
+                              {invoice.paymentStatus}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="flex space-x-2">
+                              <button className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200">
+                                <Download className="h-5 w-5" />
+                              </button>
+                              <button className="p-1 bg-green-100 text-green-600 rounded hover:bg-green-200">
+                                <Mail className="h-5 w-5" />
+                              </button>
+                              <button
+                                className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+                                onClick={() => window.print()} // Triggers the browser's print functionality
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="h-5 w-5"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                >
+                                  <path d="M6 9V4a1 1 0 011-1h10a1 1 0 011 1v5h2a2 2 0 012 2v6a2 2 0 01-2 2h-3v2a1 1 0 01-1 1H8a1 1 0 01-1-1v-2H4a2 2 0 01-2-2v-6a2 2 0 012-2h2zm2 0h8V5H8v4zm8 2H8v6h8v-6zm-8 8h8v-1H8v1zm10-2h2v-6h-2v6zm-12-6H4v6h2v-6z" />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                      .reverse()
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="8" // Ensure it spans the correct number of columns (including the last "Sent" column)
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No Invoice available.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1334,12 +1403,12 @@ export default function Dashboard() {
       case "createinvoices":
         return (
           <CreateInvoicePage
-            userDetails={allUserInfo}
-            productDetails={allProducts}
-            customerDetails={allCustomers}
+            // userDetails={allUserInfo}
+            // productDetails={allProducts}
+            // customerDetails={allCustomers}
             setActiveTab1={setActiveTab}
-            
           />
+          
         );
       case "purchase-orders":
         return (
@@ -1390,6 +1459,10 @@ export default function Dashboard() {
             </div>
           </div>
         );
+      case "preview-page":
+          return(
+<PreviewPage setActiveTab={setActiveTab}/>
+          );
       case "settings":
         return (
           <div
@@ -1566,8 +1639,9 @@ export default function Dashboard() {
                     type="text"
                     id="country"
                     value={formData.country}
+                    disabled
                     onChange={handleInputChange}
-                    className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
+                    className="mt-1 w-full p-3 rounded-md border  text-gray-400 border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-40 transition-all duration-300 ease-in-out hover:shadow-md"
                     required
                   />
                 </div>
@@ -1642,7 +1716,7 @@ export default function Dashboard() {
                 {/* Color Picker Section */}
                 <div ref={colorPickerRef} className="align">
                   <label className="block text-sm font-medium text-gray-600">
-                    Choose Color
+                    Brand Color
                   </label>
                   <div className="relative">
                     <input
@@ -1769,7 +1843,11 @@ export default function Dashboard() {
             </form>
           </div>
         );
-      default:
+      case "statements":
+        return (
+          <StatementTab />
+        )
+        default:
         return null;
     }
   };
@@ -1814,36 +1892,6 @@ export default function Dashboard() {
     }
   };
 
-  
-
-
-  const handleCheckboxChange = (e) => {
-    const { checked } = e.target;
-    setCopyShipping(checked);
-
-    if (checked) {
-      // Copy billing address to shipping address
-      setFormData((prevData) => ({
-        ...prevData,
-        shippingAddress: { ...prevData.billingAddress },
-      }));
-    } else {
-      // Reset shipping address if unchecked
-      setFormData((prevData) => ({
-        ...prevData,
-        shippingAddress: {
-          country: "",
-          address1: "",
-          city: "",
-          state: "",
-          pincode: "",
-        },
-      }));
-    }
-  };
-
-
-
   useEffect(() => {
     if (allInvoiceData.length > 0) {
       const totalRaised = allInvoiceData.reduce(
@@ -1878,8 +1926,6 @@ export default function Dashboard() {
     // console.log("condition:", userData.first_name!="");
     fetchUserInfo();
   }, []);
-
-
 
   useEffect(() => {
     if (allUserInfo) {
@@ -1995,12 +2041,28 @@ export default function Dashboard() {
       const result = await response.json();
       if (response.ok) {
         // console.log("result",result);
-        alert("Profile updated successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Profile updated successfully!",
+          text: "Your profile has been updated.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#2563EB",
+          // timer: 3000, // Auto close after 3 seconds
+        });
+
         setShowSettings(false);
-        handleTabChange("home");
-        setisShimmer(false);
         fetchUserInfo();
+        setActiveTab("home");
+        setisShimmer(false);
       } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error occured",
+          text: "Your profile has been failed.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#2563EB",
+          // timer: 3000, // Auto close after 3 seconds
+        });
         alert("Error updating profile: " + result.message);
       }
     } catch (error) {
@@ -2025,26 +2087,6 @@ export default function Dashboard() {
     };
   }, []);
 
-  const handleTabChange = (newTab) => {
-    if (activeTab === "createinvoices") {
-      // Show confirmation alert when leaving "createinvoices"
-      Swal.fire({
-        title: "Are you sure?",
-        text: "You have unsaved changes. Do you want to leave this page?",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Leave",
-        cancelButtonText: "Stay",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          setActiveTab(newTab); // Switch to the new tab
-        }
-        // If "Stay" is clicked, do nothing (alert closes automatically)
-      });
-    } else {
-      setActiveTab(newTab); // Switch to the new tab directly
-    }
-  };
   // const handleTabChange = (newTab) => {
   //   if (activeTab === "createinvoices") {
   //     // Show confirmation alert when leaving "createinvoices"
@@ -2057,18 +2099,36 @@ export default function Dashboard() {
   //       cancelButtonText: "Stay",
   //     }).then((result) => {
   //       if (result.isConfirmed) {
-  //         setActiveTab(newTab); // Update activeTab state
-  //         // navigate(`/dashboard/${newTab}`); // Navigate to the new route
+  //         setActiveTab(newTab); // Switch to the new tab
   //       }
-  //       // If "Stay" is clicked, the alert closes automatically and no action is taken
+  //       // If "Stay" is clicked, do nothing (alert closes automatically)
   //     });
   //   } else {
-  //     setActiveTab(newTab); // Update activeTab state
-  //     navigate(`/dashboard/${newTab}`); // Navigate to the new route
+  //     setActiveTab(newTab); // Switch to the new tab directly
   //   }
   // };
-  
-
+  const handleTabChange = (newTab) => {
+    if (activeTab === "createinvoices") {
+      // Show confirmation alert when leaving "createinvoices"
+      Swal.fire({
+        title: "Are you sure?",
+        text: "You have unsaved changes. Do you want to leave this page?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Leave",
+        cancelButtonText: "Stay",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setActiveTab(newTab); // Update activeTab state
+          navigate(`/dashboard/${newTab}`); // Navigate to the new route
+        }
+        // If "Stay" is clicked, the alert closes automatically and no action is taken
+      });
+    } else {
+      setActiveTab(newTab); // Update activeTab state
+      navigate(`/dashboard/${newTab}`); // Navigate to the new route
+    }
+  };
 
   useEffect(() => {
     // Sync the activeTab with the URL when the pathname changes
@@ -2079,21 +2139,19 @@ export default function Dashboard() {
   }, [location.pathname]);
 
   return (
-
-
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
       {/* Sidebar */}
       {/* Top Bar - Visible after scrolling and hidden when the sidebar is open */}
       <div className="md:hidden fixed top-4 right-4 z-50">
-      {/* Hamburger or Close icon based on sidebar state */}
+        {/* Hamburger or Close icon based on sidebar state */}
 
-      <button
-        className="text-2xl"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        {isSidebarOpen ? <X /> : <Menu />}
-      </button>
-    </div>
+        <button
+          className="text-2xl"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          {isSidebarOpen ? <X /> : <Menu />}
+        </button>
+      </div>
       {!isSidebarOpen && hasScrolled && (
         <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50 md:hidden transition-transform">
           <div className="flex items-center justify-between p-4">
@@ -2197,7 +2255,7 @@ export default function Dashboard() {
                 }}
                 className="text-gray-600 hover:text-blue-500 transition-colors"
               >
-                Create Invoice
+                 + Create Invoice
               </button>
             </div>
           )}
@@ -2208,11 +2266,24 @@ export default function Dashboard() {
             onClick={() => {
               if (showSetting !== true) {
                 // setActiveTab("templates");
+                // setActiveTab("preview-page");
                 setIsSidebarOpen(false); // Close the sidebar
               }
             }}
           >
             Templates
+          </SidebarButton>
+          <SidebarButton
+            icon={<NotebookTabs className="h-5 w-5" />}
+            isActive={activeTab === "statements"}
+            onClick={() => {
+              if (showSetting !== true) {
+                handleTabChange("statements");
+                setIsSidebarOpen(false); // Close the sidebar
+              }
+            }}
+          >
+            Statements
           </SidebarButton>
           <SidebarButton
             icon={<IndianRupee className="h-5 w-5" />}
@@ -2263,20 +2334,23 @@ export default function Dashboard() {
                   ) : (
                     <h1 className="text-2xl font-bold mt-7 md:mt-0">
                       Hello{" "}
-                      {allUserInfo.first_name
+                      <span className="text-3xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">{allUserInfo.first_name
                         ? capitalizeFirstLetter(allUserInfo.first_name)
-                        : "User"}
-                      !
+                        : "User"}!
+                      </span>
                     </h1>
                   )}
                 </div>
               ) : (
                 <h1 className="text-2xl font-bold mt-7 md:mt-0">
                   Hello{" "}
+                  <span className="text-3xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
                   {allUserInfo.first_name
                     ? capitalizeFirstLetter(allUserInfo.first_name)
-                    : "User"}
-                  !
+                    : "User"}!
+                  </span>
+                  
+                  
                 </h1>
               )}
             </div>
@@ -2297,12 +2371,5 @@ export default function Dashboard() {
         {renderTabContent()}
       </main>
     </div>
-
-
-
-   
-
   );
 }
-
-
