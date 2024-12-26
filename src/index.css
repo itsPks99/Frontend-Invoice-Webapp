@@ -1,14 +1,33 @@
+/* Font Imports */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Lato:wght@400;700&display=swap');
+
+/* Tailwind Directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Remove spin buttons for input[type="number"] */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Remove arrows for Firefox */
 input[type="number"] {
-  -moz-appearance: textfield;
+  appearance: textfield; /* Standard property */
+  -webkit-appearance: none; /* Webkit-based browsers like Chrome, Safari */
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Apply Fonts */
+body {
+  font-family: 'Lato', sans-serif;  /* Primary Font */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: Georgia, 'Times New Roman', Times, serif;  /* Secondary Font */
+}
+
+p, input, button, span {
+  font-family: 'Nunito Sans', sans-serif;  /* Tertiary Font */
 }

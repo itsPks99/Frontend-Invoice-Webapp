@@ -99,6 +99,15 @@ export default function Signup() {
               Back
             </button>
           </Link>
+          <div className="flex items-center justify-center">
+          <div className=" bg-blue-500 ">
+            <img
+              alt="Logo"
+              src="/src/assets/logos/Asset 3@4x-100.jpg"
+              className="h-8 "
+            />
+          </div>
+        </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create a new account
           </h2>

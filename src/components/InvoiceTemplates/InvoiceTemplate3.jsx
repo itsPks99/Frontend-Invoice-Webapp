@@ -1,5 +1,5 @@
 import React from 'react';
-import Utils from "../ReusableFunctions";
+import ReusableFunctions from "../ReusableFunctions";
 
 const CreativeInvoice = ({invoiceData, userData}) => {
 
@@ -26,7 +26,7 @@ const CreativeInvoice = ({invoiceData, userData}) => {
         </div>
         <div className="text-right">
           <h2 className="text-xl font-semibold">Invoice #: { userData.invoice_Prefix+invoiceData.invoiceNumber}</h2>
-          <p>Invoice Date: {formatDate(invoiceData.invoiceDate, "DD/MM/YYYY")}</p>
+          <p>Invoice Date: {ReusableFunctions.formatDate(invoiceData.invoiceDate, "DD/MM/YYYY")}</p>
           <p>Payment Due: {invoiceData.invoiceDueDate}</p>
         </div>
       </div>
@@ -96,7 +96,7 @@ const CreativeInvoice = ({invoiceData, userData}) => {
         Total Tax: ₹ {invoiceData.payment.tax||0}
       </div>
         <h3 className="text-[20px] font-bold">Total Amount Due: ₹{invoiceData.payment.grandTotal}</h3>
-        <p className="text-[12px]">(Amount in Words: {Utils.numberToWords(invoiceData.payment.grandTotal)})</p>
+        <p className="text-[12px]">(Amount in Words: {ReusableFunctions.numberToWords(invoiceData.payment.grandTotal)})</p>
       </div>
     </div>
 

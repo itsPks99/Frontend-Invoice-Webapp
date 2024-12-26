@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Invoice from "../components/InvoiceTemplates/InvoiceTemplate1";
 import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
 import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
@@ -13,9 +13,10 @@ const PreviewPage = ({ setActiveTab }) => {
   const navigate = useNavigate();
   const { invoiceData, userData } = location.state || {};
 
+  
   if (!invoiceData || !userData) {
     // Redirect back to CreateInvoicePage if no data is passed
-    navigate("/create-invoice");
+    navigate("/dashboard/invoices");
     return null;
   } else {
     // console.log("invoiceData:", invoiceData);
@@ -46,7 +47,7 @@ const PreviewPage = ({ setActiveTab }) => {
           </div>
           <div className="space-x-4">
             <button
-              onClick={() => handlePreviewChange(false)} // Wrap the call in a function
+              onClick={() => {handleTabChange("createinvoices");}} // Wrap the call in a function
               className="px-4 py-2 border rounded-lg text-lg text-gray-600 hover:bg-gray-100"
             >
               Create another invoice
@@ -94,9 +95,7 @@ const PreviewPage = ({ setActiveTab }) => {
         </div>
 
         {/* Invoice Body */}
-        <div className="flex justify-end mx-5 my-10">
-        <Invoice invoiceData={invoiceData} userData={userData} />
-        </div>
+        <Invoice2 invoiceData={invoiceData} userData={userData} />
        
         <div className="flex justify-end mx-5 my-10">
           <button

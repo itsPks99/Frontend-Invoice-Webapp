@@ -43,11 +43,11 @@ export default function Login() {
           </button>
         </Link>
         <div className="flex items-center justify-center">
-          <div className="rounded-full bg-blue-500 p-2">
+          <div className=" bg-blue-500 ">
             <img
               alt="Logo"
-              src="/placeholder.svg?height=24&width=24"
-              className="h-8 w-8"
+              src="/src/assets/logos/Asset 3@4x-100.jpg"
+              className="h-8 "
             />
           </div>
         </div>

@@ -75,15 +75,16 @@ export default function LandingPage() {
         }`}
       >
         {/* Logo Section */}
-        <div className="flex items-center space-x-2">
-          <span
-            className={`transition-all duration-300 ${
-              scrolled ? "text-xl" : "text-2xl"
-            } font-extrabold text-gray-800 tracking-wide transform hover:scale-101 hover:text-blue-600`}
-          >
-            Workzy
-          </span>
-        </div>
+        <div className="">
+  <img
+    src="src/assets/logos/Asset 2@4x-100.jpg" // Replace with the actual path to your image
+    alt="Workzy Logo"
+    className={`transition-all duration-300 ${
+      scrolled ? "h-8" : "h-10"
+    } transform hover:scale-101`}
+  />
+</div>
+
 
         {/* Nav Links (Desktop) */}
         <div className="hidden md:flex space-x-8">

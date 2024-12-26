@@ -3,7 +3,7 @@ import { Trash, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import CustomerForm from "../components/CustomerForm";
-
+import ReusableFunctions from "./ReusableFunctions";
 import Invoice from "../components/InvoiceTemplates/InvoiceTemplate1";
 import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
 import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
@@ -30,7 +30,7 @@ const CreateInvoicePage = ({
   const [loading, setLoading] = useState(false);
   const [totalDiscount, setTotalDiscount] = useState("");
   const [isPaymentReceived, setIsPaymentReceived] = useState(false);
-  const [amountReceived, setAmountReceived] = useState(0); // Initial amount
+  const [amountReceived, setAmountReceived] = useState(""); // Initial amount
   const [InvoiceNumber, setInvoiceNumber] = useState("");
   const [InvoicePrefix, setInvoicePrefix] = useState("");
   const [posoNumber, setPosoNumber] = useState("");
@@ -221,7 +221,7 @@ const CreateInvoicePage = ({
     setLoading(false);
     setTotalDiscount(0);
     setIsPaymentReceived(false);
-    setAmountReceived(0);
+    setAmountReceived("");
     setInvoiceNumber(userDetails.invoice_Number || "");
     setInvoicePrefix(userDetails.invoice_Prefix || "");
     setPosoNumber("");
@@ -230,7 +230,7 @@ const CreateInvoicePage = ({
     );
     setCustomerNote("Thank you for shopping with us.");
     setPaymentDueOptions();
-    setLogo(null);
+    // setLogo(null);
     setSelectedCustomerId("");
     setSelectedPaymentMethod("Cash");
     setInvoiceDate(() => {
@@ -315,15 +315,22 @@ const CreateInvoicePage = ({
     });
   };
 
-  const removeItem = (index) => {
-    // Only remove if there's more than one item in the list
-    if (items.length > 1) {
-      const updatedItems = items.filter((_, itemIndex) => itemIndex !== index);
-      setItems(updatedItems);
-    } else {
-      alert("You cannot remove the last item.");
-    }
-  };
+
+const removeItem = (index) => {
+  if (items.length > 1) {
+    const updatedItems = items.filter((_, itemIndex) => itemIndex !== index);
+    setItems(updatedItems);
+  } else {
+    Swal.fire({
+      icon: "warning",
+      title: "Cannot Remove Item",
+      text: "You cannot remove the last item.",
+      confirmButtonColor: "#2563EB",
+      confirmButtonText: "OK",
+    });
+  }
+};
+
 
   // Find selected customer from data
   const selectedCustomer = customerDetails.find(
@@ -331,11 +338,13 @@ const CreateInvoicePage = ({
   );
   // console.log("selectedCustomer--", selectedCustomer);
 
-  const userState =
-    selectedCustomer !== undefined
-      ? selectedCustomer.billingAddress.state
-      : "Delhi"; // Replace with dynamic user state
-  // console.log("userState", userState);
+  // const userState =
+  //   selectedCustomer !== undefined
+  //     ? selectedCustomer.billingAddress.state
+  //     : "Delhi"; // Replace with dynamic user state
+  // console.log("userState", userDetails.state);
+
+  const [userState, setUserState] = useState("");
 
   const customerState =
     customerDetails.find((c) => c._id === selectedCustomerId)?.billingAddress
@@ -367,24 +376,50 @@ const CreateInvoicePage = ({
     // console.log("InvoiceData.brandLogoUrl", InvoiceData.brandLogoUrl);
   };
 
+  // const handleTotalDiscountChange = (e) => {
+  //   const discountValue = parseInt(e.target.value, 10); // Convert string to integer
+  //   let newDiscount = 0;
+
+  //   if (selected === "percentage") {
+  //     newDiscount = isNaN(discountValue)
+  //       ? 0
+  //       : Math.round((calculateTotal()  * discountValue) / 100);
+  //   } else {
+  //     newDiscount = isNaN(discountValue) ? 0 : discountValue;
+  //   }
+
+  //   setTotalDiscount(newDiscount); // Update the state
+
+  //   // Log the updated value after ensuring it is set
+  //   // console.log("TotalDiscount", newDiscount);
+  // };
+
   const handleTotalDiscountChange = (e) => {
     const discountValue = parseInt(e.target.value, 10); // Convert string to integer
+  
+    const totalAmount = calculateTotal(); // Total amount (including tax)
+    const totalTax = calculateTotalTax(); // Total tax amount
+  
+    const taxableAmount = totalAmount - totalTax; // Subtract tax to get taxable amount
+  
     let newDiscount = 0;
-
+  
     if (selected === "percentage") {
+      // Apply percentage-based discount on taxable amount
       newDiscount = isNaN(discountValue)
         ? 0
-        : Math.round((calculateTotal() * discountValue) / 100);
+        : Math.round((taxableAmount * discountValue) / 100);
     } else {
-      newDiscount = isNaN(discountValue) ? 0 : discountValue;
+      // Apply flat discount
+      newDiscount = isNaN(discountValue) ? 0 : Math.min(discountValue, taxableAmount);
     }
-
+  
     setTotalDiscount(newDiscount); // Update the state
-
-    // Log the updated value after ensuring it is set
-    // console.log("TotalDiscount", newDiscount);
+  
+    // console.log("Taxable Amount:", taxableAmount);
+    // console.log("Discount Applied:", newDiscount);
   };
-
+  
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...items];
     updatedItems[index][field] = value;
@@ -436,142 +471,6 @@ const CreateInvoicePage = ({
     window.scrollTo(0, 0);
   };
 
-  //--------------------------------------------------------------------------------------------
-
-  // UseEffets
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        await Promise.all([fetchProducts(), fetchCustomers(), fetchUserInfo()]);
-      } catch (error) {
-        console.error("Error in fetching data:", error);
-      } finally {
-        setLoading(false); // Ensure loading state is updated after all fetches
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    // Ensure userDetails.invoice_Number is valid
-    let checkINV = parseInt(userDetails.invoice_Number, 10);
-    // console.log('checkINV befor:', checkINV);
-    if (!isNaN(checkINV)) {
-      checkINV++; // Increment the invoice number
-      // console.log('checkINV after:', checkINV);
-      const newInvoiceNumber = checkINV;
-      // console.log('newInvoiceNumber:', newInvoiceNumber);
-      setInvoiceNumber(newInvoiceNumber);
-      // console.log('InvoiceNumber:',InvoiceNumber);
-    } else {
-      // console.error("Invalid invoice number:", userDetails.invoice_Number);
-    }
-    setInvoicePrefix(userDetails.invoice_Prefix);
-  }, [userDetails.invoice_Number, userDetails.invoice_Prefix]);
-
-  useEffect(() => {
-    if (!isPaymentReceived) {
-      setSelectedPaymentMethod("Cash");
-      setAmountReceived(0);
-    }
-  }, [isPaymentReceived]);
-
-  React.useEffect(() => {
-    // setInvoiceNumber(`${userDetails.invoice_Prefix}${invoiceHandler}`);
-  }, [invoiceHandler, userDetails.invoice_Prefix]);
-
-  // Reset totalDiscount when selected changes
-  useEffect(() => {
-    setTotalDiscount(0); // Reset to 0 whenever selected changes
-  }, [selected]);
-
-  //--------------------------------------------------------------------------------------------
-
-  // Calculation Funtions
-
-  const calculateTotal = () => {
-    return items.reduce((total, item) => {
-      let itemTotal = item.quantity * item.price;
-
-      if (
-        getTaxType(userState, customerState) === "SGST" ||
-        getTaxType(userState, customerState) === "CGST"
-      ) {
-        itemTotal +=
-          (item.price * item.sgst) / 100 + (item.price * item.cgst) / 100;
-        // console.log('itemTotal - I:', itemTotal);
-      }
-
-      if (getTaxType(userState, customerState) === "IGST") {
-        itemTotal += (item.price * item.igst) / 100;
-        // console.log('itemTotal - C S:', itemTotal);
-      }
-
-      return total + itemTotal || 0;
-    }, 0); // Return a number
-  };
-
-  const calculateSubTotal = () => {
-    return items.reduce((total, item) => {
-      let itemTotal = item.quantity * item.price;
-
-      return total + itemTotal || 0;
-    }, 0); // Return a number
-  };
-
-  const calculateTotalTax = () => {
-    return items.reduce((total, item) => {
-      let itemTotalTax = 0;
-
-      // Check if SGST or CGST
-      if (
-        getTaxType(userState, customerState) === "SGST" ||
-        getTaxType(userState, customerState) === "CGST"
-      ) {
-        const totalTaxRate =
-          (Number(item.sgst) || 0) + (Number(item.cgst) || 0); // Sum SGST and CGST, default to 0 if undefined
-        // console.log('totalTaxRate',totalTaxRate);
-        itemTotalTax += (item.price * totalTaxRate) / 100;
-      }
-
-      // Check if IGST
-      if (getTaxType(userState, customerState) === "IGST") {
-        itemTotalTax += (item.price * Number(item.igst || 0)) / 100; // Default to 0 if IGST is not set
-        // console.log('totalTaxRate',itemTotalTax);
-      }
-
-      return total + itemTotalTax || 0;
-    }, 0); // Return a number
-  };
-
-  const calculateDiscount = () => {
-    const itemDiscount = totalDiscount || 0; // Assume each item has a `discount` property
-    return Number(itemDiscount);
-  };
-
-  // Function to calculate future date
-  const calculateDueDate = (days) => {
-    const today = new Date();
-    today.setDate(today.getDate() + days);
-    return today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
-  };
-
-  const getTaxType = (userState, customerState, taxtype) => {
-    return userState === customerState
-      ? taxtype === "C"
-        ? "CGST"
-        : "SGST"
-      : "IGST";
-  };
-
-  // Calculate Balance Amount
-  const calculateBalance = (received) => {
-    const calculatedBalance = total - received;
-    setBalance(calculatedBalance);
-  };
 
   //--------------------------------------------------------------------------------------------
 
@@ -652,6 +551,8 @@ const CreateInvoicePage = ({
       if (response.ok) {
         const data = await response.json();
         setUserDetails(data.user); // Save to state
+        setUserState(data.user.state);
+        setLogo(data.user.brandLogoUrl);
         // console.log("User Details:", data.user);
       } else {
         console.error(
@@ -703,7 +604,7 @@ const CreateInvoicePage = ({
             city: userDetails.city || "N/A",
             state: userDetails.state || "N/A",
             pincode: userDetails.pincode || "N/A",
-
+            customerId:selectedCustomer._id,
             billTo: {
               customerName:
                 selectedCustomer.firstName + " " + selectedCustomer.lastName ||
@@ -737,7 +638,7 @@ const CreateInvoicePage = ({
                 igst: item.igst,
               },
               subTotalAmount:
-                getTaxType(userState, customerState) === "IGST"
+              ReusableFunctions.getTaxType(userState, customerState) === false
                   ? Math.round(
                       item.quantity * item.price +
                         (item.price * item.igst || 0) / 100
@@ -754,7 +655,7 @@ const CreateInvoicePage = ({
               tax: Math.round(calculateTotalTax()) || 0,
               paymentMade: Math.round(amountReceived) || 0,
               balanceDue: Math.round(
-                calculateTotal() - totalDiscount - amountReceived
+                calculateTotal() - Number(totalDiscount) - Number(amountReceived)
               ),
               grandTotal:
                 Math.round(calculateTotal() - Number(totalDiscount)) || 0,
@@ -765,7 +666,7 @@ const CreateInvoicePage = ({
             termsAndCondition: termsAndCondition,
           };
 
-          // console.log("Updated InvoiceData: ", updatedData);
+          console.log("Updated InvoiceData: ", updatedData);
           return updatedData;
         });
 
@@ -822,13 +723,15 @@ const CreateInvoicePage = ({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(invoiceData), // Pass invoiceData as the request body
+          redirect: "follow",
         }
       );
+      // console.log("response",response);
 
       if (response.ok) {
         const data = await response.json(); // Parse the JSON response if needed
 
-        console.log('invoicedata', data)
+      
 
         const invNumber = data.invoice.invoiceNumber || "N/A";
         const totalInvoiceAmt =
@@ -838,7 +741,7 @@ const CreateInvoicePage = ({
           Number(userData.total_invoice_balance) +
             data.invoice.payment.balanceDue || "0";
         const totalPaidAmt =
-          Number(userData.total_invoice_paid_amount || 0) +
+          Number(userData.total_invoice_paid_amount || "0") +
             data.invoice.payment.paymentMade || "0";
         // console.log("invNumber", invNumber);
         // console.log("totalInvoiceAmt", totalInvoiceAmt);
@@ -860,10 +763,10 @@ const CreateInvoicePage = ({
           confirmButtonColor: "#2563EB",
           // timer: 3000, // Auto close after 3 seconds
         });
-        // console.log("Invoice created successfully:", data);
+        console.log("Invoice created successfully:", data);
         handleTabChange("preview-page");
         navigate(`/dashboard/${"preview-page"}`,
-          {state: { invoiceData: data.invoice, userData :userDetails}}
+          {state: { invoiceData: data.invoice, userData :userDetails} , replace: true}
         );
         resetFields();
       } else {
@@ -925,39 +828,212 @@ const CreateInvoicePage = ({
     }
   };
 
+  //--------------------------------------------------------------------------------------------
+
+  // UseEffets
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        await Promise.all([fetchProducts(), fetchCustomers(), fetchUserInfo()]);
+      } catch (error) {
+        console.error("Error in fetching data:", error);
+      } finally {
+        setLoading(false); // Ensure loading state is updated after all fetches
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    // Ensure userDetails.invoice_Number is valid
+    let checkINV = parseInt(userDetails.invoice_Number, 10);
+    // console.log('checkINV befor:', checkINV);
+    if (!isNaN(checkINV)) {
+      checkINV++; // Increment the invoice number
+      // console.log('checkINV after:', checkINV);
+      const newInvoiceNumber = checkINV;
+      // console.log('newInvoiceNumber:', newInvoiceNumber);
+      setInvoiceNumber(newInvoiceNumber);
+      // console.log('InvoiceNumber:',InvoiceNumber);
+    } else {
+      // console.error("Invalid invoice number:", userDetails.invoice_Number);
+    }
+    setInvoicePrefix(userDetails.invoice_Prefix);
+  }, [userDetails.invoice_Number, userDetails.invoice_Prefix]);
+
+  useEffect(() => {
+    if (!isPaymentReceived) {
+      setSelectedPaymentMethod("Cash");
+      setAmountReceived("");
+    }
+  }, [isPaymentReceived]);
+
+  React.useEffect(() => {
+    // setInvoiceNumber(`${userDetails.invoice_Prefix}${invoiceHandler}`);
+  }, [invoiceHandler, userDetails.invoice_Prefix]);
+
+  // Reset totalDiscount when selected changes
+  useEffect(() => {
+    setTotalDiscount(0); // Reset to 0 whenever selected changes
+  }, [selected]);
+
+  //--------------------------------------------------------------------------------------------
+
+  // Calculation Funtions
+
+  const calculateTotal = () => {
+    return items.reduce((total, item) => {
+      let itemTotal = item.quantity * item.price;
+
+      if (
+        // getTaxType(userState, customerState) === "SGST" ||
+        ReusableFunctions.getTaxType(userState, customerState) === true
+      ) {
+        itemTotal +=
+          (item.price * item.sgst) / 100 + (item.price * item.cgst) / 100;
+        // console.log('itemTotal - I:', itemTotal);
+      }
+
+      if (ReusableFunctions.getTaxType(userState, customerState) === false) {
+        itemTotal += (item.price * item.igst) / 100;
+        // console.log('itemTotal - C S:', itemTotal);
+      }
+
+      return total + itemTotal || 0;
+    }, 0); // Return a number
+  };
+
+  const calculateSubTotal = () => {
+    return items.reduce((total, item) => {
+      let itemTotal = item.quantity * item.price;
+
+      return total + itemTotal || 0;
+    }, 0); // Return a number
+  };
+
+  const calculateTotalTax = () => {
+    return items.reduce((total, item) => {
+      let itemTotalTax = 0;
+
+      // Check if SGST or CGST
+      if (
+        // getTaxType(userState, customerState) === "SGST" ||
+        ReusableFunctions.getTaxType(userState, customerState) === true
+      ) {
+        const totalTaxRate =
+          (Number(item.sgst) || 0) + (Number(item.cgst) || 0); // Sum SGST and CGST, default to 0 if undefined
+        // console.log('totalTaxRate',totalTaxRate);
+        itemTotalTax += (item.price * totalTaxRate) / 100;
+      }
+
+      // Check if IGST
+      if (ReusableFunctions.getTaxType(userState, customerState) === false) {
+        itemTotalTax += (item.price * Number(item.igst || 0)) / 100; // Default to 0 if IGST is not set
+        // console.log('totalTaxRate',itemTotalTax);
+      }
+
+      return total + itemTotalTax || 0;
+    }, 0); // Return a number
+  };
+
+  const calculateEachTax = (userState, customerState, items) => {
+
+    let totalCGST = 0;
+    let totalSGST = 0;
+    let totalIGST = 0;
+  
+    // console.log('items',items);
+    
+    items.forEach((item) => {
+  if (userState === customerState) {
+        // Intra-state: Calculate CGST and SGST
+        totalCGST += (Number(item.price) * (Number(item.cgst) || 0)) / 100;
+        totalSGST += (Number(item.price) * (Number(item.sgst) || 0)) / 100;
+      } else {
+        // Inter-state: Calculate IGST
+        totalIGST += (Number(item.price) * (Number(item.igst) || 0)) / 100;
+      }
+    });  
+    return {
+      totalCGST: totalCGST,
+      totalSGST: totalSGST,  
+      totalIGST: totalIGST       
+    };
+  };
+
+  const taxBreakdown = calculateEachTax(userState, customerState, items);
+  
+
+  
+
+  const calculateDiscount = () => {
+    const itemDiscount = totalDiscount || 0; // Assume each item has a `discount` property
+    return Number(itemDiscount);
+  };
+
+  // Function to calculate future date
+  const calculateDueDate = (days) => {
+    const today = new Date();
+    today.setDate(today.getDate() + days);
+    return today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+  };
+
+  // const getTaxType = (userState, customerState, taxtype) => {
+  //   return userState === customerState
+  //     ? taxtype === "C"
+  //       ? "CGST"
+  //       : "SGST"
+  //     : "IGST";
+  // };
+  // const getTaxType = (userState, customerState) => {
+  //   // console.log('userState',userState);
+  //   // console.log('customerState',customerState);
+  //   if (userState === customerState) {
+  //     // console.log('userState === customerState',userState === customerState);
+  //     return  true ;
+  //   }else{
+  //     // console.log('userState === customerState',userState === customerState);
+  //     return false;
+  //   }
+   
+  // };
+  
+
+  // Calculate Balance Amount
+  const calculateBalance = (received) => {
+    const calculatedBalance = total - received;
+    setBalance(calculatedBalance);
+  };
+
+  
+
   return (
 
     
       
       <div className="p-6 mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
       <div className="mb-10 flex items-center justify-between">
-        <div>
-          {logo ? (
-            <img
+      <div className="flex justify-between items-center w-full">
+  {/* Left: Invoice Title */}
+  <div className="flex-1 text-left">
+    <h1 className="text-2xl font-bold">INVOICE</h1>
+  </div>
+
+  {/* Right: Logo */}
+  <div className="flex-shrink-0">
+  {logo &&(<img
+              className="h-14 rounded-md border border-blue-500"
               src={logo}
-              alt="Invoice Logo"
-              className="h-16 w-auto rounded-xl border"
-            />
-          ) : (
-            // <div>
-            <h1 className="text-2xl font-bold">INVOICE</h1>
-          )}
-        </div>
-        {/* <div>
-          <label
-            htmlFor="logo-upload"
-            className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600"
-          >
-            <span className="mr-2">Upload Logo</span>
-            <input
-              id="logo-upload"
-              type="file"
-              accept="image/*"
-              onChange={handleLogoUpload}
-              className="hidden"
-            />
-          </label>
-        </div> */}
+              alt=""
+            />)}
+  </div>
+</div>
+
+
+        
       </div>
 
       {/* Business Info */}
@@ -1171,7 +1247,7 @@ const CreateInvoicePage = ({
                   Qty
                 </th>
                 <th className="border px-3 py-2 text-center w-2/12">Price</th>
-                {getTaxType(userState, customerState) === "SGST" && (
+                {/* {getTaxType(userState, customerState) === true && (
                   <>
                     <th className="border px-3 py-2 text-center w-1/12">
                       SGST
@@ -1185,11 +1261,14 @@ const CreateInvoicePage = ({
                     </th>
                   </>
                 )}
-                {getTaxType(userState, customerState) === "IGST" && (
+                {getTaxType(userState, customerState) === false && (
                   <th className="border px-3 py-2 text-center w-1/12">
                     IGST(%)
                   </th>
-                )}
+                )} */}
+                <th className="border px-3 py-2 text-center w-1/12">
+                    TAX(%)
+                  </th>
                 <th className="border px-3 py-2 text-center w-1/12">
                   Amount with tax
                 </th>
@@ -1295,8 +1374,9 @@ const CreateInvoicePage = ({
                       className="w-full  text-center p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
                     />
                   </td>
-                  {(getTaxType(userState, customerState) === "SGST" ||
-                    getTaxType(userState, customerState) === "CGST") && (
+                  {/* {(
+                    // getTaxType(userState, customerState) === "SGST" ||
+                    getTaxType(userState, customerState) === true) && (
                     <>
                       <td className="border px-4 py-2 text-center">
                         {item.sgst || "0"}
@@ -1305,8 +1385,18 @@ const CreateInvoicePage = ({
                         {item.cgst || "0"}
                       </td>
                     </>
+                  )} */}
+                  {(
+                    // getTaxType(userState, customerState) === "SGST" ||
+                    ReusableFunctions.getTaxType(userState, customerState) === true) && (
+                    <>
+                      <td className="border px-4 py-2 text-center">
+                        {Math.round(Number(item.sgst) + Number(item.cgst)) || "0"}
+                      </td>
+                      
+                    </>
                   )}
-                  {getTaxType(userState, customerState) === "IGST" && (
+                  {ReusableFunctions.getTaxType(userState, customerState) === false && (
                     <td className="border px-4 py-2 text-center">
                       {item.igst || "0"}
                     </td>
@@ -1349,65 +1439,72 @@ const CreateInvoicePage = ({
 
       <hr />
 
-      <div className="flex flex-col md:flex-row mt-5 mb-10 gap-12">
-        {/* Customer Note */}
-        <div className="w-full md:w-2/3 px-2">
-          <label
-            htmlFor="customerNote"
-            className="block text-sm font-semibold mb-2"
-          >
-            Customer Note:
-          </label>
-          <textarea
-            id="customerNote"
-            value={customerNote}
-            onChange={handleCustomerNoteChange}
-            className="w-full h-20 p-2 border border-gray-300 rounded-md resize-none"
-            placeholder="Enter customer note here..."
-          ></textarea>
-        </div>
-        <div className="text-right mt-10 mb-10 flex gap-4 items-center">
-          <p className=" text-center items-center text-sm font-semibold mb-2 ">
-            Add Discount
-            <br />
-            <span className="ml-1  text-gray-400">(optional)</span>
-          </p>
+      <div className="flex flex-col md:flex-row justify-between mt-5 mb-10 gap-12 items-center">
+  {/* Customer Note */}
+  <div className="w-full md:w-2/3 px-2">
+    <label
+      htmlFor="customerNote"
+      className="block text-sm font-semibold mb-2"
+    >
+      Customer Note:
+    </label>
+    <textarea
+      id="customerNote"
+      value={customerNote}
+      onChange={handleCustomerNoteChange}
+      className="w-full h-20 p-2 border border-gray-300 rounded-md resize-none"
+      placeholder="Enter customer note here..."
+    ></textarea>
+  </div>
 
+  {/* Add Discount */}
+  <div className="w-full md:w-1/3 flex flex-col md:flex-row justify-end items-end gap-4">
+    <div className="text-right">
+      <p className="text-sm font-semibold mb-1">
+        Add Discount
+        <br />
+        <span className="text-gray-400">(optional)</span>
+      </p>
+    </div>
+
+    <div className="flex items-center gap-2">
+      <input
+        type="number"
+        min="0"
+        max={selected === "percentage" ? "10" : "100000"}
+        step="0.01"
+        placeholder={selected === "percentage" ? "0%" : "0"}
+        onChange={handleTotalDiscountChange}
+        className="w-20 h-10 py-2 px-2 text-center border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
+      />
+      <div className="flex flex-col space-y-2">
+        <label className="flex items-center">
           <input
-            type="number"
-            min="0"
-            max={selected === "percentage" ? "10" : "100000"}
-            step="0.01"
-            placeholder={selected === "percentage" ? "0%" : "0"}
-            onChange={handleTotalDiscountChange}
-            className="w-20 h-10 py-2 px-2 text-center border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
+            type="radio"
+            name="option"
+            value="rupee"
+            className="form-radio text-blue-500"
+            checked={selected === "rupee"}
+            onChange={(e) => setSelected(e.target.value)}
           />
-          <div className="flex flex-col space-y-2">
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="option"
-                value="rupee"
-                className="form-radio text-blue-500"
-                checked={selected === "rupee"}
-                onChange={(e) => setSelected(e.target.value)}
-              />
-              <span className="ml-2">₹</span>
-            </label>
-            <label className="flex items-center">
-              <input
-                type="radio"
-                name="option"
-                value="percentage"
-                className="form-radio text-blue-500"
-                checked={selected === "percentage"}
-                onChange={(e) => setSelected(e.target.value)}
-              />
-              <span className="ml-2">%</span>
-            </label>
-          </div>
-        </div>
+          <span className="ml-2">₹</span>
+        </label>
+        <label className="flex items-center">
+          <input
+            type="radio"
+            name="option"
+            value="percentage"
+            className="form-radio text-blue-500"
+            checked={selected === "percentage"}
+            onChange={(e) => setSelected(e.target.value)}
+          />
+          <span className="ml-2">%</span>
+        </label>
       </div>
+    </div>
+  </div>
+</div>
+
       <hr />
       <div className="flex flex-col md:flex-row mt-5 mb-10">
         {/* Terms and Conditions Section */}
@@ -1436,15 +1533,7 @@ const CreateInvoicePage = ({
                   Subtotal :
                 </td>
                 <td className="px-4 py-2 text-right">
-                  ₹{Math.round(calculateSubTotal())}
-                </td>
-              </tr>
-              <tr className="border-b">
-                <td className="px-4 py-2 text-left font-semibold">
-                  Total Tax :
-                </td>
-                <td className="px-4 py-2 text-right">
-                  ₹{Math.round(calculateTotalTax())}
+                  ₹ {Math.round(calculateSubTotal())}
                 </td>
               </tr>
               <tr className="border-b">
@@ -1452,16 +1541,57 @@ const CreateInvoicePage = ({
                   Discount :
                 </td>
                 <td className="px-4 py-2 text-right">
-                  (- ₹{Math.round(calculateDiscount())})
+                  (- ₹ {Math.round(calculateDiscount() )})
                 </td>
               </tr>
+              {ReusableFunctions.getTaxType(userState, customerState) === true && (
+                <>
+              <tr className="border-b">
+                <td className="px-4 py-2 text-left text-[14px]">
+                  CGST :
+                </td>
+                <td className="px-4 py-2 text-right">
+                  ₹ {Math.round(taxBreakdown.totalCGST)}
+                </td>
+              </tr>
+              <tr className="border-b">
+                <td className="px-4 py-2 text-left text-[14px]">
+                  SGST :
+                </td>
+                <td className="px-4 py-2 text-right">
+                  ₹ {Math.round(taxBreakdown.totalSGST)}
+                </td>
+              </tr>
+              </>
+              )}
+              {ReusableFunctions.getTaxType(userState, customerState) === false && (
+                <>
+              <tr className="border-b">
+                <td className="px-4 py-2 text-left text-[14px]">
+                  IGST :
+                </td>
+                <td className="px-4 py-2 text-right">
+                  ₹ {Math.round(taxBreakdown.totalIGST)}
+                </td>
+              </tr>
+              </>)}
+              
+              <tr className="border-b">
+                <td className="px-4 py-2 text-left font-semibold">
+                  Total Tax :
+                </td>
+                <td className="px-4 py-2 text-right">
+                  ₹ {Math.round(calculateTotalTax())}
+                </td>
+              </tr>
+              
 
               <tr>
                 <td className="px-4 py-2 text-left font-semibold">
                   Total Amount :
                 </td>
                 <td className="px-4 py-2 text-right font-semibold">
-                  ₹{Math.round(calculateTotal() - Number(totalDiscount) || 0)}
+                  ₹ {Math.round(calculateTotal() - Number(totalDiscount) || 0)}
                 </td>
               </tr>
             </tbody>
@@ -1529,12 +1659,14 @@ const CreateInvoicePage = ({
 
                     {/* Deposit To Dropdown */}
                     <td className="px-4 py-2 text-right border border-gray-300">
-                      <input
-                        type="number"
-                        value={amountReceived}
-                        onChange={handleAmountChange}
-                        className="w-full p-2 text-sm text-right border rounded"
-                      />
+                    <input
+  type="number"
+  value={amountReceived}
+  placeholder="Enter received amount"
+  onChange={handleAmountChange}
+  className="w-full p-2 text-sm border rounded text-right placeholder:text-left"
+/>
+
                     </td>
 
                     {/* Amount Received */}
@@ -1582,48 +1714,75 @@ const CreateInvoicePage = ({
 
       {/* Save Button */}
      
-      <div className="mt-6 text-left">
-        <button
-          className={`bg-blue-500 text-white px-4 py-2 mb-10 rounded hover:bg-blue-600 flex items-center justify-center ${
-            loading ? "cursor-not-allowed opacity-70" : ""
-          }`}
-          onClick={() => {
-            callCreateAPI(userDetails);
-          }}
-          disabled={loading} // Disable button while loading
-        >
-          {loading ? (
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v8H4z"
-              ></path>
-            </svg>
-          ) : InvoiceData.userId === "" ? (
-            "Save and Continue"
-          ) : (
-            "Genereate Invoice"
-          )}
-        </button>
-      </div>
-      {/* <Invoice invoiceData={InvoiceData} 
+      <div className="mt-6 flex justify-between items-center">
+  {/* Save Button */}
+  <button
+    className={`bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center justify-center ${
+      loading ? "cursor-not-allowed opacity-70" : ""
+    }`}
+    onClick={() => {
+      callCreateAPI(userDetails);
+    }}
+    disabled={loading} // Disable button while loading
+  >
+    {loading ? (
+      <svg
+        className="animate-spin h-5 w-5 text-white"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v8H4z"
+        ></path>
+      </svg>
+    ) : InvoiceData.userId === "" ? (
+      "Save and Continue"
+    ) : (
+      "Generate Invoice"
+    )}
+  </button>
+
+  {/* Reset Form Button */}
+  <p
+    onClick={() => {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "This will clear all the form fields.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, reset it!",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          resetFields(); // Add your reset logic here
+          clearAllFields();
+          window.scrollTo(0, 0);
+        }
+      });
+    }}
+    className="text-red-700 px-3 py-1 cursor-pointer border border-red-700 rounded-3xl hover:bg-red-700 hover:text-white transition-all duration-300 ease-out"
+  >
+    Reset Form
+  </p>
+</div>
+
+      {InvoiceData.companyName!==""  &&(<Invoice2 invoiceData={InvoiceData} 
       // customerData={customerDetails}
       userData={userDetails} 
-      /> */}
+      />)}
+      
       {showCustomerForm && (
               <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                 <CustomerForm

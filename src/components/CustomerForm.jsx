@@ -3,16 +3,7 @@ import Swal from "sweetalert2";
 import { validateGSTNumber } from "../apiServices";
 import PickState from "../components/PickState";
 
-const CustomerForm = ({
-  onClose,
-  fetchCust,
-  //   onSubmit,
-  //   formData,
-  //   inputChange,
-  //   inputChange2,
-  //   copyShipping,
-  //   checkboxChange,
-}) => {
+const CustomerForm = ({ onClose, fetchCust }) => {
   const [copyShipping, setCopyShipping] = useState(false);
   const [isGstValid, setIsGstValid] = useState(null);
   const [isChecking, setIsChecking] = useState(false);
@@ -65,10 +56,6 @@ const CustomerForm = ({
       },
     });
   };
-
-  //   const handleclose = (value) => {
-  //     onClose(value); // Update the activeTab in the Dashboard
-  //   };
 
   const customerHandleFormSubmit = async (e) => {
     e.preventDefault();
@@ -167,6 +154,7 @@ const CustomerForm = ({
       email: customerFormData.email,
       phone: Number(customerFormData.phone),
       gstNumber: customerFormData.gstNumber,
+
       billingAddress: {
         country: customerFormData.billingAddress.country,
         address1: customerFormData.billingAddress.address1,
@@ -183,7 +171,7 @@ const CustomerForm = ({
       },
     };
 
-    // console.log("requestData", requestData);
+    console.log("requestData", requestData);
 
     try {
       const token = localStorage.getItem("authToken");
@@ -200,7 +188,7 @@ const CustomerForm = ({
       );
 
       const result = await response.json();
-      // console.log("result:", result);
+      console.log("result:", result);
       if (response.ok) {
         // console.log("Customer added successfully:", result);
         Swal.fire({
@@ -276,42 +264,30 @@ const CustomerForm = ({
   };
 
   // Handler for validation button click
-const handleValidationClick = () => {
-  if (customerFormData.gstNumber) {
-    setIsChecking(true);
+  const handleValidationClick = () => {
+    if (customerFormData.gstNumber) {
+      setIsChecking(true);
 
-    validateGSTNumber(customerFormData.gstNumber)
-      .then((gstData) => {
-        if (gstData) {
-          setIsGstValid(true);
-          console.log("GST number is valid:", gstData);
-          settradeName(gstData.result.source_output.trade_name);
-        } else {
-          setIsGstValid(false);
-          console.log("GST number is not valid:", gstData);
-        }
-      })
-      .catch((error) => {
-        console.error("Error validating GST number:", error);
-        setIsGstValid(false); // Set to false in case of error
-      })
-      .finally(() => {
-        setIsChecking(false);
-      });
-  }
-};
-
-
-  //   useEffect(() => {
-  //     const validateGst = async () => {
-  //       if (customerFormData.gstNumber) {
-  //         const isValid = await validateGSTNumber(customerFormData.gstNumber);
-  //         setIsGstValid(isValid);
-  //       }
-  //     };
-
-  //     validateGst();
-  //   }, [customerFormData.gstNumber]);
+      validateGSTNumber(customerFormData.gstNumber)
+        .then((gstData) => {
+          if (gstData) {
+            setIsGstValid(true);
+            console.log("GST number is valid:", gstData);
+            settradeName(gstData.result.source_output.trade_name);
+          } else {
+            setIsGstValid(false);
+            console.log("GST number is not valid:", gstData);
+          }
+        })
+        .catch((error) => {
+          console.error("Error validating GST number:", error);
+          setIsGstValid(false); // Set to false in case of error
+        })
+        .finally(() => {
+          setIsChecking(false);
+        });
+    }
+  };
 
   return (
     <form
@@ -330,36 +306,37 @@ const handleValidationClick = () => {
       <div className="flex justify-between items-center px-0 p-2">
         <h3 className="text-lg font-bold underline">Add New Customer</h3>
         <div className="flex justify-between items-center px-4 py-2 ">
-  {/* Reset Form Button */}
-  <p
-    onClick={() => {
-      clearcustomerFormData(); // Add your reset logic here
-    }}
-    className="text-red-700 mr-5 px-3 py-1 cursor-pointer border border-red-700 rounded-3xl hover:bg-red-700 hover:text-white transition-all duration-300 ease-out"
+          {/* Reset Form Button */}
+          <p
+            onClick={() => {
+              clearcustomerFormData(); // Add your reset logic here
+            }}
+            className="text-red-700 mr-5 px-3 py-1 cursor-pointer border border-red-700 rounded-3xl hover:bg-red-700 hover:text-white transition-all duration-300 ease-out"
+          >
+            Reset Form
+          </p>
 
-  >
-    Reset Form
-  </p>
-
-  {/* Close Button */}
-  <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-6 w-6"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M6 18L18 6M6 6l12 12"
-      />
-    </svg>
-  </button>
-</div>
-
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
       {/* Personal Info */}
       <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
@@ -468,43 +445,54 @@ const handleValidationClick = () => {
             placeholder="Enter GST number"
           />
           <p
-            onClick={() =>
-            {if (isGstValid !== true) {
-              handleValidationClick();
+            onClick={() => {
+              if (isGstValid !== true) {
+                handleValidationClick();
+              }
             }}
-            }
             className="absolute right-3 transform text-blue-500 px-3 py-1 focus:outline-none cursor-pointer"
             disabled={isChecking} // Disable button while checking
           >
-            {isChecking ? "Checking..." : isGstValid !== true ?"Verify" : <span className="text-gray-300">Verified</span> }
+            {isChecking ? (
+              "Checking..."
+            ) : isGstValid !== true ? (
+              "Verify"
+            ) : (
+              <span className="text-gray-300">Verified</span>
+            )}
           </p>
-          {isGstValid !== null ? (isGstValid === false ? (
-            <p className="text-red-600 text-sm mt-1">Invalid GST Number</p>
-          ): (
-            <p className="text-green-600 text-sm mt-1">Valid GST Number (Trade Name: {tradeName})</p>
-          )) : <p></p> }
+          {isGstValid !== null ? (
+            isGstValid === false ? (
+              <p className="text-red-600 text-sm mt-1">Invalid GST Number</p>
+            ) : (
+              <p className="text-green-600 text-sm mt-1">
+                Valid GST Number (Trade Name: {tradeName})
+              </p>
+            )
+          ) : (
+            <p></p>
+          )}
         </div>
       </div>
 
       <div>
-
-
         <br />
-        
+
         <hr />
         <br />
-        <div className="mb-5 flex justify-between"><h3 className="text-lg font-bold ">Address Details</h3> 
-        <label className="inline-flex items-center">
-    <input
-      type="checkbox"
-      className="form-checkbox"
-      checked={copyShipping}
-      onChange={checkboxChange}
-    />
-    <span className="ml-2">Same as Billing Address</span>
-  </label>
+        <div className="mb-5 flex justify-between">
+          <h3 className="text-lg font-bold ">Address Details</h3>
+          <label className="inline-flex items-center">
+            <input
+              type="checkbox"
+              className="form-checkbox"
+              checked={copyShipping}
+              onChange={checkboxChange}
+            />
+            <span className="ml-2">Same as Billing Address</span>
+          </label>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ">
           <div>
             <label className="block text-sm font-medium text-gray-600">
@@ -576,9 +564,7 @@ const handleValidationClick = () => {
               placeholder="Pincode"
               className="mt-1 w-full p-3 rounded-md border border-gray-300"
             />
-          
           </div>
-          
 
           <div>
             <label className="block text-sm font-medium text-gray-600">
@@ -653,7 +639,6 @@ const handleValidationClick = () => {
             />
           </div>
         </div>
-      
       </div>
 
       <div className="text-center">
