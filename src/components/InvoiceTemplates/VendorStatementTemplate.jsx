@@ -1,17 +1,17 @@
 import React from "react";
 import ReusableFunctions from "../ReusableFunctions";
 
-const CustomerStatementTemplate = ({
+const VendorStatementTemplate = ({
   userData,
-  customerDetails,
+  vendorDetails,
   statementData,
 }) => {
   console.log("userData", userData);
-  console.log("customerDetails", customerDetails);
+  console.log("vendorDetails", vendorDetails);
   console.log("statementData", statementData);
 
   return (
-    <div className="w-[210mm] mx-auto bg-white border border-gray-300 shadow-lg rounded-lg p-6 ">
+    <div className="w-[210mm] mx-auto bg-white border border-gray-300 shadow-lg rounded-lg p-8 m-5">
       
       {/* Header Section */}
       <div className="border-b-2 border-blue-500 pb-4 mb-6">
@@ -42,28 +42,28 @@ const CustomerStatementTemplate = ({
         </div>
       </div>
 
-      {/* Customer Details */}
+      {/* Vendor Details */}
       <div className="grid grid-cols-2 gap-6">
       <div>
   <p className="text-gray-400">Bill to</p>
   <p className="font-bold text-gray-900">
-    {customerDetails?.firstName?.toUpperCase() || ""}{" "}
-    {customerDetails?.lastName?.toUpperCase() || ""}
-    <span className="text-[12px]">
-    {" "} ({customerDetails?.companyName || "N/A"})
+    {vendorDetails?.firstName?.toUpperCase() || ""}{" "}
+    {vendorDetails?.lastName?.toUpperCase() || ""}
+     <span className="text-[12px]">
+       {" "}({vendorDetails?.companyName || "N/A"})
     </span>
   </p>
   <p className="text-gray-600 text-sm">
-    {customerDetails?.billingAddress?.address1 || "N/A"}
+    {vendorDetails?.billingAddress?.address1 || "N/A"}
   </p>
   <p className="text-gray-600 text-sm">
-    {customerDetails?.billingAddress?.city || "N/A"},{" "}
-    {customerDetails?.billingAddress?.pincode || "N/A"},{" "}
-    {customerDetails?.billingAddress?.country || "N/A"}
+    {vendorDetails?.billingAddress?.city || "N/A"},{" "}
+    {vendorDetails?.billingAddress?.pincode || "N/A"},{" "}
+    {vendorDetails?.billingAddress?.country || "N/A"}
   </p>
-  <p className="text-gray-600 text-sm">PH: {customerDetails?.phone || "N/A"}</p>
+  <p className="text-gray-600 text-sm">PH: {vendorDetails?.phone || "N/A"}</p>
   <p className="text-gray-600 text-sm">
-    GST: {customerDetails?.gstNumber || "N/A"}
+    GST: {vendorDetails?.gstNumber || "N/A"}
   </p>
 </div>
 
@@ -182,7 +182,7 @@ const CustomerStatementTemplate = ({
         </div>
 
         {/* Bottom Footer - Disclaimer */}
-        <div className="mt-6 text-center text-xs text-gray-500 ">
+        <div className="mt-6 text-center text-xs text-gray-500 mb-10">
           <p>
             This is a system-generated document and does not require a
             signature.
@@ -191,11 +191,10 @@ const CustomerStatementTemplate = ({
             © {new Date().getFullYear()}{" "}
             {userData.companyName || "Your Company"}. All rights reserved.
           </p>
-          
         </div>
       </div>
     </div>
   );
 };
 
-export default CustomerStatementTemplate;
+export default VendorStatementTemplate;

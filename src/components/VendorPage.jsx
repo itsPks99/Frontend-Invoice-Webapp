@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { Upload, PlusCircle, Edit, Trash } from "lucide-react";
 import Swal from "sweetalert2";
 
-const CustomerPage = ({ setActiveTab }) => {
-  const [allCustomers, setAllCustomers] = useState([]);
-  const [filteredCustomers, setFilteredCustomers] = useState([]); // For filtered results
+const VendorPage = ({ setActiveTab }) => {
+  const [allVendors, setAllVendors] = useState([]);
+  const [filteredVendors, setFilteredVendors] = useState([]); // For filtered results
   const [searchTerm, setSearchTerm] = useState(""); // Search term
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  const fetchCustomers = async () => {
+  const fetchVendors = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:3000/api/customers/fetchAllCustomer", {
+      const response = await fetch("http://localhost:3000/api/vendor/fetchAllVendor", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -22,27 +24,31 @@ const CustomerPage = ({ setActiveTab }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setAllCustomers(data.customer);
-        setFilteredCustomers(data.customer); // Initialize filtered data
+        // console.log('data', data.vendor);
+        setAllVendors(data.vendor);
+        setFilteredVendors(data.vendor); // Initialize filtered data
+        setIsLoading(false);
       } else {
-        console.error("Failed to fetch customers:", response.statusText);
+        console.error("Failed to fetch vendors:", response.statusText);
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching vendors:", error);
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchVendors();
   }, []);
 
-  // Filter customers based on search term
+  // Filter vendors based on search term
   useEffect(() => {
-    const filtered = allCustomers.filter((customer) => {
-      const fullName = `${customer.firstName} ${customer.lastName}`.toLowerCase();
-      const companyName = customer.companyName?.toLowerCase() || "";
-      const email = customer.email?.toLowerCase() || "";
-      const phone = customer.phone?.toString() || "";
+    const filtered = allVendors.filter((vendor) => {
+      const fullName = `${vendor.firstName} ${vendor.lastName}`.toLowerCase();
+      const companyName = vendor.companyName?.toLowerCase() || "";
+      const email = vendor.email?.toLowerCase() || "";
+      const phone = vendor.phone?.toString() || "";
       return (
         fullName.includes(searchTerm.toLowerCase()) ||
         companyName.includes(searchTerm.toLowerCase()) ||
@@ -50,11 +56,79 @@ const CustomerPage = ({ setActiveTab }) => {
         phone.includes(searchTerm)
       );
     });
-    setFilteredCustomers(filtered);
-  }, [searchTerm, allCustomers]);
+    setFilteredVendors(filtered);
+  }, [searchTerm, allVendors]);
+
+  const handleDelete = async (vendorId) => {
+    const userConfirmed = await Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to delete this Vendor? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+
+    if (!userConfirmed.isConfirmed) {
+      return; // Exit if user cancels
+    }
+
+    try {
+      const token = localStorage.getItem("authToken");
+
+      if (!token) {
+        Swal.fire({
+          icon: "error",
+          title: "Unauthorized",
+          text: "Token is missing. Please log in again.",
+        });
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/vendor/deleteVendor/${vendorId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "Product has been deleted successfully.",
+          confirmButtonColor: "#3085d6",
+        });
+        
+        fetchVendors(); // Refresh list
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text:
+            data.message || "Failed to delete the product. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "An unexpected error occurred. Please try again later.",
+      });
+    }
+  };
 
   const downloadCSV = () => {
-    if (filteredCustomers.length === 0) {
+    if (filteredVendors.length === 0) {
       alert("No data available to export!");
       return;
     }
@@ -62,12 +136,12 @@ const CustomerPage = ({ setActiveTab }) => {
     const csvHeaders = ["Name", "Company", "Email", "Phone"];
     const csvRows = [
       csvHeaders.join(","), // Add header row
-      ...filteredCustomers.map((customer) =>
+      ...filteredVendors.map((vendor) =>
         [
-          `${customer.firstName} ${customer.lastName}`,
-          customer.companyName || "N/A",
-          customer.email || "N/A",
-          customer.phone || "N/A",
+          `${vendor.firstName} ${vendor.lastName}`,
+          vendor.companyName || "N/A",
+          vendor.email || "N/A",
+          vendor.phone || "N/A",
         ].join(",")
       ),
     ];
@@ -78,15 +152,17 @@ const CustomerPage = ({ setActiveTab }) => {
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = "CustomersInfo.csv";
+    link.download = "VendorsInfo.csv";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  const handleTabChange = (newTab) => {
+  const handleTabChange = (newTab, vendorDetails, clickType) => {
     setActiveTab(newTab); // Update the activeTab in the Dashboard
-    navigate(`/dashboard/${newTab}`);
+    navigate(`/dashboard/${newTab}`, {
+      state: { vendorDetails , clickType }, // Pass additional data to the route
+    });
     window.scrollTo(0, 0);
   };
 
@@ -94,7 +170,7 @@ const CustomerPage = ({ setActiveTab }) => {
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-8">
-        <h1 className="text-4xl font-extrabold text-gray-800">Customers</h1>
+        <h1 className="text-4xl font-extrabold text-gray-800">Vendors</h1>
         <div className="flex space-x-4 mt-4 md:mt-0">
           <button
             className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
@@ -103,10 +179,14 @@ const CustomerPage = ({ setActiveTab }) => {
             <Upload className="w-5 h-5 mr-2" /> Export CSV
           </button>
           <button
-            onClick={() => handleTabChange("add-customer")}
+            onClick={() =>  handleTabChange(
+              "add-vendor",
+              {}, // Example vendorDetails
+              "create" // Example clickType
+            ) }
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            <PlusCircle className="w-5 h-5 mr-2" /> Add Customer
+            <PlusCircle className="w-5 h-5 mr-2" /> Add Vendor
           </button>
         </div>
       </div>
@@ -131,7 +211,7 @@ const CustomerPage = ({ setActiveTab }) => {
           </div>
         </div>
         <span className="text-gray-600 mt-4 md:mt-0">
-          <strong>{filteredCustomers.length}</strong> customers found
+          <strong>{filteredVendors.length}</strong> vendors found
         </span>
       </div>
 
@@ -148,29 +228,37 @@ const CustomerPage = ({ setActiveTab }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredCustomers.length > 0 ? (
-              [...filteredCustomers].reverse().map((customer, index) => (
+            {isLoading ? (<>
+              <div className="absolute inset-0 flex justify-center items-center">
+      <div className="w-10 h-10 border-4 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+    </div></>) : (<>
+    {filteredVendors.length > 0 ? (
+              filteredVendors.map((vendor, index) => (
                 <tr
                   key={index}
                   className={`text-[16px] ${
                     index % 2 === 0 ? "bg-white" : "bg-gray-50"
                   } hover:bg-gray-100 transition-all hover:cursor-pointer`}
                 >
-                  <td className="px-4 py-5 font-semibold">{customer.firstName + " " + customer.lastName}</td>
-                  <td className="px-4 py-5">{customer.companyName || "N/A"}</td>
-                  <td className="px-4 py-5">{customer.email || "N/A"}</td>
-                  <td className="px-4 py-5">{customer.phone || "N/A"}</td>
+                  <td className="px-4 py-5 font-semibold">{vendor.firstName + " " + vendor.lastName}</td>
+                  <td className="px-4 py-5">{vendor.companyName || "N/A"}</td>
+                  <td className="px-4 py-5">{vendor.email || "N/A"}</td>
+                  <td className="px-4 py-5">{vendor.phone || "N/A"}</td>
                   <td className="px-4 py-5">
                     <div className="flex space-x-2">
                       <button
                         className="p-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
-                        onClick={() => alert("Edit customer")}
+                        onClick={() => handleTabChange(
+                          "add-vendor",
+                          vendor, // Example vendorDetails
+                          "update" // Example clickType
+                        )}
                       >
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
-                        onClick={() => alert("Delete customer")}
+                        onClick={() =>handleDelete(vendor._id)}
                       >
                         <Trash className="h-4 w-4" />
                       </button>
@@ -181,10 +269,12 @@ const CustomerPage = ({ setActiveTab }) => {
             ) : (
               <tr>
                 <td colSpan="5" className="px-4 py-6 text-center text-gray-500">
-                  No customers found.
+                  No vendors found.
                 </td>
               </tr>
             )}
+  </>)}
+            
           </tbody>
         </table>
       </div>
@@ -192,4 +282,4 @@ const CustomerPage = ({ setActiveTab }) => {
   );
 };
 
-export default CustomerPage;
+export default VendorPage;

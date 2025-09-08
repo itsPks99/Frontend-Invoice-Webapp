@@ -4,6 +4,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import DashboardNew from "./pages/newpages/Dashboard/dashboard";
 
 const AppRoutes = () => {
   return (
@@ -12,6 +13,9 @@ const AppRoutes = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/signin" element={<Login />} />
       <Route path="/dashboard/*" element={<Dashboard />} />
+      <Route path="/dashboardnew/*" element={<DashboardNew />} />
+      {/* <Route path="/dashboardnew/*" element={<DashboardNew />} /> */}
+
     </Routes>
   );
 };

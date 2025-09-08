@@ -11,17 +11,39 @@ const PreviewPage = ({ setActiveTab }) => {
   };
   const location = useLocation();
   const navigate = useNavigate();
-  const { invoiceData, userData } = location.state || {};
+  let { invoiceData, userData } = location.state || {};
+  const queryParams = new URLSearchParams(location.search);
 
   
-  if (!invoiceData || !userData) {
-    // Redirect back to CreateInvoicePage if no data is passed
-    navigate("/dashboard/invoices");
-    return null;
-  } else {
-    // console.log("invoiceData:", invoiceData);
-    // console.log("userData:", userData);
-  }
+  // if (!invoiceData || !userData) {
+  //   // Redirect back to CreateInvoicePage if no data is passed
+  //   invoiceData = JSON.parse(decodeURIComponent(queryParams.get("invoiceData") || "{}"));
+  //   userData = JSON.parse(decodeURIComponent(queryParams.get("userData") || "{}"));
+  //   navigate("/dashboard/invoices");
+  //   return null;
+  // } else {
+  //   // console.log("invoiceData:", invoiceData);
+  //   // console.log("userData:", userData);
+  // }
+
+
+  // Redirect if no data is found (useEffect prevents infinite re-renders)
+  useEffect(() => {
+    if (!invoiceData || !userData) {
+      const parsedInvoiceData = JSON.parse(decodeURIComponent(queryParams.get("invoiceData") || "{}"));
+      const parsedUserData = JSON.parse(decodeURIComponent(queryParams.get("userData") || "{}"));
+
+      if (!parsedInvoiceData || !parsedUserData) {
+        navigate("/dashboard/invoices", { replace: true }); // ✅ Fix: Runs only once inside useEffect
+      }
+    }
+  }, [invoiceData, userData, navigate, queryParams]); // ✅ Only runs when dependencies change
+
+    // If data is missing, return null to prevent rendering
+    if (!invoiceData || !userData) {
+      return null;
+    }
+
   const handleTabChange = (newTab) => {
     setActiveTab(newTab); // Update the activeTab in the Dashboard
     navigate(`/dashboard/${newTab}`, { replace: true }); 

@@ -7,7 +7,27 @@ import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
 import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
 import PreviewPage from "../components/PreviewPage";
 import ReusableFunctions from "../components/ReusableFunctions";
-
+import { useEffect, useCallback, useRef } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import CreateInvoicePage from "../components/CreateInvoicePage";
+import { useClickAway } from "react-use";
+import PickState from "../components/PickState";
+import { HexColorPicker } from "react-colorful";
+import StatementTab from "../components/StatementTab";
+import InvoiceList from "../components/InvoicePage";
+import CustomerStatements from "../components/CustomerStatement";
+import CustomerList from "../components/CustomerPage";
+import VendorPage from "../components/VendorPage";
+import AddNewCustomerForm from "../components/Addcustomer";
+import ProductsAndServices from "../components/ProductandService";
+import AddProductServiceForm from "../components/Addproduct";
+import TemplatePage from "../components/TemplatePage";
+import AddNewVendorForm from "../components/Addvendor";
+import VendorStatements from "../components/VendorStatement";
+import BillList from "../components/BillPage";
+import CreateBillPage from "../components/RecordBillPage";
+import EstimateList from "../components/EstimatePage";
+import CreateEstimatePage from "../components/CreateEstimatePage";
 import {
   Home,
   Package,
@@ -33,26 +53,11 @@ import {
   ReceiptIndianRupee,
   ScanBarcode,
   BookUser,
-  
   FileText,
   Wallet,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { useEffect, useCallback, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import CreateInvoicePage from "../components/CreateInvoicePage";
-import { useClickAway } from "react-use";
-import PickState from "../components/PickState";
-import { HexColorPicker } from "react-colorful";
-import StatementTab from "../components/StatementTab";
-import InvoiceList from "../components/InvoicePage";
-import CustomerStatements from "../components/CustomerStatement";
-import CustomerList from "../components/CustomerPage";
-import AddNewCustomerForm from "../components/Addcustomer";
-import ProductsAndServices from "../components/ProductandService";
-import AddProductServiceForm from "../components/Addproduct";
-import TemplatePage from "../components/TemplatePage";
 
 const MetricCard = ({ title, value, percentage, isPositive }) => (
   <div className="bg-gradient-to-r from-white to-blue-50 p-6 rounded-xl shadow-sm hover:shadow-md transform hover:scale-101 transition-transform duration-300">
@@ -137,11 +142,7 @@ export default function Dashboard() {
         await fetchUserInfo(); // Ensure user data is fetched before proceeding
 
         if (activeTab === "home") {
-          if (
-            allUserInfo?.first_name === "" ||
-            allUserInfo?.last_name === "" ||
-            allUserInfo?.phone === ""
-          ) {
+          if (allUserInfo?.first_name === "" || allUserInfo?.last_name === "" || allUserInfo?.phone === "") {
             setShowSettings(true);
             setActiveTab("settings"); // Show the form if user data is missing
           } else {
@@ -154,11 +155,7 @@ export default function Dashboard() {
         } else if (activeTab === "customers") {
           await fetchCustomers();
         } else if (activeTab === "invoices") {
-          await Promise.all([
-            fetchCustomers(),
-            fetchProducts(),
-            fetchInvoices(),
-          ]);
+          await Promise.all([fetchCustomers(), fetchProducts(), fetchInvoices()]);
         }
       } catch (error) {
         console.error("Error in handleTabChange:", error);
@@ -198,16 +195,13 @@ export default function Dashboard() {
   const fetchProducts = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        "http://localhost:3000/api/products/fetchProducts",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/products/fetchProducts", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -226,16 +220,13 @@ export default function Dashboard() {
   const fetchCustomers = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        "http://localhost:3000/api/customers/fetchAllCustomer",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/customers/fetchAllCustomer", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -262,16 +253,13 @@ export default function Dashboard() {
         return;
       }
 
-      const response = await fetch(
-        "http://localhost:3000/api/auth/user-profile",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/auth/user-profile", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -284,9 +272,7 @@ export default function Dashboard() {
         // fetchCustomers();
         // console.log("allUserInfo.first_name:", allUserInfo.first_name);
       } else {
-        console.error(
-          `Failed to fetch user info: ${response.status} - ${response.statusText}`
-        );
+        console.error(`Failed to fetch user info: ${response.status} - ${response.statusText}`);
         setLoading(false);
       }
     } catch (error) {
@@ -324,16 +310,13 @@ export default function Dashboard() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:3000/api/products/${productId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:3000/api/products/${productId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
 
@@ -349,8 +332,7 @@ export default function Dashboard() {
         Swal.fire({
           icon: "error",
           title: "Failed!",
-          text:
-            data.message || "Failed to delete the product. Please try again.",
+          text: data.message || "Failed to delete the product. Please try again.",
         });
       }
     } catch (error) {
@@ -392,16 +374,13 @@ export default function Dashboard() {
         return;
       }
 
-      const response = await fetch(
-        `http://localhost:3000/api/brand-logo/remove`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Token passed in header
-          },
-        }
-      );
+      const response = await fetch(`http://localhost:3000/api/brand-logo/remove`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Token passed in header
+        },
+      });
 
       const data = await response.json();
 
@@ -438,48 +417,45 @@ export default function Dashboard() {
     }
   }, [navigate]);
 
- 
+  const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You will be logged out of your account.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, log me out!",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Clear the auth token from localStorage
+        localStorage.removeItem("authToken");
 
-const handleLogout = () => {
-  Swal.fire({
-    title: "Are you sure?",
-    text: "You will be logged out of your account.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, log me out!",
-    cancelButtonText: "Cancel",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Clear the auth token from localStorage
-      localStorage.removeItem("authToken");
-
-      // Redirect the user to the login page
-      navigate("/");
-    }
-  });
-};
-
-
-  const handleRowClick = (customer) => {
-    console.log("Row clicked:", customer);
-    // Example: Navigate to a customer details page
-    setActiveTab("customer-statements");
-    navigate(`/dashboard/customers/${customer._id}`);
+        // Redirect the user to the login page
+        navigate("/");
+      }
+    });
   };
 
-  const handleEditClick = (e, customer) => {
-    e.stopPropagation(); // Prevent the row click event
-    console.log("Edit clicked for:", customer);
-    // Example: Open edit modal or navigate to edit page
-  };
+  // const handleRowClick = (customer) => {
+  //   console.log("Row clicked:", customer);
+  //   // Example: Navigate to a customer details page
+  //   setActiveTab("customer-statements");
+  //   navigate(`/dashboard/customers/${customer._id}`);
+  // };
 
-  const handleDeleteClick = (e, customerId) => {
-    e.stopPropagation(); // Prevent the row click event
-    console.log("Delete clicked for ID:", customerId);
-    // Example: Trigger delete confirmation
-  };
+  // const handleEditClick = (e, customer) => {
+  //   e.stopPropagation(); // Prevent the row click event
+  //   console.log("Edit clicked for:", customer);
+  //   // Example: Open edit modal or navigate to edit page
+  // };
+
+  // const handleDeleteClick = (e, customerId) => {
+  //   e.stopPropagation(); // Prevent the row click event
+  //   console.log("Delete clicked for ID:", customerId);
+  //   // Example: Trigger delete confirmation
+  // };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -490,10 +466,7 @@ const handleLogout = () => {
             <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {isShimmer ? (
                 Array.from({ length: 4 }).map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="h-20 bg-gray-200 rounded-lg animate-pulse"
-                  ></div>
+                  <div key={idx} className="h-20 bg-gray-200 rounded-lg animate-pulse"></div>
                 ))
               ) : (
                 <>
@@ -501,9 +474,7 @@ const handleLogout = () => {
                     title="Total Invoice Amount"
                     value={`₹ ${allUserInfo.total_invoice_amount || 0}`}
                     percentage={Math.round(
-                      (allUserInfo.total_invoice_balance /
-                        (allUserInfo.total_invoice_amount || 1)) *
-                        100
+                      (allUserInfo.total_invoice_balance / (allUserInfo.total_invoice_amount || 1)) * 100
                     )}
                     isPositive={true}
                   />
@@ -511,9 +482,7 @@ const handleLogout = () => {
                     title="Total Balance Amount"
                     value={`₹ ${allUserInfo.total_invoice_balance || 0}`}
                     percentage={Math.round(
-                      (allUserInfo.total_invoice_balance /
-                        (allUserInfo.total_invoice_amount || 1)) *
-                        100
+                      (allUserInfo.total_invoice_balance / (allUserInfo.total_invoice_amount || 1)) * 100
                     )}
                     isPositive={allUserInfo.total_invoice_balance === "0"}
                   />
@@ -521,9 +490,7 @@ const handleLogout = () => {
                     title="Total Paid Amount"
                     value={`₹ ${allUserInfo.total_invoice_paid_amount || 0}`}
                     percentage={Math.round(
-                      (allUserInfo.total_invoice_paid_amount /
-                        (allUserInfo.total_invoice_amount || 1)) *
-                        100
+                      (allUserInfo.total_invoice_paid_amount / (allUserInfo.total_invoice_amount || 1)) * 100
                     )} // Dynamically calculate percentage
                     isPositive={allUserInfo.total_invoice_paid_amount > 0}
                   />
@@ -568,17 +535,14 @@ const handleLogout = () => {
                           .map((invoice, index) => (
                             <tr
                               key={index}
-                              className={`hover:bg-gray-100 ${
-                                index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                              } text-center`}
+                              className={`hover:bg-gray-100 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"} text-center`}
                             >
                               <td className="px-4 py-2">
                                 <span
                                   className={`inline-block rounded-full px-2 py-1 text-xs ${
                                     invoice.paymentStatus === "paid"
                                       ? "bg-green-100 text-green-600"
-                                      : invoice.paymentStatus ===
-                                        "partially paid"
+                                      : invoice.paymentStatus === "partially paid"
                                       ? "bg-yellow-100 text-yellow-600"
                                       : "bg-red-100 text-red-600"
                                   }`}
@@ -590,28 +554,16 @@ const handleLogout = () => {
                                 {allUserInfo.invoice_Prefix}
                                 {invoice.invoiceNumber}
                               </td>
-                              <td className="px-4 py-2">
-                                {invoice.billTo.customerName}
-                              </td>
-                              <td className="px-4 py-2">
-                                {new Date(
-                                  invoice.invoiceDate
-                                ).toLocaleDateString()}
-                              </td>
-                              <td className="px-4 py-2">
-                                {invoice.products.length}
-                              </td>
-                              <td className="px-4 py-2">
-                                ₹{invoice.payment.grandTotal}
-                              </td>
+                              <td className="px-4 py-2">{invoice.billTo.customerName}</td>
+                              <td className="px-4 py-2">{new Date(invoice.invoiceDate).toLocaleDateString()}</td>
+                              <td className="px-4 py-2">{invoice.products.length}</td>
+                              <td className="px-4 py-2">₹{invoice.payment.grandTotal}</td>
 
                               <td className="px-4 py-2 relative">
                                 {/* Toggle Dropdown */}
                                 <div
                                   className="relative inline-block text-left"
-                                  ref={(el) =>
-                                    (dropdownRefs.current[index] = el)
-                                  }
+                                  ref={(el) => (dropdownRefs.current[index] = el)}
                                 >
                                   <button
                                     onClick={() => toggleDropdown(index)}
@@ -627,38 +579,26 @@ const handleLogout = () => {
                                         {[
                                           {
                                             label: "View Details",
-                                            icon: (
-                                              <Eye className="w-5 h-5 text-blue-500" />
-                                            ),
-                                            onClick: () =>
-                                            {setActiveTab("preview-page");
-                                              navigate(`/dashboard/${"preview-page"}`, 
-                                                {state: { invoiceData: invoice, userData :allUserInfo}});
-                                            }
+                                            icon: <Eye className="w-5 h-5 text-blue-500" />,
+                                            onClick: () => {
+                                              setActiveTab("preview-page");
+                                              navigate(`/dashboard/${"preview-page"}`, {
+                                                state: { invoiceData: invoice, userData: allUserInfo },
+                                              });
+                                            },
                                           },
                                           {
                                             label: "Download",
-                                            icon: (
-                                              <Download className="h-5 w-5" />
-                                            ),
+                                            icon: <Download className="h-5 w-5" />,
                                             onClick: () => {
-                                              ReusableFunctions.downloadInvoice(
-                                                invoice,
-                                                allUserInfo
-                                              );
-                                              setTimeout(
-                                                () => setDropdownIndex(null),
-                                                500
-                                              ); // Close the dropdown
+                                              ReusableFunctions.downloadInvoice(invoice, allUserInfo);
+                                              setTimeout(() => setDropdownIndex(null), 500); // Close the dropdown
                                             },
                                           },
                                           {
                                             label: "Send Invoice",
-                                            icon: (
-                                              <Mail className="h-5 w-5 text-red-500" />
-                                            ),
-                                            onClick: () =>
-                                              alert("Sending Invoice..."),
+                                            icon: <Mail className="h-5 w-5 text-red-500" />,
+                                            onClick: () => alert("Sending Invoice..."),
                                           },
                                           {
                                             label: "Print",
@@ -673,14 +613,8 @@ const handleLogout = () => {
                                               </svg>
                                             ),
                                             onClick: () => {
-                                              ReusableFunctions.handlePrintInvoice(
-                                                invoice,
-                                                allUserInfo
-                                              );
-                                              setTimeout(
-                                                () => setDropdownIndex(null),
-                                                500
-                                              );
+                                              ReusableFunctions.handlePrintInvoice(invoice, allUserInfo);
+                                              setTimeout(() => setDropdownIndex(null), 500);
                                             },
                                           },
                                           // {
@@ -697,9 +631,7 @@ const handleLogout = () => {
                                             onClick={action.onClick}
                                           >
                                             {action.icon}
-                                            <span className="ml-2">
-                                              {action.label}
-                                            </span>
+                                            <span className="ml-2">{action.label}</span>
                                           </li>
                                         ))}
                                       </ul>
@@ -898,6 +830,8 @@ const handleLogout = () => {
           // </div>
           <CustomerList setActiveTab={setActiveTab} />
         );
+      case "vendors":
+        return <VendorPage setActiveTab={setActiveTab} />;
       case "invoices":
         return (
           // <div className="bg-white p-6 rounded-lg shadow">
@@ -1023,6 +957,21 @@ const handleLogout = () => {
             setActiveTab1={setActiveTab}
           />
         );
+      case "bills":
+        return (<BillList setActiveTab={setActiveTab} />);
+      case "estimates":
+        return (<EstimateList setActiveTab={setActiveTab} />);
+      case "createestimates":
+        return (
+          <CreateEstimatePage
+            // userDetails={allUserInfo}
+            // productDetails={allProducts}
+            // customerDetails={allCustomers}
+            setActiveTab1={setActiveTab}
+          />
+        );
+      case "createbills":
+        return (<CreateBillPage setActiveTab1={setActiveTab} />);
       case "purchase-orders":
         return (
           <div className="bg-white p-6 rounded-lg shadow">
@@ -1073,7 +1022,7 @@ const handleLogout = () => {
           </div>
         );
       case "preview-page":
-        return <PreviewPage setActiveTab={setActiveTab} />;
+        return (<PreviewPage setActiveTab={setActiveTab} />);
       case "settings":
         return (
           <div
@@ -1093,20 +1042,12 @@ const handleLogout = () => {
       `}
             </style>
 
-            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">
-              Enter Your Organization Details
-            </h2>
+            <h2 className="text-2xl font-semibold text-gray-800 text-center mb-4">Enter Your Organization Details</h2>
 
-            <form
-              onSubmit={(e) => handleFormSubmitUserDetails(e)}
-              className="space-y-4"
-            >
+            <form onSubmit={(e) => handleFormSubmitUserDetails(e)} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="relative">
-                  <label
-                    htmlFor="first_name"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="first_name" className="block text-sm font-medium text-gray-600">
                     First Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1120,10 +1061,7 @@ const handleLogout = () => {
                 </div>
 
                 <div className="relative">
-                  <label
-                    htmlFor="last_name"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="last_name" className="block text-sm font-medium text-gray-600">
                     Last Name <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1138,10 +1076,7 @@ const handleLogout = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="relative">
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-600">
                     Phone <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1155,10 +1090,7 @@ const handleLogout = () => {
                 </div>
 
                 <div className="relative">
-                  <label
-                    htmlFor="companyName"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-600">
                     Company Name
                   </label>
                   <input
@@ -1172,10 +1104,7 @@ const handleLogout = () => {
               </div>
 
               <div className="relative">
-                <label
-                  htmlFor="companyFullAddress"
-                  className="block text-sm font-medium text-gray-600"
-                >
+                <label htmlFor="companyFullAddress" className="block text-sm font-medium text-gray-600">
                   Full Address <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -1190,10 +1119,7 @@ const handleLogout = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="relative">
-                  <label
-                    htmlFor="city"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-600">
                     City <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1207,10 +1133,7 @@ const handleLogout = () => {
                 </div>
 
                 <div className="relative">
-                  <label
-                    htmlFor="state"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="state" className="block text-sm font-medium text-gray-600">
                     State <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -1218,9 +1141,7 @@ const handleLogout = () => {
                     value={formData.state} // This will bind the state from formData
                     onChange={(e) => {
                       // Find the selected state object based on the selected value (code)
-                      const selectedState = PickState.find(
-                        (state) => state.name === e.target.value
-                      );
+                      const selectedState = PickState.find((state) => state.name === e.target.value);
                       // Set the state name into formData
                       setFormData({
                         ...formData,
@@ -1234,8 +1155,7 @@ const handleLogout = () => {
                   >
                     {PickState.map((state) => (
                       <option key={state.name} value={state.name}>
-                        {state.name}{" "}
-                        {/* This will show the state name in the dropdown */}
+                        {state.name} {/* This will show the state name in the dropdown */}
                       </option>
                     ))}
                   </select>
@@ -1243,10 +1163,7 @@ const handleLogout = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="relative">
-                  <label
-                    htmlFor="country"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="country" className="block text-sm font-medium text-gray-600">
                     Country <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1260,10 +1177,7 @@ const handleLogout = () => {
                   />
                 </div>
                 <div className="relative">
-                  <label
-                    htmlFor="pincode"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="pincode" className="block text-sm font-medium text-gray-600">
                     Pincode <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1276,10 +1190,7 @@ const handleLogout = () => {
                   />
                 </div>
                 <div className="relative">
-                  <label
-                    htmlFor="GST"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="GST" className="block text-sm font-medium text-gray-600">
                     GST
                   </label>
                   <input
@@ -1294,10 +1205,7 @@ const handleLogout = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="relative">
-                  <label
-                    htmlFor="invoice_Prefix"
-                    className="block text-sm font-medium text-gray-600"
-                  >
+                  <label htmlFor="invoice_Prefix" className="block text-sm font-medium text-gray-600">
                     Invoice Prefix <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1315,12 +1223,8 @@ const handleLogout = () => {
                   />
                 </div>
                 <div className="relative">
-                  <label
-                    htmlFor="invoice_Number"
-                    className="block text-sm font-medium text-gray-600"
-                  >
-                    Invoice Number{" "}
-                    <span className="text-gray-400">(start from) </span>
+                  <label htmlFor="invoice_Number" className="block text-sm font-medium text-gray-600">
+                    Invoice Number <span className="text-gray-400">(start from) </span>
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1334,9 +1238,7 @@ const handleLogout = () => {
                 </div>
                 {/* Color Picker Section */}
                 <div ref={colorPickerRef} className="align">
-                  <label className="block text-sm font-medium text-gray-600">
-                    Brand Color
-                  </label>
+                  <label className="block text-sm font-medium text-gray-600">Brand Color</label>
                   <div className="relative">
                     <input
                       type="text"
@@ -1377,15 +1279,12 @@ const handleLogout = () => {
                 </div>
               </div>
               <p className="text-[13px] ml-2 text-gray-400">
-                Note: Your invoice number will be look like this: (
-                {formData.invoice_Prefix + formData.invoice_Number})
+                Note: Your invoice number will be look like this: ({formData.invoice_Prefix + formData.invoice_Number})
               </p>
 
               {/* Image Upload Section */}
               <div className="mb-20">
-                <label className="block text-sm font-medium text-gray-600 mb-2">
-                  Company Logo
-                </label>
+                <label className="block text-sm font-medium text-gray-600 mb-2">Company Logo</label>
                 <div
                   className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer transition-all duration-300 hover:border-indigo-500 hover:bg-indigo-50"
                   onDrop={onDrop}
@@ -1394,11 +1293,7 @@ const handleLogout = () => {
                 >
                   {image ? (
                     <div className="relative flex justify-center">
-                      <img
-                        src={image}
-                        alt="Uploaded"
-                        className=" h-40 object-contain rounded-lg shadow-md "
-                      />
+                      <img src={image} alt="Uploaded" className=" h-40 object-contain rounded-lg shadow-md " />
                       <button
                         type="button" // Prevent default form submission
                         onClick={(e) => {
@@ -1475,16 +1370,20 @@ const handleLogout = () => {
           </div>
         );
       case "statements":
-        return <StatementTab />;
+        return (<StatementTab />);
       case "customer-statements":
-        return <CustomerStatements />;
+        return (<CustomerStatements />);
+      case "vendor-statements":
+        return (<VendorStatements />);
       case "add-customer":
-        return <AddNewCustomerForm setActiveTab={setActiveTab} />;
+        return (<AddNewCustomerForm setActiveTab={setActiveTab} />);
+      case "add-vendor":
+        return (<AddNewVendorForm setActiveTab={setActiveTab} />);
       case "add-product":
-        return <AddProductServiceForm setActiveTab={setActiveTab} />;
+        return (<AddProductServiceForm setActiveTab={setActiveTab} />);
       case "templates":
-        return <TemplatePage />;
-        default:
+        return (<TemplatePage />);
+      default:
         return null;
     }
   };
@@ -1678,16 +1577,13 @@ const handleLogout = () => {
       const formData = new FormData();
       formData.append("brandLogo", file); // The key "brandLogo" matches your backend API's expected field name
 
-      const response = await fetch(
-        "http://localhost:3000/api/brand-logo/upload",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`, // Do NOT set "Content-Type" header manually for FormData
-          },
-          body: formData, // Pass FormData as the body
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/brand-logo/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, // Do NOT set "Content-Type" header manually for FormData
+        },
+        body: formData, // Pass FormData as the body
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -1695,9 +1591,7 @@ const handleLogout = () => {
         Swal.fire("Success!", "Brand logo uploaded successfully!", "success");
         return data; // Return the response data for further use
       } else {
-        console.error(
-          `Failed to upload image: ${response.status} - ${response.statusText}`
-        );
+        console.error(`Failed to upload image: ${response.status} - ${response.statusText}`);
         Swal.fire("Error!", "Failed to upload brand logo.", "error");
       }
     } catch (error) {
@@ -1719,17 +1613,14 @@ const handleLogout = () => {
     try {
       const token = localStorage.getItem("authToken"); // Replace this with your actual token, or retrieve it dynamically (e.g., from localStorage, context, etc.)
       // console.log("request data", JSON.stringify(formData));
-      const response = await fetch(
-        "http://localhost:3000/api/auth/updatePofile",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Adding token to Authorization header
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/auth/updatePofile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Adding token to Authorization header
+        },
+        body: JSON.stringify(formData),
+      });
 
       const result = await response.json();
       if (response.ok) {
@@ -1802,7 +1693,7 @@ const handleLogout = () => {
         if (result.isConfirmed) {
           setActiveTab(newTab); // Update activeTab state
           navigate(`/dashboard/${newTab}`); // Navigate to the new route
-          window.scrollTo(0,0);
+          window.scrollTo(0, 0);
         }
         if (
           activeTab !== "invoices" &&
@@ -1825,7 +1716,7 @@ const handleLogout = () => {
       }
       setActiveTab(newTab); // Update activeTab state
       navigate(`/dashboard/${newTab}`); // Navigate to the new route
-      window.scrollTo(0,0);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -1845,31 +1736,21 @@ const handleLogout = () => {
       <div className="md:hidden fixed top-4 right-4 z-50">
         {/* Hamburger or Close icon based on sidebar state */}
 
-        <button
-          className="text-2xl"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        >
+        <button className="text-2xl" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
           {isSidebarOpen ? <X /> : <Menu />}
         </button>
       </div>
       {!isSidebarOpen && hasScrolled && (
-        <div className="fixed top-0 left-0 w-full bg-white shadow-md z-50 md:hidden transition-transform">
+        <div className="fixed flex h-screen w-full top-0 left-0  bg-white shadow-md z-50 md:hidden transition-transform">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center justify-center">
               <div className="flex bg-blue-500 justify-center">
-                <img
-                  alt="Logo"
-                  src="/src/assets/logos/Asset 2@4x-100.jpg"
-                  className="h-7 "
-                />
+                <img alt="Logo" src="/src/assets/logos/Asset 2@4x-100.jpg" className="h-7 " />
               </div>
             </div>
 
             {/* Hamburger Menu */}
-            <button
-              className="text-2xl"
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
+            <button className="text-2xl" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
               {isSidebarOpen ? <X /> : <Menu />}
             </button>
           </div>
@@ -2027,11 +1908,7 @@ const handleLogout = () => {
       <aside className="sticky top-0 left-0 w-full md:w-64 bg-white h-screen overflow-y-auto border-r transition-all duration-300 z-40">
         {/* Logo Section */}
         <div className="flex items-center px-6 py-4">
-          <img
-            alt="Logo"
-            src="/src/assets/logos/Asset 3@4x-100.jpg "
-            className="h-8 w-auto mb-5"
-          />
+          <img alt="Logo" src="/src/assets/logos/Asset 3@4x-100.jpg " className="h-8 w-auto mb-5" />
         </div>
 
         {/* Navigation */}
@@ -2040,7 +1917,8 @@ const handleLogout = () => {
           <button
             onClick={() => handleTabChange("home")}
             className={`flex items-center  px-6 py-2  w-full hover:bg-gray-100 ${
-              activeTab === "home" ? "font-bold text-blue-600" : "text-gray-700"            }`}
+              activeTab === "home" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
           >
             <Home className="h-6 w-6 mr-2" />
             Home
@@ -2122,25 +2000,27 @@ const handleLogout = () => {
             Purchases
           </button> */}
 
-          {/* Accounting */}
+          {/* invoices */}
           <button
             onClick={() => handleTabChange("invoices")}
             className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
-              activeTab === "invoices" ? "font-bold text-blue-600" : "text-gray-700"            }`}
+              activeTab === "invoices" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
           >
             <ReceiptIndianRupee className="h-6 w-6 mr-2" />
             Invoices
           </button>
-          {/* Accounting */}
+          {/* bills */}
           <button
-            onClick={() => handleTabChange("customers")}
+            onClick={() => handleTabChange("bills")}
             className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
-              activeTab === "customers" ? "font-bold text-blue-600" : "text-gray-700"            }`}
+              activeTab === "bills" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
           >
-            <Users className="h-6 w-6 mr-2" />
-            Customers
+            <ReceiptIndianRupee className="h-6 w-6 mr-2" />
+            Bills
           </button>
-          {/* Accounting */}
+          {/* products */}
           <button
             onClick={() => handleTabChange("products")}
             className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
@@ -2150,41 +2030,83 @@ const handleLogout = () => {
             <ScanBarcode className="h-6 w-6 mr-2" />
             Products & Services
           </button>
-          {/* Accounting */}
+          {/* customers */}
+          <button
+            onClick={() => handleTabChange("customers")}
+            className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
+              activeTab === "customers" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
+          >
+            <Users className="h-6 w-6 mr-2" />
+            Customers
+          </button>
+
+          {/* vendors */}
+          <button
+            onClick={() => handleTabChange("vendors")}
+            className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
+              activeTab === "vendors" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
+          >
+            <Users className="h-6 w-6 mr-2" />
+            Vendors
+          </button>
+
+          {/* customer-statements */}
           <button
             onClick={() => handleTabChange("customer-statements")}
             className={`flex items-center px-6 py-2 w-full hover:bg-gray-100 ${
               activeTab === "customer-statements" ? "font-bold text-blue-600" : "text-gray-700"
             }`}
           >
-            <BookUser className={`h-6 w-6 mr-2 ${
-              activeTab === "customer-statements" ? "font-bold text-blue-600" : "text-gray-700"   }`}/>
+            <BookUser
+              className={`h-6 w-6 mr-2 ${
+                activeTab === "customer-statements" ? "font-bold text-blue-600" : "text-gray-700"
+              }`}
+            />
             Customer Statements
           </button>
-          {/* Accounting */}
+          {/* customer-statements */}
           <button
-            // onClick={() => handleTabChange("estimates")}
+            onClick={() => handleTabChange("vendor-statements")}
+            className={`flex items-center px-6 py-2 w-full hover:bg-gray-100 ${
+              activeTab === "vendor-statements" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
+          >
+            <BookUser
+              className={`h-6 w-6 mr-2 ${
+                activeTab === "vendor-statements" ? "font-bold text-blue-600" : "text-gray-700"
+              }`}
+            />
+            Vendor Statements
+          </button>
+          {/* estimates */}
+          <button
+            onClick={() => handleTabChange("estimates")}
             className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
-              activeTab === "estimates" ? "font-bold text-blue-600" : "text-gray-700"            }`}
+              activeTab === "estimates" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
           >
             <IndianRupee className="h-6 w-6 mr-2" />
             Estimates
           </button>
-          {/* Accounting */}
+          {/* statements */}
           <button
             onClick={() => handleTabChange("statements")}
             className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
-              activeTab === "statements" ? "font-bold text-blue-600" : "text-gray-700"            }`}
+              activeTab === "statements" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
           >
             <FileText className="h-6 w-6 mr-2" />
             Accounting
           </button>
 
-          {/* Templates */}
+          {/* templates */}
           <button
             onClick={() => handleTabChange("templates")}
             className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
-              activeTab === "templates" ? "font-bold text-blue-600" : "text-gray-700"            }`}
+              activeTab === "templates" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
           >
             <NotepadText className="h-6 w-6 mr-2" />
             Templates
@@ -2195,18 +2117,15 @@ const handleLogout = () => {
         <div className="absolute bottom-14 left-0 w-full ">
           <div className=" p-2 flex rounded-lg font-semibold gap-2 items-center md:hidden">
             {formData.brand_LogoUrl !== undefined && (
-              <img
-                className="h-10 rounded-md border border-blue-500"
-                src={formData.brand_LogoUrl}
-                alt=""
-              />
+              <img className="h-10 rounded-md border border-blue-500" src={formData.brand_LogoUrl} alt="" />
             )}
             {formData.companyName}
           </div>
           <button
             onClick={() => handleTabChange("settings")}
             className={`flex items-center px-6 py-2  w-full hover:bg-gray-100 ${
-              activeTab === "settings" ? "font-bold text-blue-600" : "text-gray-700"            }`}
+              activeTab === "settings" ? "font-bold text-blue-600" : "text-gray-700"
+            }`}
           >
             <Settings className="h-6 w-6 mr-2" />
             Settings
@@ -2218,8 +2137,6 @@ const handleLogout = () => {
             <LogOut className="h-6 w-6 mr-2" />
             Log out
           </button>
-          
-        
         </div>
       </aside>
 
@@ -2227,11 +2144,7 @@ const handleLogout = () => {
       <main className="flex-1 p-4 md:p-7 overflow-auto">
         <div className="px-2  justify-end rounded-lg font-semibold gap-2 items-center hidden md:flex">
           {formData.brand_LogoUrl !== "" && (
-            <img
-              className="h-10 rounded-md border border-blue-500"
-              src={formData.brand_LogoUrl}
-              alt=""
-            />
+            <img className="h-10 rounded-md border border-blue-500" src={formData.brand_LogoUrl} alt="" />
           )}
           {formData.companyName !== "" ? allUserInfo.companyName : ""}
         </div>
@@ -2246,10 +2159,7 @@ const handleLogout = () => {
                     <h1 className="text-2xl font-bold mt-7 md:mt-0">
                       Hello{" "}
                       <span className="text-3xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                        {allUserInfo.first_name
-                          ? capitalizeFirstLetter(allUserInfo.first_name)
-                          : "User"}
-                        !
+                        {allUserInfo.first_name ? capitalizeFirstLetter(allUserInfo.first_name) : "User"}!
                       </span>
                     </h1>
                   )}
@@ -2258,10 +2168,7 @@ const handleLogout = () => {
                 <h1 className="text-2xl font-bold mt-7 md:mt-0">
                   Hello{" "}
                   <span className="text-3xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                    {allUserInfo.first_name
-                      ? capitalizeFirstLetter(allUserInfo.first_name)
-                      : "User"}
-                    !
+                    {allUserInfo.first_name ? capitalizeFirstLetter(allUserInfo.first_name) : "User"}!
                   </span>
                 </h1>
               )}

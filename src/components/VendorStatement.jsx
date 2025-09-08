@@ -1,41 +1,49 @@
 import React, { useEffect, useState } from "react";
-import CustomerStatementTemplate from "./InvoiceTemplates/CustomerStatementTemplate";
-import CustomerInfo from "./CustomerInfoDemi";
+import VendorInfo from "./VendorInfoDemi";
+import VendorStatementTemplate from "./InvoiceTemplates/VendorStatementTemplate";
 import ReusableFunctions from "./ReusableFunctions";
 
-const CustomerStatements = () => {
+
+const VendorStatements = () => {
   const [allUserInfo, setAllUserInfo] = useState([]);
-  const [allCustomers, setAllCustomers] = useState([]);
-  const [selectedCustomer, setSelectedCustomer] = useState("");
-  const [selectedCustomerDetails, setSelectedCustomerDetails] = useState([]);
+  const [allVendors, setAllVendors] = useState([]);
+  const [selectedVendor, setSelectedVendor] = useState("");
+  const [selectedVendorDetails, setSelectedVendorDetails] = useState([]);
   // const [selectedType, setSelectedType] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [allStatementData, setallStatementData] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
 
-  const fetchCustomers = async () => {
+  const fetchVendors = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        "http://localhost:3000/api/customers/fetchAllCustomer",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/vendor/fetchAllVendor", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       if (response.ok) {
         const data = await response.json();
-        setAllCustomers(data.customer);
+        // console.log('data', data.vendor);
+        setAllVendors(data.vendor);
+        // setFilteredVendors(data.vendor); // Initialize filtered data
+        setIsLoading(false);
+      } else {
+        console.error("Failed to fetch vendors:", response.statusText);
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching vendors:", error);
+      setIsLoading(false);
     }
   };
 
   const fetchUserInfo = async () => {
+    setIsLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       if (!token) return;
@@ -53,46 +61,20 @@ const CustomerStatements = () => {
       if (response.ok) {
         const data = await response.json();
         setAllUserInfo(data.user);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error("Error fetching user info:", error.message);
     } finally {
-      setLoading(false);
+        setIsLoading(false);
     }
   };
 
-  // const fetchCustomerStatement = async () => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-  //     if (!token) return;
+  
 
-  //     const response = await fetch(
-  //       "http://localhost:3000/api/customerStatement/get-particular-Customer-Statements",
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body:{
-  //           customerId:""
-  //         }
-  //       }
-  //     );
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setAllUserInfo(data.user);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching user info:", error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const fetchCustomerStatement = async (customerId) => {
+  const fetchVendorStatement = async (vendorId) => {
     try {
-      setLoading(true); // Set loading state before making the API call
+        setIsLoading(true); // Set loading state before making the API call
 
       const token = localStorage.getItem("authToken");
       if (!token) {
@@ -102,7 +84,7 @@ const CustomerStatements = () => {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/customerStatement/get-particular-Customer-Statements?customerId=${customerId}`,
+        `http://localhost:3000/api/vendorStatement/get-particular-Vendor-Statements?vendorId=${vendorId}`,
         {
           method: "GET",
           headers: {
@@ -116,60 +98,61 @@ const CustomerStatements = () => {
         const data = await response.json();
         if (data && data.statements) {
           setallStatementData(data.statements);
-          console.log("CustomerStatement", data.statements);
+          console.log("VendorStatement", data.statements);
+          setIsLoading(false);
         } else {
-          console.warn("No statements found for the customer.");
+          console.warn("No statements found for the vendor.");
           setallStatementData([]);
+          setIsLoading(false);
         }
       } else {
         console.error(
-          "Error fetching customer statement:",
+          "Error fetching vendor statement:",
           response.status,
           response.statusText
         );
+        setIsLoading(false);
         setallStatementData([]); // Clear the statement data on error
       }
     } catch (error) {
       setallStatementData([]); // Clear the statement data on error
-      console.error("Error fetching customer statement:", error.message);
+      console.error("Error fetching vendor statement:", error.message);
     } finally {
-      setLoading(false); // Reset loading state after the API call
+        setIsLoading(false); // Reset loading state after the API call
     }
   };
 
   const handleRefresh = () => {
-    setSelectedCustomer(""); // Clear customer dropdown
+    setSelectedVendor(""); // Clear vendor dropdown
     // setSelectedType(""); // Clear type dropdown
-    setSelectedCustomerDetails([]);
+    setSelectedVendorDetails([]);
     setallStatementData([]);
   };
 
-  const handleCustomerChange = (customerId) => {
-    setSelectedCustomer(customerId);
+  const handleVendorChange = (vendorId) => {
+    setSelectedVendor(vendorId);
 
-    // Find and store the selected customer's details
-    const customerDetails = allCustomers.find(
-      (customer) => customer._id === customerId
+    // Find and store the selected vendor's details
+    const vendorDetails = allVendors.find(
+      (vendor) => vendor._id === vendorId
     );
-    setSelectedCustomerDetails(customerDetails);
+    setSelectedVendorDetails(vendorDetails);
 
-    if (customerId) {
-      setLoading(true);
-      fetchCustomerStatement(customerId);
+    if (vendorId) {
+        setIsLoading(true);
+    //   fetchVendorStatement(vendorId);
     }
   };
 
   useEffect(() => {
-    fetchCustomers();
+    fetchVendors();
     fetchUserInfo();
   }, []);
 
   const handleAction = (action) => {
     setIsOpen(false); // Close the dropdown after selecting an action
+    ReusableFunctions.downloadStatement("vendor",allUserInfo, selectedVendorDetails, allStatementData);
     // console.log(`Action selected: ${action}`);
-    ReusableFunctions.downloadStatement("customer",allUserInfo, selectedCustomerDetails, allStatementData);
-      
-    
     // Implement specific action logic here (e.g., download, print, or send statement)
   };
 
@@ -177,30 +160,30 @@ const CustomerStatements = () => {
     <div className="bg-gray-50 min-h-screen ">
       {/* Header */}
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        Customer Statements
+        Vendor Statements
       </h1>
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-between">
-          {/* Customer Select */}
+          {/* Vendor Select */}
           <div>
             <label
-              htmlFor="customer"
+              htmlFor="vendor"
               className="block text-sm font-medium text-gray-700"
             >
-              Customer
+              Vendor
             </label>
             <select
-              id="customer"
-              value={selectedCustomer}
-              onChange={(e) => handleCustomerChange(e.target.value)}
+              id="vendor"
+              value={selectedVendor}
+              onChange={(e) => handleVendorChange(e.target.value)}
               className="mt-1 p-2 w-full border rounded-md text-gray-600"
             >
-              <option value="">Select Customer</option>
-              {allCustomers.map((customer) => (
-                <option key={customer._id} value={customer._id}>
-                  {`${customer.firstName} ${customer.lastName}`}
+              <option value="">Select Vendor</option>
+              {allVendors.map((vendor) => (
+                <option key={vendor._id} value={vendor._id}>
+                  {`${vendor.firstName} ${vendor.lastName}`}
                 </option>
               ))}
             </select>
@@ -238,7 +221,7 @@ const CustomerStatements = () => {
         </div>
       </div>
 
-      {selectedCustomerDetails && ( 
+      {selectedVendorDetails && ( 
         <div className="flex justify-end">
   <div className="relative inline-block text-left mb-5">
     {/* More Actions Button */}
@@ -294,12 +277,12 @@ const CustomerStatements = () => {
 
 
    {/* Statement Section */}
-{Array.isArray(selectedCustomerDetails) && selectedCustomerDetails.length === 0 ? (
-  <CustomerInfo />
+{Array.isArray(selectedVendorDetails) && selectedVendorDetails.length === 0 ? (
+  <VendorInfo text={"vendors"} />
 ) : (
-  <CustomerStatementTemplate
+  <VendorStatementTemplate
     userData={allUserInfo}
-    customerDetails={selectedCustomerDetails}
+    vendorDetails={selectedVendorDetails}
     statementData={allStatementData}
   />
 )}
@@ -309,4 +292,4 @@ const CustomerStatements = () => {
   );
 };
 
-export default CustomerStatements;
+export default VendorStatements;

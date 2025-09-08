@@ -21,13 +21,13 @@ input[type="number"] {
 
 /* Apply Fonts */
 body {
-  font-family: 'Lato', sans-serif;  /* Primary Font */
+  font-family: 'Inter', sans-serif; /* Primary Font */
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: Georgia, 'Times New Roman', Times, serif;  /* Secondary Font */
+  font-family: 'Inter', sans-serif; /* Secondary Font */
 }
 
 p, input, button, span {
-  font-family: 'Nunito Sans', sans-serif;  /* Tertiary Font */
+  font-family: 'Inter', sans-serif; /* Tertiary Font */
 }

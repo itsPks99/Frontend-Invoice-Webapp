@@ -6,6 +6,8 @@ import ReactDOM from "react-dom";
 import Invoice from "../components/InvoiceTemplates/InvoiceTemplate1";
 import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
 import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
+import VendorStatementTemplate from "../components/InvoiceTemplates/VendorStatementTemplate"; 
+import CustomerStatementTemplate from "../components/InvoiceTemplates/CustomerStatementTemplate";
 
 class ReusableFunctions {
   // Function to format numbers into words
@@ -152,7 +154,7 @@ class ReusableFunctions {
     try {
       // Render the invoice template
       const invoiceHtml = ReactDOMServer.renderToString(
-        <Invoice invoiceData={invoiceData} userData={userData} />
+        <Invoice3 invoiceData={invoiceData} userData={userData} />
       );
   
       const tempDiv = document.createElement("div");
@@ -229,7 +231,180 @@ class ReusableFunctions {
     }
   };
   
+  static sendInvoiceOnWhatsApp = async (invoiceData, userData) => {
+    try {
+      // Render the invoice template
+      const invoiceHtml = ReactDOMServer.renderToString(
+        <Invoice3 invoiceData={invoiceData} userData={userData} />
+      );
   
+      // Create an off-screen element to render the invoice
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.top = "-9999px";
+      tempDiv.style.left = "0";
+      tempDiv.style.width = "1000px";
+      tempDiv.style.paddingTop = "10px";
+      tempDiv.style.backgroundColor = "white";
+      tempDiv.innerHTML = invoiceHtml;
+      document.body.appendChild(tempDiv);
+  
+      // Generate canvas using html2canvas
+      const canvas = await html2canvas(tempDiv, { scale: 2, logging: true });
+  
+      const imgData = canvas.toDataURL("image/png");
+  
+      // Create PDF
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  
+      // Convert PDF to Blob
+      const pdfBlob = pdf.output("blob");
+  
+      // Create a temporary download URL for the PDF
+      const fileUrl = URL.createObjectURL(pdfBlob);
+  
+      // Generate WhatsApp message with a link
+      const message = `Hi, please find the attached invoice below:\n\nInvoice ID: ${
+        invoiceData.invoiceNumber
+      }\nAmount: ₹${invoiceData.payment.grandTotal}\nStatus: ${
+        invoiceData.paymentStatus
+      }\n\nDownload the PDF: ${fileUrl}`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  
+      // Open WhatsApp link
+      window.open(whatsappUrl, "_blank");
+  
+      // Cleanup
+      document.body.removeChild(tempDiv);
+      URL.revokeObjectURL(fileUrl); // Revoke the temporary URL to free memory
+    } catch (error) {
+      console.error("Error generating and sending PDF via WhatsApp:", error);
+    }
+  };
+
+  static downloadStatement = async (type, userData, details, statementData) => {
+    console.log(`Downloading ${type} Statement...`);
+  
+    try {
+      let statementHtml;
+      
+      // Select Template Based on Type
+      if (type === "customer") {
+        statementHtml = ReactDOMServer.renderToString(
+          <CustomerStatementTemplate
+            userData={userData}
+            customerDetails={details}
+            statementData={statementData}
+          />
+        );
+      } else {
+        statementHtml = ReactDOMServer.renderToString(
+          <VendorStatementTemplate
+            userData={userData}
+            vendorDetails={details}
+            statementData={statementData}
+          />
+        );
+      }
+  
+      // Create a Temporary Container for Rendering
+      const invoiceContainer = document.createElement("div");
+      invoiceContainer.style.width = "794px";  // A4 Width
+      invoiceContainer.style.minHeight = "1123px"; // A4 Height
+      invoiceContainer.style.position = "absolute";
+      invoiceContainer.style.top = "-9999px";
+      invoiceContainer.style.backgroundColor = "white";
+      invoiceContainer.innerHTML = statementHtml;
+      document.body.appendChild(invoiceContainer);
+  
+      // Convert the Container to Canvas
+      const canvas = await html2canvas(invoiceContainer, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        logging: true, // Debugging logs
+      });
+  
+      const imgData = canvas.toDataURL("image/png");
+      document.body.removeChild(invoiceContainer);
+  
+      // Create PDF Document
+      const pdf = new jsPDF("p", "pt", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let position = 0;
+  
+      // **Fix: Properly Handle Multi-Page Rendering**
+      while (position < imgHeight) {
+        pdf.addImage(imgData, "PNG", 10, 10 - position, imgWidth, imgHeight);
+        
+        if (position + pageHeight < imgHeight) {
+          pdf.addPage();
+          position += pageHeight;
+        } else {
+          break;
+        }
+      }
+  
+      // Save the PDF
+      pdf.save(`${type}_Statement_${details.firstName}_${details.lastName}.pdf`);
+  
+    } catch (error) {
+      console.error(`Error generating ${type} Statement PDF:`, error);
+    }
+  };
+
+  static generatePDFBlob = async (invoiceData, userData) => {
+    try {
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.top = "-9999px";
+      tempDiv.style.left = "0";
+      tempDiv.style.width = "1000px"; // Adjust for desired layout
+      tempDiv.style.backgroundColor = "white"; // Ensure white background
+      tempDiv.innerHTML = `<div>
+        <h1>${userData.companyName}</h1>
+        <p>Invoice: ${invoiceData.invoiceNumber}</p>
+        <p>Total: ₹${invoiceData.payment.grandTotal}</p>
+      </div>`;
+      document.body.appendChild(tempDiv);
+  
+      // Render canvas from the temp div
+      const canvas = await html2canvas(tempDiv, { scale: 2 });
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgData = canvas.toDataURL("image/png");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+  
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      document.body.removeChild(tempDiv);
+  
+      // Create Blob from the PDF
+      const pdfBlob = pdf.output("blob");
+      return URL.createObjectURL(pdfBlob);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      return null;
+    }
+  };
+  
+  static shareOnWhatsApp = async (invoiceData, userData) => {
+    const pdfBlobUrl = await ReusableFunctions.generatePDFBlob(invoiceData, userData);
+  
+    if (pdfBlobUrl) {
+      const message = `Here is your invoice:`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}&attachment=${pdfBlobUrl}`;
+      window.open(whatsappUrl, "_blank");
+      console.log('pdfBlobUrl',pdfBlobUrl);
+    } else {
+      alert("Failed to generate invoice PDF.");
+    }
+  };
   
   
   static convertImageToBase64 = async (imageUrl) => {

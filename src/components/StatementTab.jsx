@@ -127,7 +127,7 @@ const StatementTab = () => {
   // exportStatementToCSV(statementDetails, "statements.csv");
 
   return (
-    <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl shadow-lg">
+    <div className="bg-gradient-to-r  bg-white p-6 rounded-xl shadow-sm">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 items-center">
 
       {/* Header Section */}
@@ -189,7 +189,7 @@ const StatementTab = () => {
       Invoices
     </p>
     <p className="text-[12px] font-medium text-gray-600 mt-1">
-      <span className="text-lg font-extrabold text-green-500">{allStatementData.filter(s => s.transactionType === "Payment").length}</span>{" "}
+      <span className="text-lg font-extrabold text-green-500">{allStatementData.filter(s => s.transactionType === "Payment Received").length}</span>{" "}
       Payments
     </p></div>
   </div>

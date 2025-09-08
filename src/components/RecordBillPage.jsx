@@ -2,57 +2,51 @@ import React, { useEffect, useState } from "react";
 import { Trash, Plus } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
-import CustomerForm from "../components/CustomerForm";
+import CustomerForm from "./CustomerForm";
 import ReusableFunctions from "./ReusableFunctions";
-import Invoice from "../components/InvoiceTemplates/InvoiceTemplate1";
-import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
-import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
-import PreviewPage from "../components/PreviewPage";
+// import Bill from "../components/BillTemplates/BillTemplate1";
+// import Bill2 from "../components/BillTemplates/BillTemplate2";
+// import Bill3 from "../components/BillTemplates/BillTemplate3";
+import PreviewPage from "./PreviewPage";
 import ProductForm from "./ProductForm";
 
 
-const CreateInvoicePage = ({
-  // userDetails,
-  // productDetails,
-  // customerDetails,
+const CreateBillPage = ({
   setActiveTab1,
 }) => {
-  // console.log("userDetails:", userDetails);
-  // console.log("productDetails:", productDetails);
-  // console.log("customerDetails:", customerDetails);
+ 
 
   //--------------------------------------------------------------------------------------------
 
   // Variables
-  const [customer, setCustomer] = useState("");
+  const [vendor, setVendor] = useState("");
   const [total, setTotal] = useState(0); // Initial total value
   const [balance, setBalance] = useState(0); // Initial balance amount
   const [loading, setLoading] = useState(false);
   const [totalDiscount, setTotalDiscount] = useState("");
   const [isPaymentReceived, setIsPaymentReceived] = useState(false);
   const [amountReceived, setAmountReceived] = useState(""); // Initial amount
-  const [InvoiceNumber, setInvoiceNumber] = useState("");
-  const [InvoicePrefix, setInvoicePrefix] = useState("");
+  const [BillNumber, setBillNumber] = useState("");
   const [posoNumber, setPosoNumber] = useState("");
   const [productDetails, setProductDetails] = useState([]);
-  const [customerDetails, setCustomerDetails] = useState([]);
+  const [vendorDetails, setVendorDetails] = useState([]);
   const [userDetails, setUserDetails] = useState({});
   const [termsAndCondition, setTermsAndCondition] = useState(
-    "Please check the invoice and make the payment before 30 days."
+    "Please check the bill and make the payment before 30 days."
   );
-  const [customerNote, setCustomerNote] = useState(
+  const [vendorNote, setVendorNote] = useState(
     "Thank you for shopping with us."
   );
   const [paymentDueOptions, setPaymentDueOptions] = useState();
   const [logo, setLogo] = useState(null);
-  const [selectedCustomerId, setSelectedCustomerId] = useState(""); // Store selected customer ID
+  const [selectedVendorId, setSelectedVendorId] = useState(""); // Store selected vendor ID
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("Cash");
   const [selected, setSelected] = useState("rupee");
   const [showPreview, setshowPreview] = useState();
-  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [showVendorForm, setShowVendorForm] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
   const navigate = useNavigate();
-  const [invoiceDate, setInvoiceDate] = useState(() => {
+  const [billDate, setBillDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
   });
@@ -72,14 +66,12 @@ const CreateInvoicePage = ({
       hsnCode: "",
     },
   ]);
-
-  
-  const [InvoiceData, setInvoiceData] = useState({
+  const [BillData, setBillData] = useState({
     userId: "",
     brandLogoUrl: "",
-    invoiceNumber: "",
-    invoiceDate: "",
-    invoiceDueDate: "",
+    billNumber: "",
+    billDate: "",
+    billDueDate: "",
     companyName: "",
     country: "",
     gstNumber: "",
@@ -90,7 +82,7 @@ const CreateInvoicePage = ({
     pincode: "",
 
     billTo: {
-      customerName: "",
+      vendorName: "",
       companyName: "",
       phone: "",
       email: "",
@@ -132,7 +124,7 @@ const CreateInvoicePage = ({
       grandTotal: "",
     },
     paymentStatus: "",
-    customerInvoiceNote: "",
+    vendorBillNote: "",
     termsAndCondition: "",
   });
 
@@ -154,12 +146,12 @@ const CreateInvoicePage = ({
   };
 
   const resetFields = () => {
-    setInvoiceData({
+    setBillData({
       userId: "",
       brandLogoUrl: "",
-      invoiceNumber: "",
-      invoiceDate: "",
-      invoiceDueDate: "",
+      billNumber: "",
+      billDate: "",
+      billDueDate: "",
       companyName: "",
       country: "",
       gstNumber: "",
@@ -169,7 +161,7 @@ const CreateInvoicePage = ({
       state: "",
       pincode: "",
       billTo: {
-        customerName: "",
+        vendorName: "",
         companyName: "",
         phone: "",
         email: "",
@@ -211,31 +203,30 @@ const CreateInvoicePage = ({
         grandTotal: "",
       },
       paymentStatus: "",
-      customerInvoiceNote: "",
+      vendorBillNote: "",
       termsAndCondition: "",
     });
   };
 
   const clearAllFields = () => {
-    setCustomer("");
+    setVendor("");
     setTotal(0);
     setBalance(0);
     setLoading(false);
     setTotalDiscount(0);
     setIsPaymentReceived(false);
     setAmountReceived("");
-    setInvoiceNumber(userDetails.invoice_Number || "");
-    setInvoicePrefix(userDetails.invoice_Prefix || "");
+    setBillNumber( "");
     setPosoNumber("");
     setTermsAndCondition(
-      "Please check the invoice and make the payment before 30 days."
+      "Please check the bill and make the payment before 30 days."
     );
-    setCustomerNote("Thank you for shopping with us.");
+    setVendorNote("Thank you for shopping with us.");
     setPaymentDueOptions();
     // setLogo(null);
-    setSelectedCustomerId("");
+    setSelectedVendorId("");
     setSelectedPaymentMethod("Cash");
-    setInvoiceDate(() => {
+    setBillDate(() => {
       const today = new Date();
       return today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
     });
@@ -255,12 +246,12 @@ const CreateInvoicePage = ({
         hsnCode: "",
       },
     ]);
-    setInvoiceData({
+    setBillData({
       userId: "",
       brandLogoUrl: "",
-      invoiceNumber: "",
-      invoiceDate: "",
-      invoiceDueDate: "",
+      billNumber: "",
+      billDate: "",
+      billDueDate: "",
       companyName: "",
       country: "",
       gstNumber: "",
@@ -270,7 +261,7 @@ const CreateInvoicePage = ({
       state: "",
       pincode: "",
       billTo: {
-        customerName: "",
+        vendorName: "",
         companyName: "",
         phone: "",
         email: "",
@@ -312,54 +303,45 @@ const CreateInvoicePage = ({
         grandTotal: "",
       },
       paymentStatus: "",
-      customerInvoiceNote: "",
+      vendorBillNote: "",
       termsAndCondition: "",
     });
   };
 
 
-const removeItem = (index) => {
-  if (items.length > 1) {
-    const updatedItems = items.filter((_, itemIndex) => itemIndex !== index);
-    setItems(updatedItems);
-  } else {
-    Swal.fire({
-      icon: "warning",
-      title: "Cannot Remove Item",
-      text: "You cannot remove the last item.",
-      confirmButtonColor: "#2563EB",
-      confirmButtonText: "OK",
-    });
-  }
-};
+  const removeItem = (index) => {
+    if (items.length > 1) {
+      setItems((prevItems) => prevItems.filter((_, itemIndex) => itemIndex !== index));
+    } else {
+      Swal.fire({
+        icon: "warning",
+        title: "Cannot Remove Item",
+        text: "You cannot remove the last item.",
+        confirmButtonColor: "#2563EB",
+        confirmButtonText: "OK",
+      });
+    }
+  };
 
 
-  // Find selected customer from data
-  const selectedCustomer = customerDetails.find(
-    (customer) => customer._id === selectedCustomerId
+  // Find selected vendor from data
+  const selectedVendor = vendorDetails.find(
+    (vendor) => vendor._id === selectedVendorId
   );
-  // console.log("selectedCustomer--", selectedCustomer);
-
-  // const userState =
-  //   selectedCustomer !== undefined
-  //     ? selectedCustomer.billingAddress.state
-  //     : "Delhi"; // Replace with dynamic user state
-  // console.log("userState", userDetails.state);
+  
 
   const [userState, setUserState] = useState("");
 
-  const customerState =
-    customerDetails.find((c) => c._id === selectedCustomerId)?.billingAddress
+  const vendorState =
+    vendorDetails.find((c) => c._id === selectedVendorId)?.billingAddress
       ?.state || "";
-  // console.log("customerState", customerState);
-  // console.log("selectedCustomerId", selectedCustomerId);
-  // console.log("customerDetails--", customerDetails);
+  
 
   //--------------------------------------------------------------------------------------------
 
   //Handlers
-  const [invoiceHandler, setInvoiceHandler] = useState(
-    parseInt(userDetails.invoice_Number, 10)
+  const [billHandler, setBillHandler] = useState(
+    parseInt(userDetails.bill_Number, 10)
   );
 
   const handleLogoUpload = (event) => {
@@ -368,33 +350,17 @@ const removeItem = (index) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setLogo(e.target.result); // Set the uploaded logo as a base64
-        // setInvoiceData((prevData) => ({
+        // setBillData((prevData) => ({
         //   ...prevData,
         //   brandLogoUrl: e.target.result, // Set the uploaded logo as a base64 string
         // }));
       };
       reader.readAsDataURL(file);
     }
-    // console.log("InvoiceData.brandLogoUrl", InvoiceData.brandLogoUrl);
+    // console.log("BillData.brandLogoUrl", BillData.brandLogoUrl);
   };
 
-  // const handleTotalDiscountChange = (e) => {
-  //   const discountValue = parseInt(e.target.value, 10); // Convert string to integer
-  //   let newDiscount = 0;
-
-  //   if (selected === "percentage") {
-  //     newDiscount = isNaN(discountValue)
-  //       ? 0
-  //       : Math.round((calculateTotal()  * discountValue) / 100);
-  //   } else {
-  //     newDiscount = isNaN(discountValue) ? 0 : discountValue;
-  //   }
-
-  //   setTotalDiscount(newDiscount); // Update the state
-
-  //   // Log the updated value after ensuring it is set
-  //   // console.log("TotalDiscount", newDiscount);
-  // };
+ 
 
   const handleTotalDiscountChange = (e) => {
     const discountValue = parseInt(e.target.value, 10); // Convert string to integer
@@ -432,8 +398,8 @@ const removeItem = (index) => {
     setTermsAndCondition(e.target.value);
   };
 
-  const handleCustomerNoteChange = (e) => {
-    setCustomerNote(e.target.value);
+  const handleVendorNoteChange = (e) => {
+    setVendorNote(e.target.value);
   };
 
   const handleDueDateChange = (e) => {
@@ -457,7 +423,7 @@ const removeItem = (index) => {
 
   // Handle Amount Change
   const handleAmountChange = (e) => {
-    const value = e.target.value; // Handle empty input as 0
+    const value = parseFloat(e.target.value); // Handle empty input as 0
     setAmountReceived(value);
     calculateBalance(value); // Recalculate balance
     // setTotalAmount(totalAmount - amountReceived);
@@ -495,7 +461,7 @@ const removeItem = (index) => {
       if (response.ok) {
         const data = await response.json();
         setProductDetails(data.products); // Save to state
-        console.log("Product Details:", data.products);
+        // console.log("Product Details:", data.products);
       } else {
         console.error("Failed to fetch products:", response.statusText);
       }
@@ -504,29 +470,32 @@ const removeItem = (index) => {
     }
   };
 
-  const fetchCustomers = async () => {
+  
+
+  const fetchVendors = async () => {
+    
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        "http://localhost:3000/api/customers/fetchAllCustomer",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:3000/api/vendor/fetchAllVendor", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
-        setCustomerDetails(data.customer); // Save to state
-        // console.log("Customer Details:", data.customer);
+        console.log('data', data.vendor);
+        setVendorDetails(data.vendor);
+        
       } else {
-        console.error("Failed to fetch customers:", response.statusText);
+        console.error("Failed to fetch vendors:", response.statusText);
+        
       }
     } catch (error) {
-      console.error("Error fetching customers:", error);
+      console.error("Error fetching vendors:", error);
+      
     }
   };
 
@@ -568,12 +537,12 @@ const removeItem = (index) => {
 
   const callCreateAPI = async (userData) => {
 
-    // console.log('selectedCustomer data', selectedCustomer.firstName + " " + selectedCustomer.lastName || "");
+    // console.log('selectedVendor data', selectedVendor.firstName + " " + selectedVendor.lastName || "");
 
-    if (selectedCustomer) {
+    if (selectedVendor) {
       if (items[0].hsnCode !== "" || items[0].price !== 0) {
         setLoading(true); // Start loading
-        setInvoiceData((prevData) => {
+        setBillData((prevData) => {
           const paymentStatus = (() => {
             const total = Math.round(calculateTotal());
             const discount = Math.round(totalDiscount);
@@ -595,9 +564,9 @@ const removeItem = (index) => {
             ...prevData,
             userId: userDetails.id || "",
             brandLogoUrl: logo || "",
-            invoiceNumber: InvoiceNumber || "N/A",
-            invoiceDate: invoiceDate || "N/A",
-            invoiceDueDate: paymentDue || "N/A",
+            billNumber: BillNumber || "N/A",
+            billDate: billDate || "N/A",
+            billDueDate: paymentDue || "N/A",
             companyName: userDetails.companyName || "N/A",
             country: userDetails.country || "N/A",
             gstNumber: userDetails.GST || "N/A",
@@ -606,28 +575,28 @@ const removeItem = (index) => {
             city: userDetails.city || "N/A",
             state: userDetails.state || "N/A",
             pincode: userDetails.pincode || "N/A",
-            customerId:selectedCustomer._id,
+            vendorId:selectedVendor._id,
             billTo: {
-              customerName:
-                selectedCustomer.firstName + " " + selectedCustomer.lastName ||
+              vendorName:
+                selectedVendor.firstName + " " + selectedVendor.lastName ||
                 "",
-              companyName: selectedCustomer.companyName || "N/A",
-              phone: selectedCustomer.phone || "N/A",
-              email: selectedCustomer.email || "N/A",
-              address: selectedCustomer.billingAddress.address1 || "N/A",
-              city: selectedCustomer.billingAddress.city || "N/A",
-              gstNumber: selectedCustomer.gstNumber || "N/A",
-              state: selectedCustomer.billingAddress.state || "N/A",
-              country: selectedCustomer.billingAddress.country || "N/A",
-              pincode: selectedCustomer.billingAddress.pincode || "N/A",
-              placeOfSupply: selectedCustomer.billingAddress.state || "N/A",
+              companyName: selectedVendor.companyName || "N/A",
+              phone: selectedVendor.phone || "N/A",
+              email: selectedVendor.email || "N/A",
+              address: selectedVendor.billingAddress.address1 || "N/A",
+              city: selectedVendor.billingAddress.city || "N/A",
+              gstNumber: selectedVendor.gstNumber || "N/A",
+              state: selectedVendor.billingAddress.state || "N/A",
+              country: selectedVendor.billingAddress.country || "N/A",
+              pincode: selectedVendor.billingAddress.pincode || "N/A",
+              placeOfSupply: selectedVendor.billingAddress.state || "N/A",
             },
             shipTo: {
-              address: selectedCustomer.shippingAddress.address1 || "N/A",
-              city: selectedCustomer.shippingAddress.city || "N/A",
-              state: selectedCustomer.shippingAddress.state || "N/A",
-              country: selectedCustomer.shippingAddress.country || "N/A",
-              pincode: selectedCustomer.shippingAddress.pincode || "N/A",
+              address: selectedVendor.shippingAddress.address1 || "N/A",
+              city: selectedVendor.shippingAddress.city || "N/A",
+              state: selectedVendor.shippingAddress.state || "N/A",
+              country: selectedVendor.shippingAddress.country || "N/A",
+              pincode: selectedVendor.shippingAddress.pincode || "N/A",
             },
             products: items.map((item) => ({
               name: item.productName,
@@ -640,7 +609,7 @@ const removeItem = (index) => {
                 igst: item.igst,
               },
               subTotalAmount:
-              ReusableFunctions.getTaxType(userState, customerState) === false
+              ReusableFunctions.getTaxType(userState, vendorState) === false
                   ? Math.round(
                       item.quantity * item.price +
                         (item.price * item.igst || 0) / 100
@@ -664,25 +633,25 @@ const removeItem = (index) => {
             },
 
             paymentStatus,
-            customerInvoiceNote: customerNote,
+            vendorBillNote: vendorNote,
             termsAndCondition: termsAndCondition,
           };
 
-          console.log("Updated InvoiceData: ", updatedData);
+          console.log("Updated BillData: ", updatedData);
           return updatedData;
         });
 
         // Simulate API call and stop loader after delay
-        // callCreateAPI(InvoiceData, userDetails);
+        // callCreateAPI(BillData, userDetails);
         setTimeout(() => {
-          if (InvoiceData.userId === "") {
-            // InvoiceData is empty, show an alert or handle the case where it's empty
+          if (BillData.userId === "") {
+            // BillData is empty, show an alert or handle the case where it's empty
             setLoading(false);
-            // console.log("InvoiceData is empty!", InvoiceData);
+            // console.log("BillData is empty!", BillData);
             // callCreateAPI(userData);
           } else {
-            // InvoiceData is not empty, proceed with the API call
-            createInvoiceApi(InvoiceData, userData);
+            // BillData is not empty, proceed with the API call
+            createBillApi(BillData, userData);
           }
         }, 1500);
       } else {
@@ -697,16 +666,16 @@ const removeItem = (index) => {
     } else {
       Swal.fire({
         icon: "error",
-        title: "No customer selected!",
-        text: "Please select a customer.",
+        title: "No vendor selected!",
+        text: "Please select a vendor.",
         confirmButtonText: "OK",
         confirmButtonColor: "#2563EB",
       });
     }
   };
 
-  const createInvoiceApi = async (invoiceData, userData) => {
-    // console.log("invoiceData:", invoiceData);
+  const createBillApi = async (billData, userData) => {
+    // console.log("billData:", billData);
     try {
       const token = localStorage.getItem("authToken");
 
@@ -717,14 +686,14 @@ const removeItem = (index) => {
       }
 
       const response = await fetch(
-        "http://localhost:3000/api/invoice/generateInvoice",
+        "http://localhost:3000/api/bill/generateBill",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(invoiceData), // Pass invoiceData as the request body
+          body: JSON.stringify(billData), // Pass billData as the request body
           redirect: "follow",
         }
       );
@@ -735,53 +704,52 @@ const removeItem = (index) => {
 
       
 
-        const invNumber = data.invoice.invoiceNumber || "N/A";
-        const totalInvoiceAmt =
-          Number(userData.total_invoice_amount) +
-            data.invoice.payment.grandTotal || "0";
+        const totalBillAmt =
+          Number(userData.total_bill_amount) +
+            data.bill.payment.grandTotal || "0";
         const totalBalanceAmt =
-          Number(userData.total_invoice_balance) +
-            data.invoice.payment.balanceDue || "0";
+          Number(userData.total_bill_balance) +
+            data.bill.payment.balanceDue || "0";
         const totalPaidAmt =
-          Number(userData.total_invoice_paid_amount || "0") +
-            data.invoice.payment.paymentMade || "0";
+          Number(userData.total_bill_paid_amount || "0") +
+            data.bill.payment.paymentMade || "0";
         // console.log("invNumber", invNumber);
-        // console.log("totalInvoiceAmt", totalInvoiceAmt);
+        // console.log("totalBillAmt", totalBillAmt);
         // console.log("totalBalanceAmt", totalBalanceAmt);
         // console.log("totalPaidAmt", totalPaidAmt);
 
-        updateProfileApi({
-          invoice_Number: invNumber,
-          // invoice_Prefix: ,
-          total_invoice_amount: totalInvoiceAmt,
-          total_invoice_balance: totalBalanceAmt,
-          total_invoice_paid_amount: totalPaidAmt,
-        });
+        // updateProfileApi({ 
+        //   bill_Number: invNumber,
+        //   // bill_Prefix: ,
+        //   total_bill_amount: totalBillAmt,
+        //   total_bill_balance: totalBalanceAmt,
+        //   total_bill_paid_amount: totalPaidAmt,
+        // });
         Swal.fire({
           icon: "success",
-          title: "Invoice created successfully!",
-          text: "Your invoice has been generated and saved.",
+          title: "Bill created successfully!",
+          text: "Your bill has been generated and saved.",
           confirmButtonText: "OK",
           confirmButtonColor: "#2563EB",
           // timer: 3000, // Auto close after 3 seconds
         });
-        console.log("Invoice created successfully:", data);
+        console.log("Bill created successfully:", data);
         handleTabChange("preview-page");
         navigate(`/dashboard/${"preview-page"}`,
-          {state: { invoiceData: data.invoice, userData :userDetails} , replace: true}
+          {state: { billData: data.bill, userData :userDetails} , replace: true}
         );
         resetFields();
       } else {
         setLoading(false);
 
         console.error(
-          `Failed to create invoice: ${response.status} - ${response.statusText}`
+          `Failed to create bill: ${response.status} - ${response.statusText}`
         );
       }
     } catch (error) {
       setLoading(false);
 
-      console.error("Error creating invoice:", error.message);
+      console.error("Error creating bill:", error.message);
     } finally {
       setLoading(false); // Ensure the loading state is cleared
     }
@@ -807,7 +775,7 @@ const removeItem = (index) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(profileData), // Pass invoiceData as the request body
+          body: JSON.stringify(profileData), // Pass billData as the request body
         }
       );
 
@@ -838,7 +806,7 @@ const removeItem = (index) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        await Promise.all([fetchProducts(), fetchCustomers(), fetchUserInfo()]);
+        await Promise.all([fetchProducts(), fetchVendors(), fetchUserInfo()]);
       } catch (error) {
         console.error("Error in fetching data:", error);
       } finally {
@@ -849,22 +817,7 @@ const removeItem = (index) => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    // Ensure userDetails.invoice_Number is valid
-    let checkINV = parseInt(userDetails.invoice_Number, 10);
-    // console.log('checkINV befor:', checkINV);
-    if (!isNaN(checkINV)) {
-      checkINV++; // Increment the invoice number
-      // console.log('checkINV after:', checkINV);
-      const newInvoiceNumber = checkINV;
-      // console.log('newInvoiceNumber:', newInvoiceNumber);
-      setInvoiceNumber(newInvoiceNumber);
-      // console.log('InvoiceNumber:',InvoiceNumber);
-    } else {
-      // console.error("Invalid invoice number:", userDetails.invoice_Number);
-    }
-    setInvoicePrefix(userDetails.invoice_Prefix);
-  }, [userDetails.invoice_Number, userDetails.invoice_Prefix]);
+  
 
   useEffect(() => {
     if (!isPaymentReceived) {
@@ -873,9 +826,7 @@ const removeItem = (index) => {
     }
   }, [isPaymentReceived]);
 
-  React.useEffect(() => {
-    // setInvoiceNumber(`${userDetails.invoice_Prefix}${invoiceHandler}`);
-  }, [invoiceHandler, userDetails.invoice_Prefix]);
+ 
 
   // Reset totalDiscount when selected changes
   useEffect(() => {
@@ -891,15 +842,15 @@ const removeItem = (index) => {
       let itemTotal = item.quantity * item.price;
 
       if (
-        // getTaxType(userState, customerState) === "SGST" ||
-        ReusableFunctions.getTaxType(userState, customerState) === true
+        // getTaxType(userState, vendorState) === "SGST" ||
+        ReusableFunctions.getTaxType(userState, vendorState) === true
       ) {
         itemTotal +=
           (item.price * item.sgst) / 100 + (item.price * item.cgst) / 100;
         // console.log('itemTotal - I:', itemTotal);
       }
 
-      if (ReusableFunctions.getTaxType(userState, customerState) === false) {
+      if (ReusableFunctions.getTaxType(userState, vendorState) === false) {
         itemTotal += (item.price * item.igst) / 100;
         // console.log('itemTotal - C S:', itemTotal);
       }
@@ -922,8 +873,8 @@ const removeItem = (index) => {
 
       // Check if SGST or CGST
       if (
-        // getTaxType(userState, customerState) === "SGST" ||
-        ReusableFunctions.getTaxType(userState, customerState) === true
+        // getTaxType(userState, vendorState) === "SGST" ||
+        ReusableFunctions.getTaxType(userState, vendorState) === true
       ) {
         const totalTaxRate =
           (Number(item.sgst) || 0) + (Number(item.cgst) || 0); // Sum SGST and CGST, default to 0 if undefined
@@ -932,7 +883,7 @@ const removeItem = (index) => {
       }
 
       // Check if IGST
-      if (ReusableFunctions.getTaxType(userState, customerState) === false) {
+      if (ReusableFunctions.getTaxType(userState, vendorState) === false) {
         itemTotalTax += (item.price * Number(item.igst || 0)) / 100; // Default to 0 if IGST is not set
         // console.log('totalTaxRate',itemTotalTax);
       }
@@ -941,7 +892,7 @@ const removeItem = (index) => {
     }, 0); // Return a number
   };
 
-  const calculateEachTax = (userState, customerState, items) => {
+  const calculateEachTax = (userState, vendorState, items) => {
 
     let totalCGST = 0;
     let totalSGST = 0;
@@ -950,7 +901,7 @@ const removeItem = (index) => {
     // console.log('items',items);
     
     items.forEach((item) => {
-  if (userState === customerState) {
+  if (userState === vendorState) {
         // Intra-state: Calculate CGST and SGST
         totalCGST += (Number(item.price) * (Number(item.cgst) || 0)) / 100;
         totalSGST += (Number(item.price) * (Number(item.sgst) || 0)) / 100;
@@ -966,7 +917,7 @@ const removeItem = (index) => {
     };
   };
 
-  const taxBreakdown = calculateEachTax(userState, customerState, items);
+  const taxBreakdown = calculateEachTax(userState, vendorState, items);
   
 
   
@@ -983,25 +934,7 @@ const removeItem = (index) => {
     return today.toISOString().split("T")[0]; // Format as YYYY-MM-DD
   };
 
-  // const getTaxType = (userState, customerState, taxtype) => {
-  //   return userState === customerState
-  //     ? taxtype === "C"
-  //       ? "CGST"
-  //       : "SGST"
-  //     : "IGST";
-  // };
-  // const getTaxType = (userState, customerState) => {
-  //   // console.log('userState',userState);
-  //   // console.log('customerState',customerState);
-  //   if (userState === customerState) {
-  //     // console.log('userState === customerState',userState === customerState);
-  //     return  true ;
-  //   }else{
-  //     // console.log('userState === customerState',userState === customerState);
-  //     return false;
-  //   }
-   
-  // };
+  
   
 
   // Calculate Balance Amount
@@ -1019,9 +952,9 @@ const removeItem = (index) => {
       <div className="p-6 mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-shadow duration-300">
       <div className="mb-10 flex items-center justify-between">
       <div className="flex justify-between items-center w-full">
-  {/* Left: Invoice Title */}
+  {/* Left: Bill Title */}
   <div className="flex-1 text-left">
-    <h1 className="text-2xl font-bold">INVOICE</h1>
+    <h1 className="text-2xl font-bold">BILL</h1>
   </div>
 
   {/* Right: Logo */}
@@ -1055,12 +988,12 @@ const removeItem = (index) => {
         </div>
 
         {/* Right Section - Place of Supply */}
-        {selectedCustomer?.billingAddress ? (
+        {selectedVendor?.billingAddress ? (
           <div className="text-right">
             <p className="text-lg font-semibold">Place of Supply</p>
             <>
               <p className="text-lg ">
-                {selectedCustomer.billingAddress.state}
+                {selectedVendor.billingAddress.state}
               </p>
             </>
           </div>
@@ -1070,38 +1003,38 @@ const removeItem = (index) => {
       </div>
 
       <div className="py-2">
-        {/* Customer Dropdown */}
+        {/* Vendor Dropdown */}
         <div className="mb-6">
-          <label className="block font-semibold mb-2">Customer</label>
+          <label className="block font-semibold mb-2">Vendor</label>
           <select
-            id="customers"
-            value={selectedCustomerId}
-            onChange={(e) => setSelectedCustomerId(e.target.value)}
+            id="vendors"
+            value={selectedVendorId}
+            onChange={(e) => setSelectedVendorId(e.target.value)}
             className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
           >
             <option value="" disabled>
-              Select a customer
+              Select a vendor
             </option>
-            {customerDetails.map((customer) => (
+            {vendorDetails.map((vendor) => (
               <option
                 key={
-                  customer._id ||
-                  customer.id ||
-                  `${customer.firstName}-${customer.lastName}`
+                  vendor._id ||
+                  vendor.id ||
+                  `${vendor.firstName}-${vendor.lastName}`
                 } // Use a unique key
-                value={customer._id || customer.id} // Use the unique identifier as the value
+                value={vendor._id || vendor.id} // Use the unique identifier as the value
               >
-                {customer.firstName} {customer.lastName} - (
-                {customer.companyName})
+                {vendor.firstName} {vendor.lastName} - (
+                {vendor.companyName})
               </option>
             ))}
           </select>
           <span
             className="flex items-center text-blue-600 cursor-pointer hover:text-blue-800 transition-colors py-2 mx-2 my-1"
-            onClick={() => setShowCustomerForm(true)}
+            onClick={() => setShowVendorForm(true)}
           >
             <Plus className="h-5 w-5 mr-1" /> {/* Lucide Plus icon */}
-            Add Customer
+            Add Vendor
           </span>
         </div>
 
@@ -1111,20 +1044,20 @@ const removeItem = (index) => {
           <div>
             <label className="block font-semibold mb-2">Billing Address</label>
             <div className="p-3 rounded-md border border-gray-300 shadow-sm bg-gray-50">
-              {selectedCustomer?.billingAddress ? (
+              {selectedVendor?.billingAddress ? (
                 <>
-                  <p>{selectedCustomer.billingAddress.address1}</p>
-                  {selectedCustomer.billingAddress.address2 && (
-                    <p>{selectedCustomer.billingAddress.address2}</p>
+                  <p>{selectedVendor.billingAddress.address1}</p>
+                  {selectedVendor.billingAddress.address2 && (
+                    <p>{selectedVendor.billingAddress.address2}</p>
                   )}
                   <p>
-                    {selectedCustomer.billingAddress.city}
+                    {selectedVendor.billingAddress.city}
                     {", "}
-                    {selectedCustomer.billingAddress.state}
+                    {selectedVendor.billingAddress.state}
                     {", "}
-                    {selectedCustomer.billingAddress.pincode}
+                    {selectedVendor.billingAddress.pincode}
                   </p>
-                  <p>GST: {selectedCustomer.gstNumber}</p>
+                  <p>GST: {selectedVendor.gstNumber}</p>
                 </>
               ) : (
                 <p className="text-gray-500">No address</p>
@@ -1136,15 +1069,15 @@ const removeItem = (index) => {
           <div>
             <label className="block font-semibold mb-2">Shipping Address</label>
             <div className="p-3 rounded-md border border-gray-300 shadow-sm bg-gray-50">
-              {selectedCustomer?.shippingAddress ? (
+              {selectedVendor?.shippingAddress ? (
                 <>
-                  <p>{selectedCustomer.shippingAddress.address1}</p>
+                  <p>{selectedVendor.shippingAddress.address1}</p>
                   <p>
-                    {selectedCustomer.shippingAddress.city}
+                    {selectedVendor.shippingAddress.city}
                     {", "}
-                    {selectedCustomer.shippingAddress.state}
+                    {selectedVendor.shippingAddress.state}
                     {", "}
-                    {selectedCustomer.shippingAddress.pincode}
+                    {selectedVendor.shippingAddress.pincode}
                    <p>‎ </p>
                   </p>
                 </>
@@ -1156,25 +1089,24 @@ const removeItem = (index) => {
         </div>
       </div>
 
-      {/* Invoice Details */}
+      {/* Bill Details */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <label className="block font-semibold mb-2">Invoice Number</label>
+          <label className="block font-semibold mb-2">Bill Number</label>
           <input
             type="text"
-            placeholder="Invoice number"
-            value={InvoicePrefix + InvoiceNumber}
-            disabled
-            // onChange={(e) => setInvoiceNumber(e.target.value)}
+            placeholder="Bill number"
+            value={BillNumber}
+            onChange={(e) => setBillNumber(e.target.value)}
             className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
           />
         </div>
         <div>
-          <label className="block font-semibold mb-2">Invoice Date</label>
+          <label className="block font-semibold mb-2">Bill Date</label>
           <input
             type="date"
-            value={invoiceDate}
-            onChange={(e) => setInvoiceDate(e.target.value)}
+            value={billDate}
+            onChange={(e) => setBillDate(e.target.value)}
             className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
           />
         </div>
@@ -1249,25 +1181,7 @@ const removeItem = (index) => {
                   Qty
                 </th>
                 <th className="border px-3 py-2 text-center w-2/12">Price</th>
-                {/* {getTaxType(userState, customerState) === true && (
-                  <>
-                    <th className="border px-3 py-2 text-center w-1/12">
-                      SGST
-                      <br />
-                      (%)
-                    </th>
-                    <th className="border px-3 py-2 text-center w-1/12">
-                      CGST
-                      <br />
-                      (%)
-                    </th>
-                  </>
-                )}
-                {getTaxType(userState, customerState) === false && (
-                  <th className="border px-3 py-2 text-center w-1/12">
-                    IGST(%)
-                  </th>
-                )} */}
+                
                 <th className="border px-3 py-2 text-center w-1/12">
                     TAX(%)
                   </th>
@@ -1328,11 +1242,13 @@ const removeItem = (index) => {
                       <option value="" disabled>
                         Select a product
                       </option>
-                      {productDetails.map((product, i) => (
-                        <option key={i} value={product.productName}>
-                          {product.productName}
-                        </option>
-                      ))}
+                      {productDetails
+  .filter((product) => product.price?.purchase?.isEnabled) 
+  .map((product, i) => (
+    <option key={i} value={product.productName}>
+      {product.productName}
+    </option>
+  ))}
                     </select>
                   </td>
                   <td className="border px-4 py-2 text-center">
@@ -1376,21 +1292,10 @@ const removeItem = (index) => {
                       className="w-full  text-center p-2 border border-gray-300 rounded-md focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40"
                     />
                   </td>
-                  {/* {(
-                    // getTaxType(userState, customerState) === "SGST" ||
-                    getTaxType(userState, customerState) === true) && (
-                    <>
-                      <td className="border px-4 py-2 text-center">
-                        {item.sgst || "0"}
-                      </td>
-                      <td className="border px-4 py-2 text-center">
-                        {item.cgst || "0"}
-                      </td>
-                    </>
-                  )} */}
+                 
                   {(
-                    // getTaxType(userState, customerState) === "SGST" ||
-                    ReusableFunctions.getTaxType(userState, customerState) === true) && (
+                    // getTaxType(userState, vendorState) === "SGST" ||
+                    ReusableFunctions.getTaxType(userState, vendorState) === true) && (
                     <>
                       <td className="border px-4 py-2 text-center">
                         {Math.round(Number(item.sgst) + Number(item.cgst)) || "0"}
@@ -1398,7 +1303,7 @@ const removeItem = (index) => {
                       
                     </>
                   )}
-                  {ReusableFunctions.getTaxType(userState, customerState) === false && (
+                  {ReusableFunctions.getTaxType(userState, vendorState) === false && (
                     <td className="border px-4 py-2 text-center">
                       {item.igst || "0"}
                     </td>
@@ -1442,20 +1347,20 @@ const removeItem = (index) => {
       <hr />
 
       <div className="flex flex-col md:flex-row justify-between mt-5 mb-10 gap-12 items-center">
-  {/* Customer Note */}
+  {/* Vendor Note */}
   <div className="w-full md:w-2/3 px-2">
     <label
-      htmlFor="customerNote"
+      htmlFor="vendorNote"
       className="block text-sm font-semibold mb-2"
     >
-      Customer Note:
+      Vendor Note:
     </label>
     <textarea
-      id="customerNote"
-      value={customerNote}
-      onChange={handleCustomerNoteChange}
+      id="vendorNote"
+      value={vendorNote}
+      onChange={handleVendorNoteChange}
       className="w-full h-20 p-2 border border-gray-300 rounded-md resize-none"
-      placeholder="Enter customer note here..."
+      placeholder="Enter vendor note here..."
     ></textarea>
   </div>
 
@@ -1546,7 +1451,7 @@ const removeItem = (index) => {
                   (- ₹ {Math.round(calculateDiscount() )})
                 </td>
               </tr>
-              {ReusableFunctions.getTaxType(userState, customerState) === true && (
+              {ReusableFunctions.getTaxType(userState, vendorState) === true && (
                 <>
               <tr className="border-b">
                 <td className="px-4 py-2 text-left text-[14px]">
@@ -1566,7 +1471,7 @@ const removeItem = (index) => {
               </tr>
               </>
               )}
-              {ReusableFunctions.getTaxType(userState, customerState) === false && (
+              {ReusableFunctions.getTaxType(userState, vendorState) === false && (
                 <>
               <tr className="border-b">
                 <td className="px-4 py-2 text-left text-[14px]">
@@ -1748,10 +1653,10 @@ const removeItem = (index) => {
           d="M4 12a8 8 0 018-8v8H4z"
         ></path>
       </svg>
-    ) : InvoiceData.userId === "" ? (
+    ) : BillData.userId === "" ? (
       "Save and Continue"
     ) : (
-      "Generate Invoice"
+      "Generate Bill"
     )}
   </button>
 
@@ -1780,20 +1685,17 @@ const removeItem = (index) => {
   </p>
 </div>
 
-      {/* {InvoiceData.companyName!==""  &&(<Invoice2 invoiceData={InvoiceData} 
-      // customerData={customerDetails}
-      userData={userDetails} 
-      />)} */}
+     
       
-      {showCustomerForm && (
+      {showVendorForm && (
               <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
                 <CustomerForm
-                  onClose={() => setShowCustomerForm(false)}
-                  fetchCust={() => fetchCustomers()}
-                  // onSubmit={customerHandleFormSubmit}
-                  // formData={customerFormData}
-                  // inputChange={customerHandleInputChange}
-                  // inputChange2={customerHandleInputChange2}
+                  onClose={() => setShowVendorForm(false)}
+                  fetchCust={() => fetchVendors()}
+                  // onSubmit={vendorHandleFormSubmit}
+                  // formData={vendorFormData}
+                  // inputChange={vendorHandleInputChange}
+                  // inputChange2={vendorHandleInputChange2}
                   // copyShipping={copyShipping}
                   // checkboxChange={handleCheckboxChange}
                 />
@@ -1804,10 +1706,10 @@ const removeItem = (index) => {
                 <ProductForm
                   onClose={() => setShowProductForm(false)}
                   fetchPro={() => fetchProducts()}
-                  // onSubmit={customerHandleFormSubmit}
-                  // formData={customerFormData}
-                  // inputChange={customerHandleInputChange}
-                  // inputChange2={customerHandleInputChange2}
+                  // onSubmit={vendorHandleFormSubmit}
+                  // formData={vendorFormData}
+                  // inputChange={vendorHandleInputChange}
+                  // inputChange2={vendorHandleInputChange2}
                   // copyShipping={copyShipping}
                   // checkboxChange={handleCheckboxChange}
                 />
@@ -1821,4 +1723,4 @@ const removeItem = (index) => {
   );
 };
 
-export default CreateInvoicePage;
+export default CreateBillPage;
