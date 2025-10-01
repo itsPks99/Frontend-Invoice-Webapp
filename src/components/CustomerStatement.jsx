@@ -93,7 +93,6 @@ const CustomerStatements = () => {
   const fetchCustomerStatement = async (customerId) => {
     try {
       setLoading(true); // Set loading state before making the API call
-
       const token = localStorage.getItem("authToken");
       if (!token) {
         console.error("Authorization token is missing.");

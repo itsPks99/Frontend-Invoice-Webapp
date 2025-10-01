@@ -1,18 +1,29 @@
 import React from "react";
 import ReusableFunctions from "../ReusableFunctions";
+import { useNavigate } from "react-router-dom";
 
-const CustomerStatementTemplate = ({
-  userData,
-  customerDetails,
-  statementData,
-}) => {
+const CustomerStatementTemplate = ({ userData, customerDetails, statementData, }) => {
+
+  const navigate = useNavigate();
   console.log("userData", userData);
   console.log("customerDetails", customerDetails);
   console.log("statementData", statementData);
 
+  const handleNavigate = ({ invoiceID, customerId, userId }) => {
+    navigate("/dashboard/invoices", {
+      state: {
+        invoiceId: invoiceID,
+        customerId: customerId,
+        userId: userId,
+        redirect: true,
+      },
+    });
+  };
+
+
   return (
     <div className="w-[210mm] mx-auto bg-white border border-gray-300 shadow-lg rounded-lg p-6 ">
-      
+
       {/* Header Section */}
       <div className="border-b-2 border-blue-500 pb-4 mb-6">
         <div className="flex justify-between items-start">
@@ -44,28 +55,28 @@ const CustomerStatementTemplate = ({
 
       {/* Customer Details */}
       <div className="grid grid-cols-2 gap-6">
-      <div>
-  <p className="text-gray-400">Bill to</p>
-  <p className="font-bold text-gray-900">
-    {customerDetails?.firstName?.toUpperCase() || ""}{" "}
-    {customerDetails?.lastName?.toUpperCase() || ""}
-    <span className="text-[12px]">
-    {" "} ({customerDetails?.companyName || "N/A"})
-    </span>
-  </p>
-  <p className="text-gray-600 text-sm">
-    {customerDetails?.billingAddress?.address1 || "N/A"}
-  </p>
-  <p className="text-gray-600 text-sm">
-    {customerDetails?.billingAddress?.city || "N/A"},{" "}
-    {customerDetails?.billingAddress?.pincode || "N/A"},{" "}
-    {customerDetails?.billingAddress?.country || "N/A"}
-  </p>
-  <p className="text-gray-600 text-sm">PH: {customerDetails?.phone || "N/A"}</p>
-  <p className="text-gray-600 text-sm">
-    GST: {customerDetails?.gstNumber || "N/A"}
-  </p>
-</div>
+        <div>
+          <p className="text-gray-400">Bill to</p>
+          <p className="font-bold text-gray-900">
+            {customerDetails?.firstName?.toUpperCase() || ""}{" "}
+            {customerDetails?.lastName?.toUpperCase() || ""}
+            <span className="text-[12px]">
+              {" "} ({customerDetails?.companyName || "N/A"})
+            </span>
+          </p>
+          <p className="text-gray-600 text-sm">
+            {customerDetails?.billingAddress?.address1 || "N/A"}
+          </p>
+          <p className="text-gray-600 text-sm">
+            {customerDetails?.billingAddress?.city || "N/A"},{" "}
+            {customerDetails?.billingAddress?.pincode || "N/A"},{" "}
+            {customerDetails?.billingAddress?.country || "N/A"}
+          </p>
+          <p className="text-gray-600 text-sm">PH: {customerDetails?.phone || "N/A"}</p>
+          <p className="text-gray-600 text-sm">
+            GST: {customerDetails?.gstNumber || "N/A"}
+          </p>
+        </div>
 
         <div className="text-right">
           {/* <p className="text-gray-500 text-sm">As of {statementData.date}</p> */}
@@ -108,16 +119,17 @@ const CustomerStatementTemplate = ({
               <th className="py-2 px-4 text-left">Due</th>
             </tr>
           </thead>
+
           <tbody>
             {statementData && statementData.length > 0 ? (
               statementData.map((statement, index) => (
                 <tr
                   key={index}
-                  className={`border-t hover:bg-gray-50 text-gray-700 text-sm ${
-                    index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                  }`}
+                  className={`border-t hover:bg-gray-50 text-gray-700 text-sm ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
                 >
-                  <td className="py-2 px-4 text-blue-600 font-semibold">
+
+                  <td className="py-2 px-4 text-blue-600 font-semibold" onClick={() => handleNavigate({ invoiceID: statement.invoiceId, customerId: statement.customerId, userId: statement.userId })} style={{ cursor: 'pointer' }}>
                     {statement.details}
                   </td>
                   <td className="py-2 px-4">
@@ -191,7 +203,7 @@ const CustomerStatementTemplate = ({
             © {new Date().getFullYear()}{" "}
             {userData.companyName || "Your Company"}. All rights reserved.
           </p>
-          
+
         </div>
       </div>
     </div>

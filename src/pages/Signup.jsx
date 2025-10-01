@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Mail, Lock, ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Link } from "react-router-dom";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -19,6 +18,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Handle input change
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -27,6 +27,7 @@ export default function Signup() {
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
+  // Validate form
   const validateForm = () => {
     const newErrors = {};
     if (!formData.email) {
@@ -49,15 +50,35 @@ export default function Signup() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Function to get location
+  const getLocation = () =>
+    new Promise((resolve) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            resolve({
+              lat: pos.coords.latitude,
+              lng: pos.coords.longitude,
+            });
+          },
+          () => resolve(null), // If denied or error → return null
+          { enableHighAccuracy: true }
+        );
+      } else {
+        resolve(null);
+      }
+    });
+
+  // Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validate the form
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
+
     try {
+      const location = await getLocation();
+
       const response = await fetch("http://localhost:3000/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,18 +86,17 @@ export default function Signup() {
           email: formData.email,
           password: formData.password,
           confirmPassword: formData.confirmPassword,
+          location, // 👈 added location here
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error(errorData.message); // Log the error message from the server
-        toast.error(errorData.message); // Show it in the toast
+        toast.error(errorData.message || "Signup failed");
         return;
       }
 
       const successData = await response.json();
-      // console.log(successData);
       localStorage.setItem("authToken", successData.token);
 
       toast.success("Signup successful! Please verify your email.");
@@ -100,14 +120,14 @@ export default function Signup() {
             </button>
           </Link>
           <div className="flex items-center justify-center">
-          <div className=" bg-blue-500 ">
-            <img
-              alt="Logo"
-              src="/src/assets/logos/Asset 3@4x-100.jpg"
-              className="h-8 "
-            />
+            <div className="bg-blue-500">
+              <img
+                alt="Logo"
+                src="/src/assets/logos/Asset 3@4x-100.jpg"
+                className="h-8"
+              />
+            </div>
           </div>
-        </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Create a new account
           </h2>
@@ -129,7 +149,6 @@ export default function Signup() {
                   placeholder="Email address"
                 />
               </div>
-
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">{errors.email}</p>
               )}
@@ -145,16 +164,12 @@ export default function Signup() {
                 required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="appearance-none w-full pl-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900  focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="appearance-none w-full pl-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Password"
               />
-
-              {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> */}
-
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">{errors.password}</p>
               )}
-              {/* </div> */}
             </div>
 
             <div className="relative flex items-center">
@@ -167,18 +182,14 @@ export default function Signup() {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
                 className="appearance-none w-full pl-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-               placeholder="Confirm Password"
+                placeholder="Confirm Password"
               />
-{errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.confirmPassword}
-              </p>
-            )}
-              {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"> */}
-
-              
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
-            
           </div>
 
           <div className="mt-8">
@@ -193,7 +204,10 @@ export default function Signup() {
         </form>
         <p className="mt-2 text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link to="/signin" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link
+            to="/signin"
+            className="font-medium text-blue-600 hover:text-blue-500"
+          >
             click Here
           </Link>
         </p>

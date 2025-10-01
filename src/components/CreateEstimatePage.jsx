@@ -493,7 +493,7 @@ const removeItem = (index) => {
       if (response.ok) {
         const data = await response.json();
         setProductDetails(data.products); // Save to state
-        // console.log("Product Details:", data.products);
+         console.log("Product Details:", data.products);
       } else {
         console.error("Failed to fetch products:", response.statusText);
       }
@@ -553,7 +553,7 @@ const removeItem = (index) => {
         setUserDetails(data.user); // Save to state
         setUserState(data.user.state);
         setLogo(data.user.brandLogoUrl);
-        // console.log("User Details:", data.user);
+         console.log("User Details:", data.user);
       } else {
         console.error(
           `Failed to fetch user info: ${response.status} - ${response.statusText}`
@@ -715,7 +715,7 @@ const removeItem = (index) => {
       }
 
       const response = await fetch(
-        "http://localhost:3000/api/estimate/generateEstimate",
+        "http://localhost:3000/api/estimate/createEstimate",
         {
           method: "POST",
           headers: {
@@ -1161,9 +1161,10 @@ const removeItem = (index) => {
           <input
             type="text"
             placeholder="Estimate number"
-            value={EstimatePrefix + EstimateNumber}
-            disabled
-            // onChange={(e) => setEstimateNumber(e.target.value)}
+            // value={EstimatePrefix + EstimateNumber}
+            
+            // disabled
+            onChange={(e) => setEstimateNumber(e.target.value)}
             className="mt-1 w-full p-3 rounded-md border border-gray-300 shadow-sm text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:ring focus:ring-blue-100 focus:ring-opacity-40 transition-all duration-300 ease-in-out transform hover:shadow-md hover:scale-101"
           />
         </div>
@@ -1297,27 +1298,27 @@ const removeItem = (index) => {
                           handleItemChange(
                             index,
                             "price",
-                            selectedProduct.price
+                            selectedProduct?.price?.sale?.sellingPrice
                           );
                           handleItemChange(
                             index,
                             "sgst",
-                            selectedProduct.tax.sgst
+                            selectedProduct?.defaultTaxRates?.intraStateRate / 2
                           );
                           handleItemChange(
                             index,
                             "cgst",
-                            selectedProduct.tax.cgst
+                            selectedProduct?.defaultTaxRates?.intraStateRate / 2
                           );
                           handleItemChange(
                             index,
                             "igst",
-                            selectedProduct.tax.igst
+                            selectedProduct?.defaultTaxRates?.interStateRate
                           );
                           handleItemChange(
                             index,
                             "hsnCode",
-                            selectedProduct.hsnCode
+                            selectedProduct.hsnAndSacCode
                           );
                         }
                       }}

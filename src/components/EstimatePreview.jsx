@@ -1,42 +1,42 @@
 import React, { useEffect, useState } from "react";
-import Invoice1 from "../components/InvoiceTemplates/InvoiceTemplate1";
-import Invoice2 from "../components/InvoiceTemplates/InvoiceTemplate2";
-import Invoice3 from "../components/InvoiceTemplates/InvoiceTemplate3";
+// import Estimate1 from "../components/InvoiceTemplates/InvoiceTemplate1";
+// import Estimate2 from "../components/InvoiceTemplates/InvoiceTemplate2";
+// import Estimate3 from "../components/InvoiceTemplates/InvoiceTemplate3";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Printer, Download, Share2, Send } from "lucide-react";
 import ReusableFunctions from "./ReusableFunctions";
 
-const PreviewPage = ({
+const EstimatePreview = ({
   setActiveTab,
-  invoiceData: propInvoiceData,
+  estimateData: propEstimateData,
   userData: propUserData,
   onClose,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  let { invoiceData, userData } = location.state || {};
-  invoiceData = propInvoiceData || invoiceData;
+  let { estimateData, userData } = location.state || {};
+  estimateData = propEstimateData || estimateData;
   userData = propUserData || userData;
 
   const queryParams = new URLSearchParams(location.search);
 
   useEffect(() => {
-    if (!invoiceData || !userData) {
-      const parsedInvoiceData = JSON.parse(
-        decodeURIComponent(queryParams.get("invoiceData") || "{}")
+    if (!estimateData || !userData) {
+      const parsedEstimateData = JSON.parse(
+        decodeURIComponent(queryParams.get("estimateData") || "{}")
       );
       const parsedUserData = JSON.parse(
         decodeURIComponent(queryParams.get("userData") || "{}")
       );
-      if (!parsedInvoiceData || !parsedUserData) {
-        navigate("/dashboard/invoices", { replace: true });
+      if (!parsedEstimateData || !parsedUserData) {
+        navigate("/dashboard/estimates", { replace: true });
       }
     }
-  }, [invoiceData, userData, navigate, queryParams]);
+  }, [estimateData, userData, navigate, queryParams]);
 
-  if (!invoiceData || !userData) return null;
+  if (!estimateData || !userData) return null;
 
   // ---------- Ribbon ----------
   const getRibbonStyle = (status) => {
@@ -53,22 +53,20 @@ const PreviewPage = ({
   };
 
   // ---------- Template Switch ----------
-  const templates = [Invoice2, Invoice1, Invoice3];
-  const [currentTemplate, setCurrentTemplate] = useState(0);
-  const ActiveTemplate = templates[currentTemplate];
-  const switchTemplate = () =>
-    setCurrentTemplate((prev) => (prev + 1) % templates.length);
+//   const templates = [Estimate2, Estimate1, Estimate3];
+//   const [currentTemplate, setCurrentTemplate] = useState(0);
+//   const ActiveTemplate = templates[currentTemplate];
+//   const switchTemplate = () =>
+//     setCurrentTemplate((prev) => (prev + 1) % templates.length);
 
   // ---------- Close Button ----------
-  // ---------- Close Button ----------
-const handleClose = () => {
-  if (typeof onClose === "function") {
-    onClose(); // In split view → collapse preview
-  } else {
-    navigate("/dashboard/invoices"); // Full page → redirect
-  }
-};
-
+  const handleClose = () => {
+    if (typeof onClose === "function") {
+      onClose(); // Split view
+    } else {
+      navigate("/dashboard/estimates"); // Full page
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
@@ -76,20 +74,21 @@ const handleClose = () => {
       <div className="sticky top-0 z-20 flex flex-col md:flex-row md:justify-between md:items-center gap-3 px-4 md:px-6 py-4 bg-white border-b border-gray-200 shadow-sm">
         <div>
           <h1 className="text-lg font-semibold">
-            Invoice #{userData.invoice_Prefix}
-            {invoiceData.invoiceNumber}
+            Estimate #{userData.estimate_Prefix}
+            {estimateData.estimateNumber}
           </h1>
           <p className="text-sm text-gray-500">
             Customer:{" "}
             <span className="font-medium text-blue-600">
-              {invoiceData.billTo.customerName}
+              {estimateData.billTo.customerName}
             </span>
           </p>
         </div>
+
         {/* Buttons */}
         <div className="flex flex-wrap gap-2 items-center">
           <button
-            onClick={() => (window.location.href = "mailto:?subject=Invoice")}
+            onClick={() => (window.location.href = "mailto:?subject=Estimate")}
             className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center text-sm"
           >
             <Send className="w-4 h-4 mr-1" /> Send
@@ -97,7 +96,7 @@ const handleClose = () => {
           <button
             onClick={() =>
               window.open(
-                `https://wa.me/?text=Invoice%20${userData.invoice_Prefix}${invoiceData.invoiceNumber}`,
+                `https://wa.me/?text=Estimate%20${userData.estimate_Prefix}${estimateData.estimateNumber}`,
                 "_blank"
               )
             }
@@ -108,7 +107,7 @@ const handleClose = () => {
           <button
             className="px-3 py-1.5 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center text-sm"
             onClick={() =>
-              ReusableFunctions.handlePrintInvoice(invoiceData, userData)
+              ReusableFunctions.handlePrintEstimate(estimateData, userData)
             }
           >
             <Printer className="w-4 h-4 mr-1" /> Print
@@ -116,12 +115,12 @@ const handleClose = () => {
           <button
             className="px-3 py-1.5 bg-gray-100 rounded-md hover:bg-gray-200 flex items-center text-sm"
             onClick={() =>
-              ReusableFunctions.downloadInvoice(invoiceData, userData)
+              ReusableFunctions.downloadEstimate(estimateData, userData)
             }
           >
             <Download className="w-4 h-4 mr-1" /> Download
           </button>
-          {/* Fixed close button */}
+          {/* Close */}
           <button
             onClick={handleClose}
             className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
@@ -130,51 +129,48 @@ const handleClose = () => {
           </button>
         </div>
       </div>
+
+      {/* ---------- Meta Info ---------- */}
       <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-4">
-          {/* <span className="px-3 py-1 text-sm font-medium bg-gray-100 rounded-lg">{invoiceData.status}</span> */}
+        <div className="flex items-center space-x-4 flex-wrap">
           <span className="text-gray-600">
             Total Amount :{" "}
             <span className="font-medium">
-              ₹ {invoiceData.payment.grandTotal}
+              ₹ {estimateData.payment.grandTotal}
             </span>
           </span>
           <span className="text-gray-600">
-            Paid:{" "}
-            <span className="font-medium">
-              ₹ {invoiceData.payment.paymentMade}
-            </span>
+            Paid: <span className="font-medium">₹ {estimateData.payment.paymentMade}</span>
           </span>
           <span className="text-gray-600">
             Balance:{" "}
-            <span className="font-medium">
-              ₹ {invoiceData.payment.balanceDue}
-            </span>
+            <span className="font-medium">₹ {estimateData.payment.balanceDue}</span>
           </span>
           <span className="text-gray-600">
             Due Date:{" "}
             <span className="font-medium">
-              {ReusableFunctions.formatDate(invoiceData.invoiceDueDate)}
+              {ReusableFunctions.formatDate(estimateData.estimateDueDate)}
             </span>
           </span>
         </div>
       </div>
-      {/* ---------- Invoice ---------- */}
+
+      {/* ---------- Estimate ---------- */}
       <div className="flex-1 overflow-y-auto p-6 bg-gray-50 flex justify-center">
         <div className="relative w-full max-w-4xl bg-white shadow-md rounded-lg p-6">
-          {/* Zoho-style Ribbon */}
+          {/* Ribbon */}
           <div className="absolute -top-3 -left-3 w-40 h-40 overflow-hidden">
             <div
               className={`absolute top-6 left-[-40px] w-40 h-8 flex items-center justify-center text-white text-xs font-bold transform -rotate-45 shadow-md ${getRibbonStyle(
-                invoiceData.paymentStatus
+                estimateData.paymentStatus
               )}`}
             >
-              {invoiceData.paymentStatus?.charAt(0).toUpperCase() +
-                invoiceData.paymentStatus?.slice(1)}
+              {estimateData.paymentStatus?.charAt(0).toUpperCase() +
+                estimateData.paymentStatus?.slice(1)}
             </div>
           </div>
 
-          <AnimatePresence mode="wait">
+          {/* <AnimatePresence mode="wait">
             <motion.div
               key={currentTemplate}
               initial={{ opacity: 0, x: 50 }}
@@ -182,14 +178,14 @@ const handleClose = () => {
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
             >
-              <ActiveTemplate invoiceData={invoiceData} userData={userData} />
+              <ActiveTemplate estimateData={estimateData} userData={userData} />
             </motion.div>
-          </AnimatePresence>
+          </AnimatePresence> */}
         </div>
       </div>
 
       {/* ---------- Footer ---------- */}
-      <div className="text-center py-4 border-t bg-white">
+      {/* <div className="text-center py-4 border-t bg-white">
         <p className="text-gray-600 text-sm italic">
           Want a different look?{" "}
           <span
@@ -199,9 +195,9 @@ const handleClose = () => {
             Switch template
           </span>
         </p>
-      </div>
+      </div> */}
     </div>
   );
 };
 
-export default PreviewPage;
+export default EstimatePreview;
